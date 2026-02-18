@@ -23,6 +23,33 @@ public class AccessLeads {
 
     public String getLeads(List<Lead>leads){
         leads.clear();
-        return dataAccess.get
+        return dataAccess.getLeadSequential(leads);
+    }
+
+    public Lead getRandom(long leadID){
+        leads = dataAccess.getLeadRandom(new Lead(leadID));
+        currLead = 0;
+
+        if(currLead<leads.size()){
+            lead = leads.get(currLead);
+            currLead++;
+        }else{
+            lead = null;
+            leads = null;
+            currLead = 0;
+        }
+        return lead;
+    }
+
+    public String insertLead(Lead currLead){
+        return dataAccess.insertLead(currLead);
+    }
+
+    public String updateLead(Lead currLead){
+        return dataAccess.updateLead(currLead);
+    }
+
+    public String deleteLead(Lead currLead){
+        return dataAccess.deleteLead(currLead);
     }
 }

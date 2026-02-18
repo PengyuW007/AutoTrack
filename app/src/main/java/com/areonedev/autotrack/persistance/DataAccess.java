@@ -9,4 +9,15 @@ public interface DataAccess {
     void open(String string);
 
     void close();
+
+    String getLeadSequential(List<Lead> leadResult);
+
+    ArrayList<Lead> getLeadRandom(Lead lead);
+
+    String insertLead(Lead lead);
+
+    String updateLead(Lead lead);
+
+    String deleteLead(Lead lead);
+
 }

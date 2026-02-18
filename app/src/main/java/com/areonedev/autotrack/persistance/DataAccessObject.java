@@ -37,4 +37,30 @@ public class DataAccessObject implements DataAccess{
     public void close() {
 
     }
+
+    //This function adds all the leads from the DB to the leads list, original leadResult is empty
+    @Override
+    public String getLeadSequential(List<Lead> leadResult) {
+        return "";
+    }
+
+    @Override
+    public ArrayList<Lead> getLeadRandom(Lead lead) {
+        return null;
+    }
+
+    @Override
+    public String insertLead(Lead lead) {
+        return "";
+    }
+
+    @Override
+    public String updateLead(Lead lead) {
+        return "";
+    }
+
+    @Override
+    public String deleteLead(Lead lead) {
+        return "";
+    }
 }

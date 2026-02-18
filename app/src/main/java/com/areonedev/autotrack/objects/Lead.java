@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class Lead {
 
-    private String id;
+    private long id;
     private String name;
     private String phone;
     private double budget;
@@ -19,7 +19,20 @@ public class Lead {
     // =========================
     // Constructor
     // =========================
-    public Lead(String id,
+    public Lead(long id){
+        this.id = id;
+        this.name = null;
+        this.phone = null;
+        this.budget = 0;
+        this.vehicleInterest = null;
+        this.stage = stage;
+        this.followUpDate = null;
+        this.notes = null;
+        this.createdAt = null;
+        this.score = 0.0; // default score
+    }
+
+    public Lead(long id,
                 String name,
                 String phone,
                 double budget,
@@ -45,7 +58,7 @@ public class Lead {
     // Getters & Setters
     // =========================
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
