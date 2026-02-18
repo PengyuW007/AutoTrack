@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "com.areonedev.autotrack"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.areonedev.autotrack"

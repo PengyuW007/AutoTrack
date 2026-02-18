@@ -1,12 +1,20 @@
 package com.areonedev.autotrack.application;
 
+import android.util.Log;
+
+import com.areonedev.autotrack.business.PriorityManager;
+import com.areonedev.autotrack.business.ScoringService;
+import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.presentation.CLI;
+
+import java.util.Date;
+
 public class Main {
 
-    public static final String dbName = "LEAD";
-    private static String dbPathName = "database/LEAD";
+    public static final String dbName = "LEADS";
+    private static String dbPathName = "database/LEADS";
 
-    public static void main(String[] args) {
+    public static void main(String[]args) {
         startUp();
         CLI.run();
 
@@ -16,6 +24,22 @@ public class Main {
 
     public static void startUp()
     {
+//        ScoringService scoringService = new ScoringService();
+//        PriorityManager priorityManager = new PriorityManager(scoringService);
+//
+//        Lead lead1 = new Lead(1, "Alice", "123",
+//                30000, "BMW X3", "NEW",
+//                new Date(), "", new Date());
+//
+//        Lead lead2 = new Lead(2, "Bob", "456",
+//                50000, "Audi A4", "NEGOTIATION",
+//                new Date(), "", new Date());
+//
+//        priorityManager.addOrUpdateLead(lead1);
+//        priorityManager.addOrUpdateLead(lead2);
+//
+//        Lead top = priorityManager.peekTopLead();
+//        System.out.println(top.toString());
         Services.createDataAccess(dbName);
     }
 
