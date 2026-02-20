@@ -12,7 +12,7 @@ public class Lead {
     private String vehicleInterest; // Update this to Vehicle Class when needed
     private String stage;
     private Date followUpDate;
-    private double score;
+    private double score; //Score of weight at different stages
     private String notes;
     private Date createdAt;
 
