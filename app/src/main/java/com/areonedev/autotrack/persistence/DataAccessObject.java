@@ -1,11 +1,9 @@
-package com.areonedev.autotrack.persistance;
+package com.areonedev.autotrack.persistence;
 
 import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.DriverManager;
-import java.sql.SQLWarning;
-import java.sql.DatabaseMetaData;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;

@@ -6,7 +6,7 @@ import java.util.List;
 import com.areonedev.autotrack.application.Main;
 import com.areonedev.autotrack.application.Services;
 import com.areonedev.autotrack.objects.Lead;
-import com.areonedev.autotrack.persistance.DataAccess;
+import com.areonedev.autotrack.persistence.DataAccess;
 
 public class AccessLeads {
     private DataAccess dataAccess;
