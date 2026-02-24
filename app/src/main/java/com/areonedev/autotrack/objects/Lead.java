@@ -58,7 +58,7 @@ public class Lead {
     // Getters & Setters
     // =========================
 
-    public long getId() {
+    public long getID() {
         return id;
     }
 

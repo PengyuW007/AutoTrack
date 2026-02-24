@@ -142,9 +142,42 @@ public class DataAccessObject implements DataAccess{
         return result;
     }
 
+    //This function returns the search value by specific lead, for example search a lead by ID = XXX,
+    // then return the whole list if it has this Lead with this ID
     @Override
-    public ArrayList<Lead> getLeadRandom(Lead lead) {
-        return null;
+    public ArrayList<Lead> getLeadRandom(Lead newLead) {
+        Lead lead;
+        long currID;
+        double currBudget;
+        Date currFollowUpDate,currCreatedAt;
+        String currName = EOF,currPhone= EOF,currVehicleInterest= EOF,currStage= EOF,currNotes= EOF;
+
+        leads = new ArrayList<>();
+
+        try{
+            cmdString="Select * from Leads where LeadID=" + newLead.getID();
+            rs3 = st1.executeQuery(cmdString);
+            // ResultSetMetaData md2 = rs3.getMetaData();
+            while (rs3.next()){
+                currID=Long.parseLong(rs2.getString("LeadID"));
+                currBudget = Double.parseDouble(rs2.getString("Budget"));
+                //currScore = Double.parseDouble(rs2.getString("Score")); this value will be calculated by ScoringService
+                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+                currFollowUpDate = formatter.parse(rs2.getString("Follow_Up_Date"));
+                currCreatedAt = formatter.parse(rs2.getString("Created_At_Date"));
+                currName = rs2.getString("LeadName");
+                currPhone =rs2.getString("LeadPhone");
+                currVehicleInterest = rs2.getString("VehicleInterest");
+                currStage = rs2.getString("Stage");
+                currNotes = rs2.getString("Notes");
+                lead = new Lead(currID,currName,currPhone,currBudget,currVehicleInterest,currStage,currFollowUpDate,currNotes,currCreatedAt);
+                leads.add(lead);
+            }
+            rs3.close();
+        } catch (Exception e) {
+            processSQLError(e);
+        }
+        return leads;
     }
 
     @Override
