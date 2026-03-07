@@ -1,6 +1,7 @@
 package com.areonedev.autotrack.application;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.areonedev.autotrack.persistence.DataAccess;
 import com.areonedev.autotrack.presentation.CLI;
@@ -16,8 +17,8 @@ public class Main {
         startUp(context);
         CLI.run();
 
-        shutDown();
-        System.out.println("All done");
+        //shutDown();
+        //System.out.println("All done");
     }
 
     public static void startUp(Context context)
@@ -33,12 +34,14 @@ public class Main {
         DataAccess dao = Services.getDataAccess(dbName);
         if (dao != null) {
             dao.open(realPath);
+            Log.d("Main", "Database opened at: " + realPath);
         }
     }
 
     public static void shutDown()
     {
         Services.closeDataAccess();
+        Log.d("Main", "Database shut down successfully.");
     }
 
     public static String getDBPathName() {

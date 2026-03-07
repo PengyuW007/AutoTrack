@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String DB_PATH = "LEADS";
     public static final String DB_NAME = "LEADS";
     //public static String[]args = {DB_PATH,DB_NAME};
     private static final String TAG = "LEADS_DB_TEST";
@@ -28,47 +27,68 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
 
-        setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        try {
+            EdgeToEdge.enable(this);
+            setContentView(R.layout.activity_main);
 
-        Main.main(this);
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                return insets;
+            });
 
-        AccessLeads accessLeads = new AccessLeads();
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2024, Calendar.DECEMBER, 25); // Dec 25, 2024
-        Date christmas = calendar.getTime();
-        Date today = new Date();
+            // 1. Initialize Database
+            Log.d(TAG, "Starting Main.main...");
+            Main.main(this);
 
-        int uniqueID = (int) (System.currentTimeMillis() % 100000);
-        Lead testLead = new Lead(uniqueID, "Test Lead", "555-0101", 5000.0, "SUV", "New",christmas , "Notes", today);
-        //accessLeads.insertLead(testLead);
-        Log.d(TAG, "Attempting to insert lead...");
-        String insertResult = accessLeads.insertLead(testLead);
+//            // 2. Setup Test Data
+//            AccessLeads accessLeads = new AccessLeads();
+//            Calendar calendar = Calendar.getInstance();
+//            calendar.set(2024, Calendar.DECEMBER, 25);
+//            Date christmas = calendar.getTime();
+//            Date today = new Date();
+//
+//            // Use a unique ID to avoid Primary Key crashes on re-run
+//            int uniqueID = (int) (System.currentTimeMillis() % 100000);
+//            Lead testLead = new Lead(uniqueID, "Test Lead " + uniqueID, "555-0101", 5000.0, "SUV", "New", christmas, "Notes", today);
+//
+//            // 3. TEST: Insert
+//            Log.d(TAG, "Attempting to insert lead ID: " + uniqueID);
+//            String insertResult = accessLeads.insertLead(testLead);
+//
+//            if (insertResult == null) {
+//                Log.d(TAG, "Insert successful!");
+//            } else {
+//                Log.e(TAG, "Insert failed: " + insertResult);
+//            }
 
-        if (insertResult == null) {
-            Log.d(TAG, "Insert successful!");
-        } else {
-            Log.e(TAG, "Insert failed: " + insertResult);
-        }
+            // 4. TEST: Retrieval
+            Log.d(TAG, "Attempting to retrieve leads...");
+            List<Lead> leadList = new ArrayList<>();
+            AccessLeads accessLeads = new AccessLeads();
+            String getResult = accessLeads.getLeads(leadList);
 
-        // 5. TEST: Retrieval (Get all leads)
-        Log.d(TAG, "Attempting to retrieve leads...");
-        List<Lead> leadList = new ArrayList<>();
-        String getResult = accessLeads.getLeads(leadList);
-
-        if (getResult == null) {
-            Log.d(TAG, "Retrieval successful! Count: " + leadList.size());
-            for (Lead l : leadList) {
-                Log.d(TAG, "Found Lead: ID=" + l.getID() + ", Name=" + l.getName() + ", Budget=" + l.getBudget());
+            if (getResult == null) {
+                Log.d(TAG, "Retrieval successful! Count: " + leadList.size());
+                for (Lead l : leadList) {
+                    Log.d(TAG, "Found Lead: ID=" + l.getID() + ", Name=" + l.getName());
+                }
+            } else {
+                Log.e(TAG, "Retrieval failed: " + getResult);
             }
-        } else {
-            Log.e(TAG, "Retrieval failed: " + getResult);
+
+        } catch (Exception e) {
+            // This will catch the crash and print it to Logcat so you can see WHY it ended
+            Log.e(TAG, "CRASH IN ONCREATE: " + e.getMessage());
+            e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Close the database connection when the app is closed
+        Main.shutDown();
     }
 }
