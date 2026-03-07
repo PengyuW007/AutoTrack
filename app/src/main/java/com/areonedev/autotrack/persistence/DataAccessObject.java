@@ -1,205 +1,175 @@
 package com.areonedev.autotrack.persistence;
 
-import java.sql.Statement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.DriverManager;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import com.areonedev.autotrack.objects.Lead;
-public class DataAccessObject implements DataAccess{
-    private Statement st1, st2, st3;
-    private Connection c1;
-    private ResultSet rs2, rs3, rs4, rs5;
 
+public class DataAccessObject implements DataAccess {
+    private SQLiteDatabase db;
     private String dbName;
     private String dbType;
-
-    private ArrayList<Lead> leads;
-
-    private String cmdString;
-    private int updateCount;
     private String result;
-    private static String EOF = "  ";
-    public DataAccessObject(String dbName)
-    {
+    private static final String EOF = "  ";
+
+    public DataAccessObject(String dbName) {
         this.dbName = dbName;
     }
+
     @Override
     public void open(String dbPath) {
-        String url;
-        try
-        {
-            // Setup for HSQL
-            dbType = "HSQL";
-            Class.forName("org.hsqldb.jdbcDriver").newInstance();
-            url = "jdbc:hsqldb:file:" + dbPath; // stored on disk mode
-            c1 = DriverManager.getConnection(url, "SA", "");
-            st1 = c1.createStatement();
-            st2 = c1.createStatement();
-            st3 = c1.createStatement();
+        try {
+            // dbPath should be: context.getDatabasePath("autotrack.db").getPath()
+            db = SQLiteDatabase.openOrCreateDatabase(dbPath, null);
+            dbType = "SQLite";
 
-            /*** Alternate setups for different DB engines, just given as examples. Don't use them. ***/
-
-            /*
-             * // Setup for SQLite. Note that this is undocumented and is not guaranteed to work.
-             * // See also: https://github.com/SQLDroid/SQLDroid
-             * dbType = "SQLite";
-             * Class.forName("SQLite.JDBCDriver").newInstance();
-             * url = "jdbc:sqlite:" + dbPath;
-             * c1 = DriverManager.getConnection(url);
-             *
-             * ... create statements
-             */
-
-            /*** The following two work on desktop builds: ***/
-
-            /*
-             * // Setup for Access
-             * dbType = "Access";
-             * Class.forName("sun.jdbc.odbc.JdbcOdbcDriver").newInstance();
-             * url = "jdbc:odbc:SC";
-             * c1 = DriverManager.getConnection(url,"userid","userpassword");
-             *
-             * ... create statements
-             */
-
-            /*
-             * //Setup for MySQL
-             * dbType = "MySQL";
-             * Class.forName("com.mysql.jdbc.Driver");
-             * url = "jdbc:mysql://localhost/database01";
-             * c1 = DriverManager.getConnection(url, "root", "");
-             *
-             * ... create statements
-             */
-        }
-        catch (Exception e)
-        {
+            // Optional: Ensure the table exists if this is the first run
+            db.execSQL("CREATE TABLE IF NOT EXISTS Leads (" +
+                    "LeadID INTEGER PRIMARY KEY, " +
+                    "LeadName TEXT, " +
+                    "LeadPhone TEXT, " +
+                    "Budget REAL, " +
+                    "VehicleInterest TEXT, " +
+                    "Stage TEXT, " +
+                    "Follow_Up_Date TEXT, " +
+                    "Notes TEXT, " +
+                    "Created_At_Date TEXT)");
+        } catch (Exception e) {
             processSQLError(e);
         }
-        System.out.println("Opened " +dbType +" database " +dbPath);
     }
 
     @Override
     public void close() {
-        try
-        {	// commit all changes to the database
-            cmdString = "shutdown compact";
-            rs2 = st1.executeQuery(cmdString);
-            c1.close();
+        if (db != null && db.isOpen()) {
+            db.close();
         }
-        catch (Exception e)
-        {
-            processSQLError(e);
-        }
-        System.out.println("Closed " +dbType +" database " +dbName);
     }
 
-    //This function adds all the leads from the DB to the leads list, original leadResult list is empty
     @Override
     public String getLeadSequential(List<Lead> leadResult) {
-        Lead lead;
-        long currID;
-        double currBudget;
-        Date currFollowUpDate,currCreatedAt;
-        String currName = EOF,currPhone= EOF,currVehicleInterest= EOF,currStage= EOF,currNotes= EOF;
-
         result = null;
-
-        try{
-            cmdString="Select * from Leads";
-            rs2 = st1.executeQuery(cmdString);
-        }catch (Exception e){
-            processSQLError(e);
-        }
-
-        try{
-            while(rs2.next()){
-                currID=Long.parseLong(rs2.getString("LeadID"));
-                currBudget = Double.parseDouble(rs2.getString("Budget"));
-                //currScore = Double.parseDouble(rs2.getString("Score")); this value will be calculated by ScoringService
-                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                currFollowUpDate = formatter.parse(rs2.getString("Follow_Up_Date"));
-                currCreatedAt = formatter.parse(rs2.getString("Created_At_Date"));
-                currName = rs2.getString("LeadName");
-                currPhone =rs2.getString("LeadPhone");
-                currVehicleInterest = rs2.getString("VehicleInterest");
-                currStage = rs2.getString("Stage");
-                currNotes = rs2.getString("Notes");
-                lead = new Lead(currID,currName,currPhone,currBudget,currVehicleInterest,currStage,currFollowUpDate,currNotes,currCreatedAt);
-                leadResult.add(lead);
-            }
-            rs2.close();
-        }catch (Exception e){
+        try {
+            Cursor cursor = db.rawQuery("SELECT * FROM Leads", null);
+            parseCursor(cursor, leadResult);
+            cursor.close();
+        } catch (Exception e) {
             result = processSQLError(e);
         }
         return result;
     }
 
-    //This function returns the search value by specific lead, for example search a lead by ID = XXX,
-    // then return the whole list if it has this Lead with this ID
     @Override
     public ArrayList<Lead> getLeadRandom(Lead newLead) {
-        Lead lead;
-        long currID;
-        double currBudget;
-        Date currFollowUpDate,currCreatedAt;
-        String currName = EOF,currPhone= EOF,currVehicleInterest= EOF,currStage= EOF,currNotes= EOF;
+        ArrayList<Lead> leads = new ArrayList<>();
+        try {
+            // Use selectionArgs (?) to prevent SQL injection
+            String[] selectionArgs = { String.valueOf(newLead.getID()) };
+            Cursor cursor = db.rawQuery("SELECT * FROM Leads WHERE LeadID = ?", selectionArgs);
 
-        leads = new ArrayList<>();
-
-        try{
-            cmdString="Select * from Leads where LeadID=" + newLead.getID();
-            rs3 = st1.executeQuery(cmdString);
-            // ResultSetMetaData md2 = rs3.getMetaData();
-            while (rs3.next()){
-                currID=Long.parseLong(rs2.getString("LeadID"));
-                currBudget = Double.parseDouble(rs2.getString("Budget"));
-                //currScore = Double.parseDouble(rs2.getString("Score")); this value will be calculated by ScoringService
-                SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-                currFollowUpDate = formatter.parse(rs2.getString("Follow_Up_Date"));
-                currCreatedAt = formatter.parse(rs2.getString("Created_At_Date"));
-                currName = rs2.getString("LeadName");
-                currPhone =rs2.getString("LeadPhone");
-                currVehicleInterest = rs2.getString("VehicleInterest");
-                currStage = rs2.getString("Stage");
-                currNotes = rs2.getString("Notes");
-                lead = new Lead(currID,currName,currPhone,currBudget,currVehicleInterest,currStage,currFollowUpDate,currNotes,currCreatedAt);
-                leads.add(lead);
-            }
-            rs3.close();
+            parseCursor(cursor, leads);
+            cursor.close();
         } catch (Exception e) {
             processSQLError(e);
         }
         return leads;
     }
 
+    /**
+     * Helper method to reduce code duplication when reading from a Cursor
+     */
+    private void parseCursor(Cursor cursor, List<Lead> list) throws Exception {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        if (cursor.moveToFirst()) {
+            do {
+                long id = cursor.getLong(cursor.getColumnIndexOrThrow("LeadID"));
+                String name = cursor.getString(cursor.getColumnIndexOrThrow("LeadName"));
+                String phone = cursor.getString(cursor.getColumnIndexOrThrow("LeadPhone"));
+                double budget = cursor.getDouble(cursor.getColumnIndexOrThrow("Budget"));
+                String vehicleInterest = cursor.getString(cursor.getColumnIndexOrThrow("VehicleInterest"));
+                String stage = cursor.getString(cursor.getColumnIndexOrThrow("Stage"));
+                String notes = cursor.getString(cursor.getColumnIndexOrThrow("Notes"));
+
+                Date followUp = formatter.parse(cursor.getString(cursor.getColumnIndexOrThrow("Follow_Up_Date")));
+                Date createdAt = formatter.parse(cursor.getString(cursor.getColumnIndexOrThrow("Created_At_Date")));
+
+                list.add(new Lead(id, name, phone, budget, vehicleInterest, stage, followUp, notes, createdAt));
+            } while (cursor.moveToNext());
+        }
+    }
+
     @Override
     public String insertLead(Lead lead) {
-        return "";
+        result = null;
+        try {
+            ContentValues values = getLeadContentValues(lead);
+            long rowId = db.insert("Leads", null, values);
+            if (rowId == -1) result = "Error inserting lead";
+        } catch (Exception e) {
+            result = processSQLError(e);
+        }
+        return result;
     }
 
     @Override
     public String updateLead(Lead lead) {
-        return "";
+        result = null;
+        try {
+            ContentValues values = getLeadContentValues(lead);
+            String whereClause = "LeadID = ?";
+            String[] whereArgs = { String.valueOf(lead.getID()) };
+
+            int rowsAffected = db.update("Leads", values, whereClause, whereArgs);
+            if (rowsAffected == 0) result = "Lead not found.";
+        } catch (Exception e) {
+            result = processSQLError(e);
+        }
+        return result;
     }
 
     @Override
     public String deleteLead(Lead lead) {
-        return "";
+        result = null;
+        try {
+            String whereClause = "LeadID = ?";
+            String[] whereArgs = { String.valueOf(lead.getID()) };
+
+            int rowsAffected = db.delete("Leads", whereClause, whereArgs);
+            if (rowsAffected == 0) result = "Lead not found.";
+        } catch (Exception e) {
+            result = processSQLError(e);
+        }
+        return result;
     }
 
-    public String processSQLError(Exception e)
-    {
-        String result = "*** SQL Error: " + e.getMessage();
+    /**
+     * Helper to map Lead object to ContentValues for Insert/Update
+     */
+    private ContentValues getLeadContentValues(Lead lead) {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        ContentValues values = new ContentValues();
+        values.put("LeadID", lead.getID());
+        values.put("LeadName", lead.getName());
+        values.put("LeadPhone", lead.getPhoneNumber());
+        values.put("Budget", lead.getBudget());
+        values.put("VehicleInterest", lead.getVehicleInterest());
+        values.put("Stage", lead.getStage());
+        values.put("Follow_Up_Date", formatter.format(lead.getFollowUpDate()));
+        values.put("Notes", lead.getNotes());
+        values.put("Created_At_Date", formatter.format(lead.getCreatedAt()));
+        return values;
+    }
 
-        // Remember, this will NOT be seen by the user!
+    public String processSQLError(Exception e) {
+        String errorMsg = "*** SQL Error: " + e.getMessage();
         e.printStackTrace();
-
-        return result;
+        return errorMsg;
     }
 }

@@ -66,7 +66,7 @@ public class Lead {
         return name;
     }
 
-    public String getPhone() {
+    public String getPhoneNumber() {
         return phone;
     }
 

@@ -1,10 +1,8 @@
 package com.areonedev.autotrack.application;
 
-import android.util.Log;
+import android.content.Context;
 
-import com.areonedev.autotrack.business.PriorityManager;
-import com.areonedev.autotrack.business.ScoringService;
-import com.areonedev.autotrack.objects.Lead;
+import com.areonedev.autotrack.persistence.DataAccess;
 import com.areonedev.autotrack.presentation.CLI;
 
 import java.util.Date;
@@ -12,35 +10,30 @@ import java.util.Date;
 public class Main {
 
     public static final String dbName = "LEADS";
-    private static String dbPathName = "database/LEADS";
+    private static String dbPathName = "LEADS.db";
 
-    public static void main(String[]args) {
-        startUp();
+    public static void main(Context context) {
+        startUp(context);
         CLI.run();
 
         shutDown();
         System.out.println("All done");
     }
 
-    public static void startUp()
+    public static void startUp(Context context)
     {
-//        ScoringService scoringService = new ScoringService();
-//        PriorityManager priorityManager = new PriorityManager(scoringService);
-//
-//        Lead lead1 = new Lead(1, "Alice", "123",
-//                30000, "BMW X3", "NEW",
-//                new Date(), "", new Date());
-//
-//        Lead lead2 = new Lead(2, "Bob", "456",
-//                50000, "Audi A4", "NEGOTIATION",
-//                new Date(), "", new Date());
-//
-//        priorityManager.addOrUpdateLead(lead1);
-//        priorityManager.addOrUpdateLead(lead2);
-//
-//        Lead top = priorityManager.peekTopLead();
-//        System.out.println(top.toString());
+// Use the Android context to get the correct path
+        String realPath = context.getDatabasePath(dbPathName).getPath();
+        setDBPathName(realPath);
+
+        // Initialize the DataAccessObject via your Services class
         Services.createDataAccess(dbName);
+
+        // Open the database using the real Android path
+        DataAccess dao = Services.getDataAccess(dbName);
+        if (dao != null) {
+            dao.open(realPath);
+        }
     }
 
     public static void shutDown()
