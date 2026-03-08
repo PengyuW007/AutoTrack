@@ -41,48 +41,12 @@ public class MainActivity extends AppCompatActivity {
             // 1. Initialize Database
             Log.d(TAG, "Starting Main.main...");
             Main.main(this);
-
-//            // 2. Setup Test Data
-//            AccessLeads accessLeads = new AccessLeads();
-//            Calendar calendar = Calendar.getInstance();
-//            calendar.set(2024, Calendar.DECEMBER, 25);
-//            Date christmas = calendar.getTime();
-//            Date today = new Date();
-//
-//            // Use a unique ID to avoid Primary Key crashes on re-run
-//            int uniqueID = (int) (System.currentTimeMillis() % 100000);
-//            Lead testLead = new Lead(uniqueID, "Test Lead " + uniqueID, "555-0101", 5000.0, "SUV", "New", christmas, "Notes", today);
-//
-//            // 3. TEST: Insert
-//            Log.d(TAG, "Attempting to insert lead ID: " + uniqueID);
-//            String insertResult = accessLeads.insertLead(testLead);
-//
-//            if (insertResult == null) {
-//                Log.d(TAG, "Insert successful!");
-//            } else {
-//                Log.e(TAG, "Insert failed: " + insertResult);
-//            }
-
-            // 4. TEST: Retrieval
-            Log.d(TAG, "Attempting to retrieve leads...");
-            List<Lead> leadList = new ArrayList<>();
-            AccessLeads accessLeads = new AccessLeads();
-            String getResult = accessLeads.getLeads(leadList);
-
-            if (getResult == null) {
-                Log.d(TAG, "Retrieval successful! Count: " + leadList.size());
-                for (Lead l : leadList) {
-                    Log.d(TAG, "Found Lead: ID=" + l.getID() + ", Name=" + l.getName());
-                }
-            } else {
-                Log.e(TAG, "Retrieval failed: " + getResult);
-            }
+            Log.d(TAG, "App initialized and DB connected.");
 
         } catch (Exception e) {
-            // This will catch the crash and print it to Logcat so you can see WHY it ended
-            Log.e(TAG, "CRASH IN ONCREATE: " + e.getMessage());
-            e.printStackTrace();
+            Log.e(TAG, "Initialization Error: " + e.getMessage());
         }
+
     }
 
     @Override
