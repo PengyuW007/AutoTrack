@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class Lead {
 
-    private long id;
+    private static long id=1;
     private String name;
     private String phone;
     private double budget;
@@ -19,20 +19,20 @@ public class Lead {
     // =========================
     // Constructor
     // =========================
-    public Lead(long id){
-        this.id = id;
+    public Lead(){
+        id++;
         this.name = null;
         this.phone = null;
         this.budget = 0;
         this.vehicleInterest = null;
-        this.stage = stage;
+        this.stage = null;
         this.followUpDate = null;
         this.notes = null;
         this.createdAt = null;
         this.score = 0.0; // default score
     }
 
-    public Lead(long id,
+    public Lead(
                 String name,
                 String phone,
                 double budget,
@@ -42,7 +42,7 @@ public class Lead {
                 String notes,
                 Date createdAt) {
 
-        this.id = id;
+        id++;
         this.name = name;
         this.phone = phone;
         this.budget = budget;
@@ -98,6 +98,26 @@ public class Lead {
         return createdAt;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPhoneNumber(String phone) {
+        this.phone = phone;
+    }
+
+    public void setBudget(double budget) {
+        this.budget = budget;
+    }
+
+    public void setVehicleInterest(String vehicleInterest) {
+        this.vehicleInterest = vehicleInterest;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public void setStage(String stage) {
         this.stage = stage;
     }
@@ -120,11 +140,16 @@ public class Lead {
     // =========================
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Lead)) return false;
-        Lead lead = (Lead) o;
-        return Objects.equals(id, lead.id);
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other == null || getClass() != other.getClass()) return false;
+        Lead lead = (Lead) other;
+
+        // Compare by Name (or ID if you prefer)
+        if (this.name != null && lead.name != null) {
+            return this.name.equals(lead.name);
+        }
+        return false;
     }
 
     @Override

@@ -100,7 +100,7 @@ public class DataAccessObject implements DataAccess {
                 Date followUp = formatter.parse(cursor.getString(cursor.getColumnIndexOrThrow("Follow_Up_Date")));
                 Date createdAt = formatter.parse(cursor.getString(cursor.getColumnIndexOrThrow("Created_At_Date")));
 
-                list.add(new Lead(id, name, phone, budget, vehicleInterest, stage, followUp, notes, createdAt));
+                list.add(new Lead(name, phone, budget, vehicleInterest, stage, followUp, notes, createdAt));
             } while (cursor.moveToNext());
         }
     }

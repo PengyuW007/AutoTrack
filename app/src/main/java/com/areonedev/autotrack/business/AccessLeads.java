@@ -10,30 +10,30 @@ import com.areonedev.autotrack.persistence.DataAccess;
 
 public class AccessLeads {
     private DataAccess dataAccess;
-    private List<Lead>leads;
+    private List<Lead> leads;
     private Lead lead;
     private int currLead;
 
-    public AccessLeads(){
+    public AccessLeads() {
         dataAccess = Services.getDataAccess(Main.dbName);
         leads = new ArrayList<>();
         lead = null;
         currLead = 0;
     }
 
-    public String getLeads(List<Lead>leads){
+    public String getLeads(List<Lead> leads) {
         leads.clear();
         return dataAccess.getLeadSequential(leads);
     }
 
-    public Lead getRandom(long leadID){
-        leads = dataAccess.getLeadRandom(new Lead(leadID));
+    public Lead getSequential() {
+        String result = null;
         currLead = 0;
 
-        if(currLead<leads.size()){
+        if (currLead < leads.size()) {
             lead = leads.get(currLead);
             currLead++;
-        }else{
+        } else {
             lead = null;
             leads = null;
             currLead = 0;
@@ -41,15 +41,32 @@ public class AccessLeads {
         return lead;
     }
 
-    public String insertLead(Lead currLead){
+    public Lead getRandom(String name){
+
+        if(name.trim().equals("")){
+            lead = null;
+        }else{
+            lead = new Lead();
+            lead.setName(name);
+            leads = dataAccess.getLeadRandom(lead);
+            if(leads.size()==1){
+                lead = leads.get(0);
+            }else{
+                lead = null;
+            }
+        }
+        return lead;
+    }
+
+    public String insertLead(Lead currLead) {
         return dataAccess.insertLead(currLead);
     }
 
-    public String updateLead(Lead currLead){
+    public String updateLead(Lead currLead) {
         return dataAccess.updateLead(currLead);
     }
 
-    public String deleteLead(Lead currLead){
+    public String deleteLead(Lead currLead) {
         return dataAccess.deleteLead(currLead);
     }
 }

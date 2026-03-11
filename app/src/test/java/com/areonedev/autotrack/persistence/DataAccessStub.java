@@ -2,6 +2,7 @@ package com.areonedev.autotrack.persistence;
 
 import com.areonedev.autotrack.application.Main;
 import com.areonedev.autotrack.objects.Lead;
+import com.areonedev.autotrack.persistence.DataAccess;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class DataAccessStub implements DataAccess {
 
         calendar.set(2023, Calendar.JANUARY, 1);
         createdDate = calendar.getTime();
-        lead = new Lead(1L,
+        lead = new Lead(
                 "Alice Chen",
                 "204-555-8123",
                 32000,
@@ -45,7 +46,7 @@ public class DataAccessStub implements DataAccess {
 
         calendar.set(2024, Calendar.FEBRUARY, 2);
         createdDate = calendar.getTime();
-        lead = new Lead(2L,
+        lead = new Lead(
                 "Brian Miller",
                 "204-555-1290",
                 45000,
@@ -58,7 +59,7 @@ public class DataAccessStub implements DataAccess {
 
         calendar.set(2025, Calendar.MARCH, 3);
         createdDate = calendar.getTime();
-        lead = new Lead(3L,
+        lead = new Lead(
                 "Sophia Martinez",
                 "204-555-6677",
                 52000,
@@ -72,7 +73,7 @@ public class DataAccessStub implements DataAccess {
 
     @Override
     public void close() {
-
+        System.out.println("Closed " +dbType +" database " +dbName);
     }
 
     @Override
@@ -84,13 +85,13 @@ public class DataAccessStub implements DataAccess {
 
     @Override
     public ArrayList<Lead> getLeadRandom(Lead currLead) {
-        ArrayList<Lead>newLeads;
+        ArrayList<Lead> newLeads;
         int index;
 
-        newLeads = new ArrayList<Lead>();
+        newLeads = new ArrayList<>();
         index = leads.indexOf(currLead);
 
-        if(index>=0){
+        if (index >= 0) {
             newLeads.add(leads.get(index));
         }
 
@@ -108,8 +109,8 @@ public class DataAccessStub implements DataAccess {
         int index;
 
         index = leads.indexOf(currLead);
-        if(index>=0){
-            leads.set(index,currLead);
+        if (index >= 0) {
+            leads.set(index, currLead);
         }
         return null;
     }
@@ -119,7 +120,7 @@ public class DataAccessStub implements DataAccess {
         int index;
 
         index = leads.indexOf(currLead);
-        if(index>=0){
+        if (index >= 0) {
             leads.remove(index);
         }
         return null;
