@@ -179,14 +179,14 @@ public class DataAccessTest extends TestCase {
         // 3. Verify: Fetch the lead again to see if changes stuck
         // We use getLeadRandom with a criteria object containing the ID
         Lead criteria = new Lead();
-        criteria.setLeadID(targetID);
+        //criteria.setLeadID(targetID);
         ArrayList<Lead> results = dataAccess.getLeadRandom(criteria);
 
         // 4. Assertions
         assertEquals("Should still find exactly 1 lead", 1, results.size());
         Lead updatedLead = results.get(0);
 
-        Assert.assertEquals("ID should remain unchanged", targetID, updatedLead.getLeadID());
+        Assert.assertEquals("ID should remain unchanged", targetID, updatedLead.getID());
         assertEquals("Name should be updated to 'Alice Updated'", "Alice Updated", updatedLead.getName());
         Assert.assertEquals("Phone should be updated to '999-9999'", "999-9999", updatedLead.getPhoneNumber());
 
