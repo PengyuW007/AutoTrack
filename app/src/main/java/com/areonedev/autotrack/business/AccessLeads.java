@@ -47,7 +47,7 @@ public class AccessLeads {
             lead = null;
         }else{
             lead = new Lead();
-            lead.setName(name);
+            lead.setLeadName(name);
             leads = dataAccess.getLeadRandom(lead);
             if(leads.size()==1){
                 lead = leads.get(0);

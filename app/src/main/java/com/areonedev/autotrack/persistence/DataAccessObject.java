@@ -71,7 +71,7 @@ public class DataAccessObject implements DataAccess {
         ArrayList<Lead> leads = new ArrayList<>();
         try {
             // Use selectionArgs (?) to prevent SQL injection
-            String[] selectionArgs = { String.valueOf(newLead.getID()) };
+            String[] selectionArgs = { String.valueOf(newLead.getLeadID()) };
             Cursor cursor = db.rawQuery("SELECT * FROM Leads WHERE LeadID = ?", selectionArgs);
 
             parseCursor(cursor, leads);
@@ -124,7 +124,7 @@ public class DataAccessObject implements DataAccess {
         try {
             ContentValues values = getLeadContentValues(lead);
             String whereClause = "LeadID = ?";
-            String[] whereArgs = { String.valueOf(lead.getID()) };
+            String[] whereArgs = { String.valueOf(lead.getLeadID()) };
 
             int rowsAffected = db.update("Leads", values, whereClause, whereArgs);
             if (rowsAffected == 0) result = "Lead not found.";
@@ -139,7 +139,7 @@ public class DataAccessObject implements DataAccess {
         result = null;
         try {
             String whereClause = "LeadID = ?";
-            String[] whereArgs = { String.valueOf(lead.getID()) };
+            String[] whereArgs = { String.valueOf(lead.getLeadID()) };
 
             int rowsAffected = db.delete("Leads", whereClause, whereArgs);
             if (rowsAffected == 0) result = "Lead not found.";
@@ -155,15 +155,15 @@ public class DataAccessObject implements DataAccess {
     private ContentValues getLeadContentValues(Lead lead) {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         ContentValues values = new ContentValues();
-        values.put("LeadID", lead.getID());
-        values.put("LeadName", lead.getName());
-        values.put("LeadPhone", lead.getPhoneNumber());
-        values.put("Budget", lead.getBudget());
-        values.put("VehicleInterest", lead.getVehicleInterest());
-        values.put("Stage", lead.getStage());
-        values.put("Follow_Up_Date", formatter.format(lead.getFollowUpDate()));
-        values.put("Notes", lead.getNotes());
-        values.put("Created_At_Date", formatter.format(lead.getCreatedAt()));
+        values.put("LeadID", lead.getLeadID());
+        values.put("LeadName", lead.getLeadName());
+        values.put("LeadPhone", lead.getLeadPhoneNumber());
+        values.put("Budget", lead.getLeadBudget());
+        values.put("VehicleInterest", lead.getLeadVehicleInterest());
+        values.put("Stage", lead.getLeadStage());
+        values.put("Follow_Up_Date", formatter.format(lead.getLeadFollowUpDate()));
+        values.put("Notes", lead.getLeadNotes());
+        values.put("Created_At_Date", formatter.format(lead.getLeadCreatedAt()));
         return values;
     }
 

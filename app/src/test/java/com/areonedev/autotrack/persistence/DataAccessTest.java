@@ -96,7 +96,7 @@ public class DataAccessTest extends TestCase {
         assertNotNull("Leads list should not be null", leads);
         assertEquals(3, leads.size());
 
-        assertEquals("Alice Chen", leads.getFirst().getName());
+        assertEquals("Alice Chen", leads.getFirst().getLeadName());
     }
 
     public void testRandom() {
@@ -133,8 +133,8 @@ public class DataAccessTest extends TestCase {
         assertEquals(1, results.size());
         dataAccess.getLeadSequential(leads);
         assertEquals(4, leads.size());
-        assertEquals("Alice Chen",leads.getFirst().getName());
-        assertEquals("Test Lead",leads.getLast().getName());
+        assertEquals("Alice Chen",leads.getFirst().getLeadName());
+        assertEquals("Test Lead",leads.getLast().getLeadName());
 
         /* Insert Duplicate */
         testLead = new Lead("Test Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
@@ -154,8 +154,8 @@ public class DataAccessTest extends TestCase {
         assertEquals(0, results.size());
         dataAccess.getLeadSequential(results);
         assertEquals(4,leads.size());
-        assertEquals("Alice Chen",leads.getFirst().getName());
-        assertEquals("Test Lead",leads.getLast().getName());
+        assertEquals("Alice Chen",leads.getFirst().getLeadName());
+        assertEquals("Test Lead",leads.getLast().getLeadName());
     }
 
     public void testUpdateLead(){
@@ -165,12 +165,12 @@ public class DataAccessTest extends TestCase {
         List<Lead> leads = new ArrayList<>();
         dataAccess.getLeadSequential(leads);
         Lead originalLead = leads.get(0);
-        long targetID = originalLead.getID();
-        String originalName = originalLead.getName();
+        long targetID = originalLead.getLeadID();
+        String originalName = originalLead.getLeadName();
 
         // 2. Act: Modify the lead's information
         // We keep the same ID but change the name and phone
-        originalLead.setName("Alice Updated");
+        originalLead.setLeadName("Alice Updated");
         originalLead.setPhoneNumber("999-9999");
 
         String result = dataAccess.updateLead(originalLead);
@@ -186,9 +186,9 @@ public class DataAccessTest extends TestCase {
         assertEquals("Should still find exactly 1 lead", 1, results.size());
         Lead updatedLead = results.get(0);
 
-        Assert.assertEquals("ID should remain unchanged", targetID, updatedLead.getID());
-        assertEquals("Name should be updated to 'Alice Updated'", "Alice Updated", updatedLead.getName());
-        Assert.assertEquals("Phone should be updated to '999-9999'", "999-9999", updatedLead.getPhoneNumber());
+        Assert.assertEquals("ID should remain unchanged", targetID, updatedLead.getLeadID());
+        assertEquals("Name should be updated to 'Alice Updated'", "Alice Updated", updatedLead.getLeadName());
+        Assert.assertEquals("Phone should be updated to '999-9999'", "999-9999", updatedLead.getLeadPhoneNumber());
 
         // Ensure we didn't accidentally change other leads
         System.out.println(TAG + "Update verified for ID: " + targetID);

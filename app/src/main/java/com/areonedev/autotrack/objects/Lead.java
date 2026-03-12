@@ -58,47 +58,47 @@ public class Lead {
     // Getters & Setters
     // =========================
 
-    public long getID() {
+    public long getLeadID() {
         return id;
     }
 
-    public String getName() {
+    public String getLeadName() {
         return name;
     }
 
-    public String getPhoneNumber() {
+    public String getLeadPhoneNumber() {
         return phone;
     }
 
-    public double getBudget() {
+    public double getLeadBudget() {
         return budget;
     }
 
-    public String getVehicleInterest() {
+    public String getLeadVehicleInterest() {
         return vehicleInterest;
     }
 
-    public String getStage() {
+    public String getLeadStage() {
         return stage;
     }
 
-    public Date getFollowUpDate() {
+    public Date getLeadFollowUpDate() {
         return followUpDate;
     }
 
-    public double getScore() {
+    public double getLeadScore() {
         return score;
     }
 
-    public String getNotes() {
+    public String getLeadNotes() {
         return notes;
     }
 
-    public Date getCreatedAt() {
+    public Date getLeadCreatedAt() {
         return createdAt;
     }
 
-    public void setName(String name) {
+    public void setLeadName(String name) {
         this.name = name;
     }
 

@@ -88,10 +88,10 @@ public class CLI {
         } else {
             Log.d("CLI", "Found " + leads.size() + " leads in LEADS.db:");
             for (Lead lead : leads) {
-                Log.d("CLI", indent + "ID: " + lead.getID() +
-                        " | Name: " + lead.getName() +
-                        " | Budget: $" + lead.getBudget() +
-                        " | Stage: " + lead.getStage());
+                Log.d("CLI", indent + "ID: " + lead.getLeadID() +
+                        " | Name: " + lead.getLeadName() +
+                        " | Budget: $" + lead.getLeadBudget() +
+                        " | Stage: " + lead.getLeadStage());
             }
         }
         Log.d("CLI", "--- End of Lead List ---");

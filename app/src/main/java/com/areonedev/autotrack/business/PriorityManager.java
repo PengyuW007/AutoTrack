@@ -21,7 +21,7 @@ public class PriorityManager {
             @Override
             public int compare(Lead l1, Lead l2) {
                 // 逆序，大分数排前面
-                return Double.compare(l2.getScore(), l1.getScore());
+                return Double.compare(l2.getLeadScore(), l1.getLeadScore());
             }
         });
     }

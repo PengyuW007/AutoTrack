@@ -9,13 +9,13 @@ public class ScoringService {
         double score = 0;
 
         // 1️⃣ Stage Weight
-        score += getStageWeight(lead.getStage());
+        score += getStageWeight(lead.getLeadStage());
 
         // 2️⃣ Follow-up urgency
         score += getTimeWeight(lead);
 
         // 3️⃣ Budget weight
-        score += lead.getBudget() / 1000;
+        score += lead.getLeadBudget() / 1000;
 
         return score;
     }
@@ -44,13 +44,13 @@ public class ScoringService {
 
     private double getTimeWeight(Lead lead) {
 
-        if (lead.getFollowUpDate() == null) return 0;
+        if (lead.getLeadFollowUpDate() == null) return 0;
 
         Calendar todayCal = Calendar.getInstance();
         resetTime(todayCal);
 
         Calendar followUpCal = Calendar.getInstance();
-        followUpCal.setTime(lead.getFollowUpDate());
+        followUpCal.setTime(lead.getLeadFollowUpDate());
         resetTime(followUpCal);
 
         if (followUpCal.before(todayCal)) {
@@ -65,14 +65,14 @@ public class ScoringService {
     }
 
     private double getEngagementWeight(Lead lead) {
-        if (lead.getFollowUpDate() == null) return 0;
+        if (lead.getLeadFollowUpDate() == null) return 0;
 
         // 假设 lead.notes 里可以标记 last response
         // 简单示例：7天未回复 -15，14天未回复 -40，屏蔽 -100
         // 这里用 followUpDate 代替 last response 方便测试
         Calendar today = Calendar.getInstance();
         Calendar lastResponse = Calendar.getInstance();
-        lastResponse.setTime(lead.getFollowUpDate());
+        lastResponse.setTime(lead.getLeadFollowUpDate());
         resetTime(lastResponse);
 
         long diff = today.getTimeInMillis() - lastResponse.getTimeInMillis();
