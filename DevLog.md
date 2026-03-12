@@ -1,11 +1,11 @@
 # Developer Log — AutoTrack
 
-**Date:** March 11, 2024  
+**Date:** March 10, 2024  
 **Module:** Persistence Layer
 
 ---
 
-## Today
+## Itinerary
 
 - Set up the unit testing environment (`DataAccessTest`) with Stub and Real database switching.
 - Tested `getLeadSequential` to verify initial dataset retrieval (3 leads).
