@@ -3,8 +3,6 @@
 **Date:** March 13, 2024  
 **Module:** Persistence Layer (Stub Database Testing)
 
----
-
 ## Itinerary
 
 - Completed the `DataAccessTest` unit test suite for the Stub database implementation.
@@ -48,8 +46,6 @@ All identified issues have now been resolved.
 ---
 **Date:** March 10, 2024  
 **Module:** Persistence Layer
-
-
 
 ## Itinerary
 
