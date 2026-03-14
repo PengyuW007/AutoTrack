@@ -20,8 +20,6 @@
 - Fixed all issues discovered during testing.
 - Confirmed stable dataset behavior across multiple test cases.
 
----
-
 ## Issues
 
 - Minor logic bugs were discovered during early testing of insert and update operations.
@@ -29,8 +27,6 @@
 - Ensured correct handling of ID matching for update and delete operations.
 
 All identified issues have now been resolved.
-
----
 
 ## Next
 
@@ -62,15 +58,11 @@ All identified issues have now been resolved.
     - Switched ID type to `long`.
     - Implemented auto-increment ID generation.
 
----
-
 ## Issues
 
 - `Log.d()` output is not visible in unit tests → switched to `System.out.println`.
 - Java version compatibility issue: `getFirst()` / `getLast()` require Java 21.
 - Decided to use a **system-generated ID** instead of a phone number as the primary key.
-
----
 
 ## Next
 
