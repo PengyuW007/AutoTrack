@@ -1,41 +1,37 @@
 # Developer Log — AutoTrack
-
----
 **Date:** March 14, 2024
+
 **Module:** Domain Model (Object-Level Testing)
 
 ## Itinerary
 
-- Completed **object-level testing** for the `Lead` class.
-- Verified that the `Lead` entity behaves correctly as the fundamental data model in the system.
-- Tested and confirmed the correctness of the following components:
+- Completed the `LeadTest` unit test suite to verify the core data model.
+- Fully tested the `Lead` class logic and state management.
+- Verified correct functionality for the following components:
+  - `Lead(String, String, ...)` (Full Constructor validation)
+  - `setLeadName(String)` (Name splitting and null-safety logic)
+  - `getLeadName()` (Formatted string retrieval)
+  - `equals(Object)` and `hashCode()` (Identity and duplicate detection)
+  - `leadID` (Auto-increment and immutability)
 
-  - `Lead` constructors
-  - Getter methods
-  - `equals()` implementation
-  - `hashCode()` implementation
-  - Object state integrity
-
-- Ensured that object creation correctly initializes all attributes.
-- Verified that getter methods consistently return the expected values.
-- Confirmed that `equals()` correctly compares `Lead` objects based on their identifying attributes.
-- Verified that `hashCode()` remains consistent with the `equals()` implementation.
-- Ensured that object instances maintain a valid state across multiple test cases.
+- Confirmed that the constructor enforces the "at least one name" validation rule.
+- Verified that null inputs are handled gracefully without throwing NullPointerExceptions.
+- Confirmed that `equals()` correctly identifies duplicates based on name and phone.
+- Verified that the static ID counter increments correctly across multiple instances.
 
 ## Issues
 
-- Minor inconsistencies were discovered during early validation of the `equals()` and `hashCode()` methods.
-- Adjusted the implementation to ensure that equality comparison is based on the correct identifying fields.
-- Verified that the updated logic behaves consistently across multiple test scenarios.
+- Discovered that `getLeadName()` returned a leading space when the first name was null.
+- Fixed by implementing `.trim()` in the name concatenation logic.
+- Found that `equals()` failed when comparing a Lead to a null object; added null-check guards.
 
 All identified issues have now been resolved.
 
 ## Next
 
 - Begin **integration testing between the Persistence Layer and the Business Layer**.
-- Verify that business logic correctly interacts with the data access layer.
-- Ensure that data retrieval and updates propagate correctly through the system layers.
-- Prepare test cases to validate **end-to-end lead management workflows**.
+- Verify that `AccessLeads` controller correctly handles data from `DataAccessStub`.
+- Prepare test cases for end-to-end lead management workflows in the UI.
 
 ---
 **Date:** March 13, 2024  
