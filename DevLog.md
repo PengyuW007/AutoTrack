@@ -1,5 +1,42 @@
 # Developer Log — AutoTrack
 ---
+**Date:** March 14, 2024
+**Module:** Domain Model (Object-Level Testing)
+
+## Itinerary
+
+- Completed **object-level testing** for the `Lead` class.
+- Verified that the `Lead` entity behaves correctly as the fundamental data model in the system.
+- Tested and confirmed the correctness of the following components:
+
+  - `Lead` constructors
+  - Getter methods
+  - `equals()` implementation
+  - `hashCode()` implementation
+  - Object state integrity
+
+- Ensured that object creation correctly initializes all attributes.
+- Verified that getter methods consistently return the expected values.
+- Confirmed that `equals()` correctly compares `Lead` objects based on their identifying attributes.
+- Verified that `hashCode()` remains consistent with the `equals()` implementation.
+- Ensured that object instances maintain a valid state across multiple test cases.
+
+## Issues
+
+- Minor inconsistencies were discovered during early validation of the `equals()` and `hashCode()` methods.
+- Adjusted the implementation to ensure that equality comparison is based on the correct identifying fields.
+- Verified that the updated logic behaves consistently across multiple test scenarios.
+
+All identified issues have now been resolved.
+
+## Next
+
+- Begin **integration testing between the Persistence Layer and the Business Layer**.
+- Verify that business logic correctly interacts with the data access layer.
+- Ensure that data retrieval and updates propagate correctly through the system layers.
+- Prepare test cases to validate **end-to-end lead management workflows**.
+
+---
 **Date:** March 13, 2024  
 **Module:** Persistence Layer (Stub Database Testing)
 

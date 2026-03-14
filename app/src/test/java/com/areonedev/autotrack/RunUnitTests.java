@@ -4,7 +4,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 //import com.areonedev.autotrack.business.BusinessTests;
-//import com.areonedev.autotrack.objects.ObjectTests;
+import com.areonedev.autotrack.objects.ObjectTests;
 import com.areonedev.autotrack.persistence.PersistenceTests;
 
 import org.junit.runner.RunWith;
@@ -12,7 +12,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        PersistenceTests.class
+        PersistenceTests.class,
+        ObjectTests.class
         // Add other test classes here as you create them, e.g., ObjectTests.class
 })
 public class RunUnitTests {

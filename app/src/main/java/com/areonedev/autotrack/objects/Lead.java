@@ -46,17 +46,28 @@ public class Lead {
             String notes,
             Date createdAt) {
 
-        this.leadID = idCounter++; // Assign unique ID
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phone = phone;
+        // 1. Validation: Check if BOTH names are missing
+        boolean isFirstEmpty = (firstName == null || firstName.trim().isEmpty());
+        boolean isLastEmpty = (lastName == null || lastName.trim().isEmpty());
+
+        if (isFirstEmpty && isLastEmpty) {
+            throw new IllegalArgumentException("Lead must have at least a First Name or a Last Name.");
+        }
+
+        this.leadID = idCounter++;
+
+        // 2. Null-Safety: Assign empty strings instead of null
+        this.firstName = isFirstEmpty ? "" : firstName.trim();
+        this.lastName = isLastEmpty ? "" : lastName.trim();
+        this.phone = (phone == null) ? "" : phone;
         this.budget = budget;
-        this.vehicleInterest = vehicleInterest;
-        this.stage = stage;
+        this.vehicleInterest = (vehicleInterest == null) ? "" : vehicleInterest;
+        this.stage = (stage == null) ? "New" : stage;
+        this.notes = (notes == null) ? "" : notes;
+
         this.followUpDate = followUpDate;
-        this.notes = notes;
-        this.createdAt = createdAt;
-        this.score = 0.0; // default score
+        this.createdAt = (createdAt == null) ? new Date() : createdAt;
+        this.score = 0.0;
     }
 
     // =========================
@@ -68,19 +79,21 @@ public class Lead {
     }
 
     public String getLeadName() {
-        return firstName + " " + lastName;
+        String first = getLeadFirstName();
+        String last = getLeadLastName();
+        return (first + " " + last).trim();
     }
 
     public String getLeadFirstName() {
-        return firstName;
+        return firstName == null ? "" : firstName;
     }
 
     public String getLeadLastName() {
-        return lastName;
+        return lastName == null ? "" : lastName;
     }
 
     public String getLeadPhoneNumber() {
-        return phone;
+        return phone == null ? "" : phone;
     }
 
     public double getLeadBudget() {
@@ -88,7 +101,7 @@ public class Lead {
     }
 
     public String getLeadVehicleInterest() {
-        return vehicleInterest;
+        return vehicleInterest == null ? "" : vehicleInterest;
     }
 
     public String getLeadStage() {
@@ -104,7 +117,7 @@ public class Lead {
     }
 
     public String getLeadNotes() {
-        return notes;
+        return notes == null ? "" : notes;
     }
 
     public Date getLeadCreatedAt() {
@@ -119,13 +132,23 @@ public class Lead {
         this.lastName = lastName;
     }
     public void setLeadName(String name) {
-        if (name != null && name.contains(" ")) {
-            int firstSpace = name.indexOf(" ");
-            this.firstName = name.substring(0, firstSpace).trim();
-            this.lastName = name.substring(firstSpace + 1).trim();
+        if (name == null || name.trim().isEmpty()) {
+            this.firstName = "null";
+            this.lastName = "null";
+            return;
+        }
+
+        String trimmedName = name.trim();
+        int firstSpace = trimmedName.indexOf(" ");
+
+        if (firstSpace != -1) {
+            // Split into first and last
+            this.firstName = trimmedName.substring(0, firstSpace).trim();
+            this.lastName = trimmedName.substring(firstSpace + 1).trim();
         } else {
-            this.firstName = name;
-            this.lastName = ""; // Or handle as you prefer
+            // No space found: treat the whole thing as the first name
+            this.firstName = trimmedName;
+            this.lastName = "";
         }
     }
 

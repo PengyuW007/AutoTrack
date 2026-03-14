@@ -36,7 +36,6 @@ public class AccessLeads {
         } else {
             lead = null;
             leads = null;
-            currLead = 0;
         }
         return lead;
     }
