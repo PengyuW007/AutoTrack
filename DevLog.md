@@ -1,5 +1,51 @@
 # Developer Log — AutoTrack
 
+**Date:** March 13, 2024  
+**Module:** Persistence Layer (Stub Database Testing)
+
+---
+
+## Today
+
+- Completed the `DataAccessTest` unit test suite for the Stub database implementation.
+- Fully tested all persistence methods in `DataAccessStub`.
+- Verified correct functionality for the following methods:
+
+  - `String getLeadSequential(List<Lead> leadResult)`
+  - `ArrayList<Lead> getLeadRandom(Lead lead)`
+  - `String insertLead(Lead lead)`
+  - `String updateLead(Lead lead)`
+  - `String deleteLead(Lead lead)`
+
+- Confirmed that all CRUD operations behave correctly in the Stub database environment.
+- Verified that list population, searching, insertion, updating, and deletion behave as expected.
+- Fixed all issues discovered during testing.
+- Confirmed stable dataset behavior across multiple test cases.
+
+---
+
+## Issues
+
+- Minor logic bugs were discovered during early testing of insert and update operations.
+- Adjusted `Lead.equals()` implementation to ensure correct object comparison during list operations.
+- Ensured correct handling of ID matching for update and delete operations.
+
+All identified issues have now been resolved.
+
+---
+
+## Next
+
+- Begin **object-level testing** for the `Lead` class.
+- Verify correctness of:
+  - Constructors
+  - Getter methods
+  - `equals()` and `hashCode()`
+  - Object state integrity
+- Ensure that `Lead` behaves correctly as the fundamental data entity before integrating further layers.
+- Prepare for the next phase: **integration between Persistence Layer and Business Layer**.
+
+
 **Date:** March 10, 2024  
 **Module:** Persistence Layer
 
