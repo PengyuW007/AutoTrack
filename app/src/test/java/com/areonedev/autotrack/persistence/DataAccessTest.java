@@ -19,8 +19,7 @@ public class DataAccessTest extends TestCase {
     private static final String dbName = Main.dbName;
     private static final String TAG = "DataAccessTest\t";
 
-    public DataAccessTest(String arg0)
-    {
+    public DataAccessTest(String arg0) {
         super(arg0);
     }
 
@@ -68,7 +67,7 @@ public class DataAccessTest extends TestCase {
 
         // 2. Test Insertion
         // Note: Ensure your Lead constructor matches these parameters
-        Lead testLead = new Lead("Test Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
+        Lead testLead = new Lead("Test", " Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
         dataAccess.insertLead(testLead);
         dataAccess.getLeadSequential(leads);
         assertEquals(4, leads.size());
@@ -107,44 +106,51 @@ public class DataAccessTest extends TestCase {
         assertEquals(leads.size(), 3);
 
         // 1. NEGATIVE TEST: Search for a lead that does NOT exist
-        Lead nonExistentCriteria = new Lead("Non Existence", "000", 0, "", "", null, "", null);
-        ArrayList<Lead> results = dataAccess.getLeadRandom(nonExistentCriteria);
-
+        Lead testLead = new Lead("Non", " Existence", "000", 0, "", "", null, "", null);
+        ArrayList<Lead> results = dataAccess.getLeadRandom(testLead);
         assertEquals("Should find 0 leads for non-existent criteria", 0, results.size());
 
-        // 2. POSITIVE TEST: Search for a lead that does exist
-        Lead testLead = new Lead("Alice Chen", "555-0100", 0, "", "", null, "", null);
+        testLead = new Lead();
+        results = dataAccess.getLeadRandom(testLead);
+        assertEquals(0, results.size());
+
+        // 2. Negative Test: Same name, but phone# is different
+        testLead = new Lead("Alice", "Chen", "555-1000", 0, "", "", null, "", null);
+        results = dataAccess.getLeadRandom(testLead);
+        assertEquals("The leads list should be empty", 0, results.size());
+
+        // 3. POSITIVE TEST: Search for a lead that does exist
+        testLead = new Lead("Alice", "Chen", "204-555-8123", 0, "", "", null, "", null);
         results = dataAccess.getLeadRandom(testLead);
         assertEquals("The leads list should not be empty", 1, results.size());
     }
 
     public void testInsert() {
         System.out.println(TAG + "Running test insertLead: Verify Lead Insertion");
-        ArrayList<Lead>leads = new ArrayList<>();
+        ArrayList<Lead> leads = new ArrayList<>();
         dataAccess.getLeadSequential(leads);
 
         /* Insert Unique */
-        Lead testLead = new Lead("Test Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
+        Lead testLead = new Lead("Test", "Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
         ArrayList<Lead> results = dataAccess.getLeadRandom(testLead);
         assertEquals(0, results.size());
-        assertEquals(3,leads.size());
+        assertEquals(3, leads.size());
         dataAccess.insertLead(testLead); //after insertion
         results = dataAccess.getLeadRandom(testLead);
         assertEquals(1, results.size());
         dataAccess.getLeadSequential(leads);
         assertEquals(4, leads.size());
-        assertEquals("Alice Chen",leads.getFirst().getLeadName());
-        assertEquals("Test Lead",leads.getLast().getLeadName());
+        assertEquals("Alice Chen", leads.getFirst().getLeadName());
+        assertEquals("Test Lead", leads.getLast().getLeadName());
 
         /* Insert Duplicate */
-        testLead = new Lead("Test Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
+        testLead = new Lead("Test", "Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
         results = dataAccess.getLeadRandom(testLead);
-        dataAccess.insertLead(testLead);
-        // This is a valid lead
+        // This is a valid lead, and it does exist in DB, however shouldn't be inserted
         assertEquals(1, results.size());
         dataAccess.getLeadSequential(results);
-        //But this insertion should not be inserted
-        assertEquals(4,leads.size());
+        //But this insertion should not be processed
+        assertEquals(4, leads.size());
 
         /* If lead is invalid, then nothing should be inserted*/
         testLead = new Lead();
@@ -153,45 +159,98 @@ public class DataAccessTest extends TestCase {
         // This insertion should not change anything
         assertEquals(0, results.size());
         dataAccess.getLeadSequential(results);
-        assertEquals(4,leads.size());
-        assertEquals("Alice Chen",leads.getFirst().getLeadName());
-        assertEquals("Test Lead",leads.getLast().getLeadName());
+        assertEquals(4, leads.size());
+        assertEquals("Alice Chen", leads.getFirst().getLeadName());
+        assertEquals("Test Lead", leads.getLast().getLeadName());
     }
 
-    public void testUpdateLead(){
+    public void testUpdateLead() {
         System.out.println(TAG + "Running test updateLead: Verify Lead Update");
 
-// 1. Arrange: Get an existing lead from the stub (e.g., Alice Chen)
+        /* HappyUpdate, valid lead update */
+        // 1. Arrange: Get an existing lead from the stub (e.g., Alice Chen)
         List<Lead> leads = new ArrayList<>();
         dataAccess.getLeadSequential(leads);
-        Lead originalLead = leads.get(0);
-        long targetID = originalLead.getLeadID();
-        String originalName = originalLead.getLeadName();
-
+        Lead oldLead = leads.get(0);
+        long oldID = oldLead.getLeadID();
+        String oldName = oldLead.getLeadName();
         // 2. Act: Modify the lead's information
         // We keep the same ID but change the name and phone
-        originalLead.setLeadName("Alice Updated");
-        originalLead.setPhoneNumber("999-9999");
-
-        String result = dataAccess.updateLead(originalLead);
-        assertNull("Update should return null on success", result);
-
-        // 3. Verify: Fetch the lead again to see if changes stuck
-        // We use getLeadRandom with a criteria object containing the ID
-        Lead criteria = new Lead();
-        //criteria.setLeadID(targetID);
-        ArrayList<Lead> results = dataAccess.getLeadRandom(criteria);
-
+        oldLead.setLeadName("Alice Updated");
+        oldLead.setLeadPhoneNumber("999-9999");
+        String result = dataAccess.updateLead(oldLead);//update process...
+        assertNull("Lead should be modified successfully",result);
+        dataAccess.getLeadSequential(leads);
+        Lead updatedLead = leads.get(0);
+        ArrayList<Lead> results = dataAccess.getLeadRandom(updatedLead);
         // 4. Assertions
         assertEquals("Should still find exactly 1 lead", 1, results.size());
-        Lead updatedLead = results.get(0);
+        assertEquals("ID must remain the same", oldID, updatedLead.getLeadID());
+        assertEquals("Name should now be 'Alice Updated'", "Alice Updated", updatedLead.getLeadName());
+        assertEquals("Phone should now be '999-9999'", "999-9999", updatedLead.getLeadPhoneNumber());
 
-        Assert.assertEquals("ID should remain unchanged", targetID, updatedLead.getLeadID());
-        assertEquals("Name should be updated to 'Alice Updated'", "Alice Updated", updatedLead.getLeadName());
-        Assert.assertEquals("Phone should be updated to '999-9999'", "999-9999", updatedLead.getLeadPhoneNumber());
+        /* Update a Non-existent lead */
+        // Since leadID is immutable and auto-incrementing, a new Lead will have a unique ID not in the DB
+        Lead ghostLead = new Lead("Ghost", "User", "000", 0, "", "", null, "", null);
+        String ghostResult = dataAccess.updateLead(ghostLead);
+        assertEquals("Updating a non-existent lead should return an error message", "Lead not found.",ghostResult);
 
-        // Ensure we didn't accidentally change other leads
-        System.out.println(TAG + "Update verified for ID: " + targetID);
+        /* Partial Update: Change only one field */
+        // Reset Alice to a valid state but change only the phone
+        oldLead.setLeadName("Alice Chen");
+        oldLead.setLeadPhoneNumber("555-9999");
+        double originalBudget = oldLead.getLeadBudget();
+        dataAccess.updateLead(oldLead);
+        dataAccess.getLeadSequential(leads);
+        updatedLead = leads.get(0);
+        results = dataAccess.getLeadRandom(updatedLead);
+        assertEquals("Should still find exactly 1 lead", 1, results.size());
+        // Re-fetch to verify
+        leads.clear();
+        dataAccess.getLeadSequential(leads);
+        Lead partialCheck = leads.get(0);
+        assertEquals("555-9999", partialCheck.getLeadPhoneNumber());
+        assertEquals("Budget should remain unchanged", originalBudget, partialCheck.getLeadBudget());
 
+        System.out.println(TAG + "Update verified for ID: " +updatedLead.getLeadID() + " New Name: " + updatedLead.getLeadName()+", Old Name: "+oldName);
+    }
+
+    public void testDeleteLead() {
+        System.out.println(TAG + "Running test updateLead: Verify Lead Deletion");
+
+        // 1. Happy Path: Delete an existing lead
+        ArrayList<Lead> leads = new ArrayList<>();
+        dataAccess.getLeadSequential(leads);
+        int initialSize = leads.size();
+        // Pick a target (e.g., the first lead, Alice)
+        Lead testLead = leads.get(0);
+        long testLeadLeadID = testLead.getLeadID();
+        // Act: Delete the lead
+        String result = dataAccess.deleteLead(testLead);
+        assertNull("Delete should return null on success", result);
+        // 2. Verification: Check that the size decreased
+        leads.clear();
+        dataAccess.getLeadSequential(leads);
+        assertEquals("Database size should decrease by 1", initialSize - 1, leads.size());
+        // 3. Verification: Ensure the lead is no longer searchable
+        ArrayList<Lead> searchResults = dataAccess.getLeadRandom(testLead);
+        assertEquals("Deleted lead should not be found in search results", 0, searchResults.size());
+        // 4. Edge Case: Delete a lead that does not exist (Ghost Lead)
+        // This lead has a new ID that was never inserted into the Stub
+        Lead ghostLead = new Lead("Ghost", "User", "000", 0, "", "", null, "", null);
+        String ghostResult = dataAccess.deleteLead(ghostLead);
+        assertEquals("Deleting a non-existent lead should return an error message", "Lead not found.", ghostResult);
+
+        /* Double Delete, delete the same lead twice */
+        // Try deleting the same target again
+        String doubleDeleteResult = dataAccess.deleteLead(testLead);
+        assertEquals("Deleting an already deleted lead should return an error", "Lead not found.", doubleDeleteResult);
+
+        // 6. Integrity Check: Ensure other data is still there
+        leads.clear();
+        dataAccess.getLeadSequential(leads);
+        assertFalse("The list should not be empty after one deletion", leads.isEmpty());
+
+        System.out.println(TAG + "Delete verified for ID: " + testLeadLeadID + ". Remaining leads: " + leads.size());
     }
 }

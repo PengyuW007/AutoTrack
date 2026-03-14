@@ -5,8 +5,10 @@ import java.util.Objects;
 
 public class Lead {
 
-    private static long id=1;
-    private String name;
+    private static long idCounter = 1;
+    private long leadID;
+    private String firstName;
+    private String lastName;
     private String phone;
     private double budget;
     private String vehicleInterest; // Update this to Vehicle Class when needed
@@ -19,31 +21,34 @@ public class Lead {
     // =========================
     // Constructor
     // =========================
-    public Lead(){
-        id++;
-        this.name = null;
+    public Lead() {
+        this.leadID = idCounter++; // Assign unique ID and increment counter
+        this.firstName = null;
+        this.lastName = null;
         this.phone = null;
         this.budget = 0;
         this.vehicleInterest = null;
-        this.stage = null;
+        this.stage = "New";
         this.followUpDate = null;
         this.notes = null;
-        this.createdAt = null;
+        this.createdAt = new Date();
         this.score = 0.0; // default score
     }
 
     public Lead(
-                String name,
-                String phone,
-                double budget,
-                String vehicleInterest,
-                String stage,
-                Date followUpDate,
-                String notes,
-                Date createdAt) {
+            String firstName,
+            String lastName,
+            String phone,
+            double budget,
+            String vehicleInterest,
+            String stage,
+            Date followUpDate,
+            String notes,
+            Date createdAt) {
 
-        id++;
-        this.name = name;
+        this.leadID = idCounter++; // Assign unique ID
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.phone = phone;
         this.budget = budget;
         this.vehicleInterest = vehicleInterest;
@@ -59,11 +64,19 @@ public class Lead {
     // =========================
 
     public long getLeadID() {
-        return id;
+        return leadID;
     }
 
     public String getLeadName() {
-        return name;
+        return firstName + " " + lastName;
+    }
+
+    public String getLeadFirstName() {
+        return firstName;
+    }
+
+    public String getLeadLastName() {
+        return lastName;
     }
 
     public String getLeadPhoneNumber() {
@@ -98,39 +111,53 @@ public class Lead {
         return createdAt;
     }
 
-    public void setLeadName(String name) {
-        this.name = name;
+    public void setLeadFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public void setPhoneNumber(String phone) {
+    public void setLeadLastName(String lastName) {
+        this.lastName = lastName;
+    }
+    public void setLeadName(String name) {
+        if (name != null && name.contains(" ")) {
+            int firstSpace = name.indexOf(" ");
+            this.firstName = name.substring(0, firstSpace).trim();
+            this.lastName = name.substring(firstSpace + 1).trim();
+        } else {
+            this.firstName = name;
+            this.lastName = ""; // Or handle as you prefer
+        }
+    }
+
+    public void setLeadPhoneNumber(String phone) {
         this.phone = phone;
     }
 
-    public void setBudget(double budget) {
+    public void setLeadBudget(double budget) {
         this.budget = budget;
     }
 
-    public void setVehicleInterest(String vehicleInterest) {
+    public void setLeadVehicleInterest(String vehicleInterest) {
         this.vehicleInterest = vehicleInterest;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setLeadCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
-    public void setStage(String stage) {
+    public void setLeadStage(String stage) {
         this.stage = stage;
     }
 
-    public void setFollowUpDate(Date followUpDate) {
+    public void setLeadFollowUpDate(Date followUpDate) {
         this.followUpDate = followUpDate;
     }
 
-    public void setScore(double score) {
+    public void setLeadScore(double score) {
         this.score = score;
     }
 
-    public void setNotes(String notes) {
+    public void setLeadNotes(String notes) {
         this.notes = notes;
     }
 
@@ -140,21 +167,29 @@ public class Lead {
     // =========================
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) return true;
-        if (other == null || getClass() != other.getClass()) return false;
-        Lead lead = (Lead) other;
+    public boolean equals(Object o) {
+        if (this == o) return true; // Same memory address
+        if (o == null || getClass() != o.getClass()) return false;
+        Lead lead = (Lead) o;
 
-        // Compare by Name (or ID if you prefer)
-        if (this.name != null && lead.name != null) {
-            return this.name.equals(lead.name);
-        }
-        return false;
+        // If IDs match, they are definitely the same
+        if (this.leadID == lead.leadID) return true;
+
+        // Logic: Match by First Name, Last Name, and Phone (ignoring case)
+        return safeCompare(this.firstName, lead.firstName) &&
+                safeCompare(this.lastName, lead.lastName) &&
+                Objects.equals(this.phone, lead.phone);
+    }
+
+    private boolean safeCompare(String s1, String s2) {
+        String str1 = (s1 == null) ? "" : s1.trim().toLowerCase();
+        String str2 = (s2 == null) ? "" : s2.trim().toLowerCase();
+        return str1.equals(str2);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(firstName, lastName, phone);
     }
 
     // =========================
@@ -164,8 +199,8 @@ public class Lead {
     @Override
     public String toString() {
         return "Lead{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
+                "id='" + leadID + '\'' +
+                ", name='" + getLeadName() + '\'' +
                 ", stage='" + stage + '\'' +
                 ", score=" + score +
                 '}';

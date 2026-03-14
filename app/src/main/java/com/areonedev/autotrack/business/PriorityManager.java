@@ -35,7 +35,7 @@ public class PriorityManager {
 
         // 重新计算 score
         double score = scoringService.calculateScore(lead);
-        lead.setScore(score);
+        lead.setLeadScore(score);
 
         // 添加到队列
         priorityQueue.add(lead);

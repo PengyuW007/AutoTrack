@@ -34,41 +34,45 @@ public class DataAccessStub implements DataAccess {
         calendar.set(2023, Calendar.JANUARY, 1);
         createdDate = calendar.getTime();
         lead = new Lead(
-                "Alice Chen",
+                "Alice",                // First Name
+                "Chen",                 // Last Name
                 "204-555-8123",
                 32000,
                 "Volkswagen Jetta",
                 "NEW",
-                today,          // follow-up today
+                today,
                 "First inquiry from website",
-                createdDate);   // created
+                createdDate);
         leads.add(lead);
 
         calendar.set(2024, Calendar.FEBRUARY, 2);
         createdDate = calendar.getTime();
         lead = new Lead(
-                "Brian Miller",
+                "Brian",                // First Name
+                "Miller",               // Last Name
                 "204-555-1290",
                 45000,
                 "Volkswagen Tiguan",
                 "VISITED",
-                today,          // follow-up today
+                today,
                 "Visited showroom, interested in financing",
-                createdDate);   // created Christmas;
+                createdDate);
         leads.add(lead);
 
         calendar.set(2025, Calendar.MARCH, 3);
         createdDate = calendar.getTime();
         lead = new Lead(
-                "Sophia Martinez",
+                "Sophia",               // First Name
+                "Martinez",             // Last Name
                 "204-555-6677",
                 52000,
                 "Volkswagen Atlas",
                 "NEGOTIATION",
                 today,
                 "Negotiating trade-in value",
-                createdDate);   // created Christmas;
+                createdDate);
         leads.add(lead);
+        System.out.println("Successfully connected "+dbType +" database " +dbPath);
     }
 
     @Override
@@ -100,29 +104,39 @@ public class DataAccessStub implements DataAccess {
 
     @Override
     public String insertLead(Lead currLead) {
-        leads.add(currLead);
-        return null;
+        //don't bother checking for duplicates, but I still added a duplicate lead checker
+        String res = null;
+        if(leads.contains(currLead)){
+            res = "Duplicate lead.";
+        }else{
+            leads.add(currLead);
+        }
+        return res;
     }
 
     @Override
     public String updateLead(Lead currLead) {
         int index;
-
+        String res = null;
         index = leads.indexOf(currLead);
         if (index >= 0) {
             leads.set(index, currLead);
+        }else{
+            res = "Lead not found.";
         }
-        return null;
+        return res;
     }
 
     @Override
     public String deleteLead(Lead currLead) {
         int index;
-
+        String res = null;
         index = leads.indexOf(currLead);
         if (index >= 0) {
             leads.remove(index);
+        }else{
+            res="Lead not found.";
         }
-        return null;
+        return res;
     }
 }

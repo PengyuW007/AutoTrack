@@ -90,7 +90,8 @@ public class DataAccessObject implements DataAccess {
         if (cursor.moveToFirst()) {
             do {
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow("LeadID"));
-                String name = cursor.getString(cursor.getColumnIndexOrThrow("LeadName"));
+                String firstName = cursor.getString(cursor.getColumnIndexOrThrow("LeadFirstName"));
+                String lastName = cursor.getString(cursor.getColumnIndexOrThrow("LeadLastName"));
                 String phone = cursor.getString(cursor.getColumnIndexOrThrow("LeadPhone"));
                 double budget = cursor.getDouble(cursor.getColumnIndexOrThrow("Budget"));
                 String vehicleInterest = cursor.getString(cursor.getColumnIndexOrThrow("VehicleInterest"));
@@ -100,7 +101,7 @@ public class DataAccessObject implements DataAccess {
                 Date followUp = formatter.parse(cursor.getString(cursor.getColumnIndexOrThrow("Follow_Up_Date")));
                 Date createdAt = formatter.parse(cursor.getString(cursor.getColumnIndexOrThrow("Created_At_Date")));
 
-                list.add(new Lead(name, phone, budget, vehicleInterest, stage, followUp, notes, createdAt));
+                list.add(new Lead(firstName,lastName, phone, budget, vehicleInterest, stage, followUp, notes, createdAt));
             } while (cursor.moveToNext());
         }
     }
