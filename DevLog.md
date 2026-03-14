@@ -1,11 +1,11 @@
 # Developer Log — AutoTrack
-
+---
 **Date:** March 13, 2024  
 **Module:** Persistence Layer (Stub Database Testing)
 
 ---
 
-## Today
+## Itinerary
 
 - Completed the `DataAccessTest` unit test suite for the Stub database implementation.
 - Fully tested all persistence methods in `DataAccessStub`.
@@ -45,11 +45,11 @@ All identified issues have now been resolved.
 - Ensure that `Lead` behaves correctly as the fundamental data entity before integrating further layers.
 - Prepare for the next phase: **integration between Persistence Layer and Business Layer**.
 
-
+---
 **Date:** March 10, 2024  
 **Module:** Persistence Layer
 
----
+
 
 ## Itinerary
 
