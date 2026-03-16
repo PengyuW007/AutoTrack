@@ -77,6 +77,7 @@ public class DataAccessStub implements DataAccess {
 
     @Override
     public void close() {
+        leads.clear();
         System.out.println("Closed " +dbType +" database " +dbName);
     }
 

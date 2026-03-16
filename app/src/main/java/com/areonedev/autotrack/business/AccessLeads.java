@@ -1,5 +1,6 @@
 package com.areonedev.autotrack.business;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,31 +29,40 @@ public class AccessLeads {
 
     public Lead getSequential() {
         String result = null;
-        currLead = 0;
 
+        if (leads == null || leads.isEmpty()) {
+            // the following line was added as a result of a failing test in AccessCoursesTest!
+            leads = new ArrayList<>();
+            dataAccess.getLeadSequential(leads);
+            currLead = 0; // Reset counter for a fresh list
+        }
         if (currLead < leads.size()) {
             lead = leads.get(currLead);
             currLead++;
         } else {
+            //now hit the end of the list, so reset the counter
             lead = null;
             leads = null;
         }
         return lead;
     }
 
-    public Lead getRandom(String name){
-
-        if(name.trim().equals("")){
+    public Lead getRandom(long id){
+        if (id == 0) {
             lead = null;
+        }
+
+        Lead temp = new Lead();
+        leads = dataAccess.getLeadRandom(temp);
+
+        currLead = 0;
+        if(currLead<leads.size()){
+            lead = leads.get(currLead);
+            currLead++;
         }else{
-            lead = new Lead();
-            lead.setLeadName(name);
-            leads = dataAccess.getLeadRandom(lead);
-            if(leads.size()==1){
-                lead = leads.get(0);
-            }else{
-                lead = null;
-            }
+            lead = null;
+            leads = null;
+            currLead =0;
         }
         return lead;
     }
@@ -67,5 +77,28 @@ public class AccessLeads {
 
     public String deleteLead(Lead currLead) {
         return dataAccess.deleteLead(currLead);
+    }
+
+    private Lead getLeadByName_Phone(String name,String phone) {
+        Lead found = null;
+
+        // 1. Basic validation to ensure we aren't searching with empty data
+        if (name != null && !name.trim().isEmpty() && phone != null && !phone.trim().isEmpty()) {
+
+            // 2. Create a "criteria" lead object to act as a search template
+            Lead criteria = new Lead();
+            criteria.setLeadName(name);
+            criteria.setLeadPhoneNumber(phone); // Ensure your Lead object has a setLeadPhone method
+
+            // 3. Ask the persistence layer for leads matching this criteria
+            List<Lead> results = dataAccess.getLeadRandom(criteria);
+
+            // 4. If the list is not empty, we found our match
+            if (results != null && !results.isEmpty()) {
+                found = results.get(0);
+            }
+        }
+
+        return found;
     }
 }

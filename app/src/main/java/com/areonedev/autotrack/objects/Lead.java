@@ -184,6 +184,10 @@ public class Lead {
         this.notes = notes;
     }
 
+    public static long getCreatedCounter(){
+        return idCounter;
+    }
+
     // =========================
     // equals & hashCode
     // Important for PriorityQueue remove()
@@ -195,24 +199,13 @@ public class Lead {
         if (o == null || getClass() != o.getClass()) return false;
         Lead lead = (Lead) o;
 
-        // If IDs match, they are definitely the same
-        if (this.leadID == lead.leadID) return true;
-
-        // Logic: Match by First Name, Last Name, and Phone (ignoring case)
-        return safeCompare(this.firstName, lead.firstName) &&
-                safeCompare(this.lastName, lead.lastName) &&
-                Objects.equals(this.phone, lead.phone);
-    }
-
-    private boolean safeCompare(String s1, String s2) {
-        String str1 = (s1 == null) ? "" : s1.trim().toLowerCase();
-        String str2 = (s2 == null) ? "" : s2.trim().toLowerCase();
-        return str1.equals(str2);
+        // Logic: Match by ID
+        return leadID == lead.leadID;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(firstName, lastName, phone);
+        return Objects.hash(leadID);
     }
 
     // =========================

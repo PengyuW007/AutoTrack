@@ -70,7 +70,7 @@ public class LeadTest extends TestCase {
         Lead lead2 = new Lead("Alice", "Chen", "204-555-8123", 50000.0, "SUV", "New", null, "", null);
 
         // Because IDs are auto-generated and unique, duplicate should be checked
-        assertTrue("Leads with different IDs should not be equal even if data matches", lead1.equals(lead2));
+        assertFalse("Leads with different IDs should not be equal even if data matches", lead1.equals(lead2));
 
         // A lead should be equal to itself
         assertTrue("Lead should be equal to itself",lead1.equals(lead1));

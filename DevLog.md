@@ -1,4 +1,34 @@
 # Developer Log — AutoTrack
+---
+**Date:** March 15, 2026
+
+**Module:** Integration Testing (Business–Persistence Seam)
+
+## Itinerary
+
+- Continued integration testing for the **Business–Persistence seam**.
+- Worked on `BusinessPersistenceSeamTest` and investigated failures related to the `getRandom` method in `AccessLeads`.
+- Began debugging the `testGetRandom` unit tests in `DataAccessTest`.
+- Reviewed the identity logic of the `Lead` class and confirmed that **LeadID must remain the primary identifier** for the `equals()` and `hashCode()` contracts.
+- Determined that the `setID()` method needs to be implemented to support the correct lifecycle of a `Lead` object.
+- Clarified the object lifecycle:
+  - A `Lead` object is initially created with **ID = 0** (transient state).
+  - After insertion through the **Persistence Layer**, the object receives its actual database ID using `setID()`.
+- Added a **static instance counter** to the `Lead` class to monitor how many objects are created during testing, helping identify unnecessary object creation.
+
+## Issues
+
+- The `testGetRandom` tests are currently **still in progress** due to inconsistencies between **object identity logic** and **search behavior in the Stub database**.
+- Searches using manually instantiated `Lead` objects fail when the Stub relies strictly on **ID-based equality**.
+- Additional adjustments are required to properly integrate the `setID()` method with the persistence workflow.
+
+## Next
+
+- Implement and integrate the `setID()` method within the `Lead` class.
+- Continue debugging and complete the `testGetRandom` test cases.
+- Refine the Stub search logic to ensure compatibility with object identity rules.
+- Finalize the **Business–Persistence seam integration testing**.
+- ---
 **Date:** March 14, 2024
 
 **Module:** Domain Model (Object-Level Testing)

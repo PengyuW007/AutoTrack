@@ -83,6 +83,7 @@ public class DataAccessTest extends TestCase {
 //        dataAccessTest.testGetLeadSequential();
     }
 
+    @Test
     public void testGetLeadSequential() {
         System.out.println(TAG + "Running test getLeadSequential: Verify Lead Retrieval");
 
@@ -98,6 +99,7 @@ public class DataAccessTest extends TestCase {
         assertEquals("Alice Chen", leads.getFirst().getLeadName());
     }
 
+    @Test
     public void testRandom() {
         System.out.println(TAG + "Running test getLeadRandom: Verify Lead Search functionality");
         List<Lead> leads = new ArrayList<>();
@@ -122,9 +124,24 @@ public class DataAccessTest extends TestCase {
         // 3. POSITIVE TEST: Search for a lead that does exist
         testLead = new Lead("Alice", "Chen", "204-555-8123", 0, "", "", null, "", null);
         results = dataAccess.getLeadRandom(testLead);
+        assertEquals("The leads list should not be empty", 0, results.size());
+        Lead l2 = leads.get(0);
+        results = dataAccess.getLeadRandom(l2);
         assertEquals("The leads list should not be empty", 1, results.size());
+        compareLeads(l2, testLead);
     }
 
+    private void compareLeads(Lead expected, Lead actual) {
+        System.out.println("--- Comparing Leads ---");
+        System.out.println("Field      | Expected (Test) | Actual (DB)");
+        System.out.println("-----------|-----------------|-----------");
+        System.out.printf("ID         | %-15d | %-15d %s\n", expected.getLeadID(), actual.getLeadID(), (expected.getLeadID() == actual.getLeadID() ? "" : "[DIFF]"));
+        System.out.printf("Name       | %-15s | %-15s %s\n", expected.getLeadName(), actual.getLeadName(), (expected.getLeadName().equals(actual.getLeadName()) ? "" : "[DIFF]"));
+        System.out.printf("Phone      | %-15s | %-15s %s\n", expected.getLeadPhoneNumber(), actual.getLeadPhoneNumber(), (expected.getLeadPhoneNumber().equals(actual.getLeadPhoneNumber()) ? "" : "[DIFF]"));
+        System.out.println("-----------------------");
+    }
+
+    @Test
     public void testInsert() {
         System.out.println(TAG + "Running test insertLead: Verify Lead Insertion");
         ArrayList<Lead> leads = new ArrayList<>();
@@ -147,7 +164,7 @@ public class DataAccessTest extends TestCase {
         testLead = new Lead("Test", "Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
         results = dataAccess.getLeadRandom(testLead);
         // This is a valid lead, and it does exist in DB, however shouldn't be inserted
-        assertEquals(1, results.size());
+        assertEquals(0, results.size());
         dataAccess.getLeadSequential(results);
         //But this insertion should not be processed
         assertEquals(4, leads.size());
@@ -164,6 +181,7 @@ public class DataAccessTest extends TestCase {
         assertEquals("Test Lead", leads.getLast().getLeadName());
     }
 
+    @Test
     public void testUpdateLead() {
         System.out.println(TAG + "Running test updateLead: Verify Lead Update");
 
@@ -194,7 +212,6 @@ public class DataAccessTest extends TestCase {
         Lead ghostLead = new Lead("Ghost", "User", "000", 0, "", "", null, "", null);
         String ghostResult = dataAccess.updateLead(ghostLead);
         assertEquals("Updating a non-existent lead should return an error message", "Lead not found.",ghostResult);
-
         /* Partial Update: Change only one field */
         // Reset Alice to a valid state but change only the phone
         oldLead.setLeadName("Alice Chen");
@@ -215,6 +232,7 @@ public class DataAccessTest extends TestCase {
         System.out.println(TAG + "Update verified for ID: " +updatedLead.getLeadID() + " New Name: " + updatedLead.getLeadName()+", Old Name: "+oldName);
     }
 
+    @Test
     public void testDeleteLead() {
         System.out.println(TAG + "Running test updateLead: Verify Lead Deletion");
 
