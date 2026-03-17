@@ -39,9 +39,40 @@ public class BusinessPersistenceSeamTest extends TestCase {
 
     public void testGetLeadsSeam() {
         System.out.println(TAG + " Running testGetLeadsSeam.");
+
         List<Lead> leads = new ArrayList<>();
         al.getLeads(leads);
         assertEquals(3, leads.size());
+
+        System.out.println(TAG+" Finished testGetLeadsSeam.");
+    }
+
+    public void testGetLeadByName_Phone(){
+        // 1. Positive Test: Search for an existing lead (Alice Chen)
+// Note: Alice Chen is part of the default Stub data
+        Lead found = al.getLeadByName_Phone("Alice Chen", "204-555-8123");
+        assertEquals("Should find Alice Chen in the database", "Alice Chen",found.getLeadName());
+        assertEquals("Alice Chen", found.getLeadName());
+        assertEquals("204-555-8123", found.getLeadPhoneNumber());
+        assertTrue("Existing lead should have a valid ID", found.getLeadID() > 0);
+
+// 2. Negative Test: Correct name, but wrong phone number
+        Lead notFound = al.getLeadByName_Phone("Alice Chen", "000-000-0000");
+        assertNull("Should not find a lead with a mismatched phone number", notFound);
+
+// 3. Negative Test: Lead that does not exist at all
+        Lead ghost = al.getLeadByName_Phone("Non Existent", "123-456-7890");
+        assertNull("Should return null for non-existent leads", ghost);
+
+// 4. Validation Test: Empty or Null parameters
+        assertNull("Should return null for empty name", al.getLeadByName_Phone("", "204-555-8123"));
+        assertNull("Should return null for null phone", al.getLeadByName_Phone("Alice Chen", null));
+
+// 5. Global Creation Count Check
+// Every time we called getLeadByName_Phone, a 'new Lead()' criteria object was created.
+        System.out.println(TAG + "Total Lead objects instantiated after search tests: " + Lead.getLeadCounter());
+
+        System.out.println(TAG + " Finished testGetLeadByName_Phone.");
     }
 
     public void testGetSequential(){
@@ -66,11 +97,16 @@ public class BusinessPersistenceSeamTest extends TestCase {
 
     public void testGetRandom(){
         System.out.println(TAG+" Running testGetRandom.");
-        List<Lead> leads = new ArrayList<>();
-
 
         Lead lead = al.getRandom(1);
+        assertEquals("Alice Chen",lead.getLeadName());
 
+        lead = al.getRandom(0);
+        assertNull("Zero IDs should return null", lead);
+
+        // Test another invalid ID (Negative)
+        lead = al.getRandom(-5);
+        assertNull("Negative IDs should return null", lead);
     }
 
     public void testInsertLeadSeam() {
@@ -79,8 +115,9 @@ public class BusinessPersistenceSeamTest extends TestCase {
         al.getLeads(leads);
         int initialSize = leads.size();
         Lead newLead = new Lead("Integration", "User", "555-0000", 100.0, "SUV", "New", null, "Test", null);
-
+        assertEquals(0,newLead.getLeadID());
         String result = al.insertLead(newLead);
+        assertEquals(4,newLead.getLeadID());
         al.getLeads(leads);
         assertNull("Insert should return null on success", result);
         Assert.assertEquals("Database size should increase by 1", initialSize + 1, leads.size());

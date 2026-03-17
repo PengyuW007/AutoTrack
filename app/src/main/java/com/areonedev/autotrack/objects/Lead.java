@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class Lead {
 
-    private static long idCounter = 1;
+    private static long leadCounter = 1;
     private long leadID;
     private String firstName;
     private String lastName;
@@ -22,7 +22,7 @@ public class Lead {
     // Constructor
     // =========================
     public Lead() {
-        this.leadID = idCounter++; // Assign unique ID and increment counter
+        this.leadID = 0; // Assign unique ID and increment counter
         this.firstName = null;
         this.lastName = null;
         this.phone = null;
@@ -54,7 +54,7 @@ public class Lead {
             throw new IllegalArgumentException("Lead must have at least a First Name or a Last Name.");
         }
 
-        this.leadID = idCounter++;
+        this.leadID = 0; // Assign unique ID and increment counter
 
         // 2. Null-Safety: Assign empty strings instead of null
         this.firstName = isFirstEmpty ? "" : firstName.trim();
@@ -73,6 +73,10 @@ public class Lead {
     // =========================
     // Getters & Setters
     // =========================
+
+    public static long getLeadCounter() {
+        return leadCounter;
+    }
 
     public long getLeadID() {
         return leadID;
@@ -124,6 +128,10 @@ public class Lead {
         return createdAt;
     }
 
+    public void setLeadID(long leadID) {
+        this.leadID = leadID;
+    }
+
     public void setLeadFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -131,6 +139,7 @@ public class Lead {
     public void setLeadLastName(String lastName) {
         this.lastName = lastName;
     }
+
     public void setLeadName(String name) {
         if (name == null || name.trim().isEmpty()) {
             this.firstName = "null";
@@ -182,10 +191,6 @@ public class Lead {
 
     public void setLeadNotes(String notes) {
         this.notes = notes;
-    }
-
-    public static long getCreatedCounter(){
-        return idCounter;
     }
 
     // =========================

@@ -43,7 +43,7 @@ public class DataAccessStub implements DataAccess {
                 today,
                 "First inquiry from website",
                 createdDate);
-        leads.add(lead);
+        insertLead(lead);
 
         calendar.set(2024, Calendar.FEBRUARY, 2);
         createdDate = calendar.getTime();
@@ -57,7 +57,7 @@ public class DataAccessStub implements DataAccess {
                 today,
                 "Visited showroom, interested in financing",
                 createdDate);
-        leads.add(lead);
+        insertLead(lead);
 
         calendar.set(2025, Calendar.MARCH, 3);
         createdDate = calendar.getTime();
@@ -71,7 +71,7 @@ public class DataAccessStub implements DataAccess {
                 today,
                 "Negotiating trade-in value",
                 createdDate);
-        leads.add(lead);
+        insertLead(lead);
         System.out.println("Successfully connected "+dbType +" database " +dbPath);
     }
 
@@ -111,7 +111,9 @@ public class DataAccessStub implements DataAccess {
             res = "Duplicate lead.";
         }else{
             leads.add(currLead);
+            currLead.setLeadID(leads.size());
         }
+
         return res;
     }
 

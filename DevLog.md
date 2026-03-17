@@ -1,33 +1,32 @@
 # Developer Log — AutoTrack
----
-**Date:** March 15, 2026
+**Date:** March 15-17, 2024
 
-**Module:** Integration Testing (Business–Persistence Seam)
+**Module:** Integration Testing & Suite Consolidation
 
 ## Itinerary
 
-- Continued integration testing for the **Business–Persistence seam**.
-- Worked on `BusinessPersistenceSeamTest` and investigated failures related to the `getRandom` method in `AccessLeads`.
-- Began debugging the `testGetRandom` unit tests in `DataAccessTest`.
-- Reviewed the identity logic of the `Lead` class and confirmed that **LeadID must remain the primary identifier** for the `equals()` and `hashCode()` contracts.
-- Determined that the `setID()` method needs to be implemented to support the correct lifecycle of a `Lead` object.
-- Clarified the object lifecycle:
-  - A `Lead` object is initially created with **ID = 0** (transient state).
-  - After insertion through the **Persistence Layer**, the object receives its actual database ID using `setID()`.
-- Added a **static instance counter** to the `Lead` class to monitor how many objects are created during testing, helping identify unnecessary object creation.
+- Successfully completed the integration tests for `BusinessPersistenceSeamTest`, verifying the connection between `AccessLeads` and `DataAccessStub`.
+- Implemented `getLeadByName_Phone(String, String)` in the Business Layer to allow searching via business keys (Name/Phone) rather than just the Primary Key.
+- Refined the **Lead Object Lifecycle**:
+  - Confirmed that a `Lead` is instantiated with **ID = 0** (Transient state).
+  - Confirmed that the **Persistence Layer** is responsible for assigning the real ID upon successful insertion.
+- Integrated the `BusinessPersistenceSeamTest` into the global `RunUnitTests.java` suite to ensure continuous integration of the business logic.
+- Utilized the **static instance counter** in the `Lead` class to verify that "Criteria" objects used for searching are being instantiated correctly without bloating the database state.
 
 ## Issues
 
-- The `testGetRandom` tests are currently **still in progress** due to inconsistencies between **object identity logic** and **search behavior in the Stub database**.
-- Searches using manually instantiated `Lead` objects fail when the Stub relies strictly on **ID-based equality**.
-- Additional adjustments are required to properly integrate the `setID()` method with the persistence workflow.
+- **The "Dead Loop" Search Bug:** Discovered that searching with a new `Lead` object (ID 0) failed in the Stub because the Stub relied on `indexOf()` (which compares IDs).
+- **Resolution:** Refactored `getLeadByName_Phone` to act as a bridge—it creates a transient criteria object, retrieves the persistent record from the Stub, and extracts the database-assigned ID from the result.
+- **Null Safety:** Fixed a potential `IndexOutOfBoundsException` in the search method by ensuring the results list is validated before accessing the first element.
+- **ID Assignment Paradox:** Resolved the conflict between `Lead.equals()` (ID-based) and search requirements by ensuring the Business Layer handles the extraction of IDs from returned persistence objects.
 
 ## Next
 
-- Implement and integrate the `setID()` method within the `Lead` class.
-- Continue debugging and complete the `testGetRandom` test cases.
-- Refine the Stub search logic to ensure compatibility with object identity rules.
-- Finalize the **Business–Persistence seam integration testing**.
+- **Android UI Testing:** Transition to the `androidTest` module to begin planning Espresso UI tests.
+- **Activity Integration:** Connect the `AccessLeads` controller to the Lead Entry and Lead List Activities.
+- **UI-to-Database Flow:** Verify that data entered into the Android Fragments correctly flows through the Business Seam and receives a persistent ID.
+- **Real Database Transition:** Move from `DataAccessStub` to the SQLite `DataAccessObject` to ensure the auto-increment logic matches the Stub's behavior.
+
 - ---
 **Date:** March 14, 2024
 
