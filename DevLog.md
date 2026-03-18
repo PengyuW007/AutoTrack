@@ -22,11 +22,10 @@
 
 ## Next
 
-- **Android UI Testing:** Transition to the `androidTest` module to begin planning Espresso UI tests.
-- **Activity Integration:** Connect the `AccessLeads` controller to the Lead Entry and Lead List Activities.
-- **UI-to-Database Flow:** Verify that data entered into the Android Fragments correctly flows through the Business Seam and receives a persistent ID.
-- **Real Database Transition:** Move from `DataAccessStub` to the SQLite `DataAccessObject` to ensure the auto-increment logic matches the Stub's behavior.
-
+- **Real Database Implementation:** Transition from `DataAccessStub` to the SQLite `DataAccessObject`. This is the priority to ensure that the auto-increment logic and Primary Key constraints discovered during integration testing function correctly in a persistent storage environment.
+- **Database Integration Testing:** Run the existing `BusinessPersistenceSeamTest` suite against the real database implementation to verify the "Seam" remains intact.
+- **Android UI Development:** Once the data layer is verified as persistent, begin building the Lead Entry and Lead List Activities using the `AccessLeads` controller.
+- **Espresso UI Testing:** Implement automated UI tests to verify the end-to-end flow from User Input -> Business Logic -> SQLite Storage.
 - ---
 **Date:** March 14, 2024
 
