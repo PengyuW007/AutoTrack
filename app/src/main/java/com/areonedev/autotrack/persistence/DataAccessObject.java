@@ -16,7 +16,9 @@ public class DataAccessObject implements DataAccess {
     private SQLiteDatabase db;
     private String dbName;
     private String dbType;
+    private final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     private String result;
+    private static final String TAG = "DataAccessObject";
     private static final String EOF = "  ";
 
     public DataAccessObject(String dbName) {
@@ -33,7 +35,8 @@ public class DataAccessObject implements DataAccess {
             // Optional: Ensure the table exists if this is the first run
             db.execSQL("CREATE TABLE IF NOT EXISTS Leads (" +
                     "LeadID INTEGER PRIMARY KEY, " +
-                    "LeadName TEXT, " +
+                    "LeadFirstName TEXT, " +
+                    "LeadLastName TEXT, " +
                     "LeadPhone TEXT, " +
                     "Budget REAL, " +
                     "VehicleInterest TEXT, " +

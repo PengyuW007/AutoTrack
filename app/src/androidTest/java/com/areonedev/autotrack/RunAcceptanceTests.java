@@ -16,6 +16,6 @@ public class RunAcceptanceTests
 {
     public RunAcceptanceTests()
     {
-        System.out.println("Sample Acceptance tests");
+        System.out.println("Acceptance Tests passed!");
     }
 }

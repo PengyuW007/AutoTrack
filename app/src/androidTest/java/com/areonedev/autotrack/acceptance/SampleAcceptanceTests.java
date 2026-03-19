@@ -7,7 +7,8 @@ import androidx.test.espresso.Espresso;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 //import androidx.test.runner.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
-import androidx.test.rule.ActivityTestRule;
+//import androidx.test.rule.ActivityTestRule;
+import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import static androidx.test.espresso.Espresso.*;
 import static androidx.test.espresso.action.ViewActions.*;
@@ -24,7 +25,8 @@ import com.areonedev.autotrack.presentation.MainActivity;
 @LargeTest
 public class SampleAcceptanceTests {
     @Rule
-    public ActivityTestRule<MainActivity> mainActivity = new ActivityTestRule<>(MainActivity.class);
+    //public ActivityTestRule<MainActivity> mainActivity = new ActivityTestRule<>(MainActivity.class);
+    public ActivityScenarioRule<MainActivity> activityScenarioRule = new ActivityScenarioRule<>(MainActivity.class); //Modern
 
     @Test
     public void testHomeActivityLaunch() {

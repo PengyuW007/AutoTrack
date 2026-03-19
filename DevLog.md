@@ -1,4 +1,29 @@
 # Developer Log — AutoTrack
+**Date:** March 18, 2026
+
+**Module:** Real Database Implementation (SQLite) & Android Test Environment
+
+## Itinerary
+- **Transition to Real Persistence:** Initiated the development of `DataAccessObject.java` to replace the `DataAccessStub` with a real SQLite implementation.
+- **Schema Design:** Defined the SQL schema for the `Leads` table, ensuring alignment with the `Lead` object. Implemented `LeadID` as an `INTEGER PRIMARY KEY AUTOINCREMENT` to ensure the database handles identity generation.
+- **Android Test Setup:** Created the `androidTest` directory structure and initialized `SampleAcceptanceTests.java`.
+- **Dependency Management:** Updated `build.gradle.kts` to include `androidx.test.rules` and `androidx.test.ext.junit`, resolving configuration errors with the test runner.
+- **Modernizing Test Rules:** Migrated from the deprecated `ActivityTestRule` to the modern `ActivityScenarioRule` for better Activity lifecycle management during UI tests.
+
+## Issues
+- **ID Assignment Logic:** Identified that the `LeadID` must only be assigned to the `Lead` object *after* a successful `db.insert()`.
+  - *Resolution:* Refactored `insertLead` to capture the generated `rowId` and update the object in-memory, ensuring the Business Layer receives the persistent ID.
+- **The "Dead Loop" Search Bug:** Recognized that searching for a lead with ID 0 (new lead) would fail in a strict ID-based SQL query.
+  - *Resolution:* Refactored `getLeadRandom` to perform a string-based search (FirstName, LastName, Phone) when the provided ID is 0.
+- **Build Configuration Errors:** Encountered "Cannot resolve symbol" for `ActivityTestRule` and `AndroidJUnit4`.
+  - *Resolution:* Cleaned up duplicate imports and added the missing `androidTestImplementation` libraries to the Kotlin DSL build file.
+
+## Next
+- **DAO Refinement:** Complete the `parseCursor` and `getLeadContentValues` methods to ensure all `Lead` fields (Budget, Dates, Notes) are correctly mapped to SQL types.
+- **Integration Re-Validation:** Swap the `DataAccessStub` for the `DataAccessObject` in the `BusinessPersistenceSeamTest` suite to verify the SQL logic.
+- **UI-to-DB Binding:** Connect the `HomeActivity` to the `AccessLeads` controller to verify that data entered in the UI is successfully persisted to the SQLite file.
+- **Persistence Verification:** Write an Espresso test to verify that a Lead created in one session survives an app restart.
+---
 **Date:** March 15-17, 2024
 
 **Module:** Integration Testing & Suite Consolidation
