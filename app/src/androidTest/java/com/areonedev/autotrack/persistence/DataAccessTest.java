@@ -6,8 +6,11 @@ import static org.junit.Assert.assertNull;
 
 import android.util.Log;
 
+// 1. Add these imports
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.junit.Test;
 import android.content.Context;
 import androidx.test.platform.app.InstrumentationRegistry;
 
@@ -15,15 +18,11 @@ import com.areonedev.autotrack.application.Main;
 import com.areonedev.autotrack.application.Services;
 import com.areonedev.autotrack.objects.Lead;
 
-//import junit.framework.TestCase;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import java.util.ArrayList;
 import java.util.List;
 
+// 2. Add this annotation
+@RunWith(AndroidJUnit4.class)
 public class DataAccessTest{
     private DataAccess dataAccess;
     private static final String dbName = Main.dbName;
@@ -36,9 +35,9 @@ public class DataAccessTest{
     public void setUp() {
 
         // Use the following statements to run with the stub database:
-        stub();
+        //stub();
         // or switch to the real database:
-        //real();
+        real();
         // Note the increase in test execution time.
     }
 
@@ -58,18 +57,6 @@ public class DataAccessTest{
 
         Services.closeDataAccess();
         Services.createDataAccess(dataAccess);
-        dataAccess = Services.getDataAccess(dbName);
-    }
-
-    private void stub() {
-        Services.closeDataAccess();
-        Log.d(TAG, "\nStarting Persistence test DataAccess (using STUB)");
-        dataAccess = new DataAccessStub(dbName);
-
-        // Injection: Tell Services to use this stub
-        Services.createDataAccess(dataAccess);
-
-        // Retrieve it back to ensure we are using the singleton instance
         dataAccess = Services.getDataAccess(dbName);
     }
 

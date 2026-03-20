@@ -3,6 +3,7 @@ package com.areonedev.autotrack.persistence;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,9 +18,9 @@ public class DataAccessObject implements DataAccess {
     private String dbName;
     private String dbType;
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-    private String result;
     private static final String TAG = "DataAccessObject";
     private static final String EOF = "  ";
+    private static final String TABLE_LEADS = "Leads";
 
     public DataAccessObject(String dbName) {
         this.dbName = dbName;
@@ -28,24 +29,34 @@ public class DataAccessObject implements DataAccess {
     @Override
     public void open(String dbPath) {
         try {
-            // dbPath should be: context.getDatabasePath("autotrack.db").getPath()
+            // 1. Safety Check: Ensure the directory exists
+            java.io.File dbFile = new java.io.File(dbPath);
+            java.io.File dbDir = dbFile.getParentFile();
+            if (dbDir != null && !dbDir.exists()) {
+                dbDir.mkdirs(); // Create the /databases/ folder if it's missing
+            }
+
+            // 2. Open or Create the database
             db = SQLiteDatabase.openOrCreateDatabase(dbPath, null);
             dbType = "SQLite";
 
-            // Optional: Ensure the table exists if this is the first run
-            db.execSQL("CREATE TABLE IF NOT EXISTS Leads (" +
-                    "LeadID INTEGER PRIMARY KEY, " +
-                    "LeadFirstName TEXT, " +
-                    "LeadLastName TEXT, " +
-                    "LeadPhone TEXT, " +
+            // 3. Create Table (Matches Lead class fields)
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_LEADS + " (" +
+                    "LeadID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "FirstName TEXT, " +
+                    "LastName TEXT, " +
+                    "PhoneNumber TEXT, " +
                     "Budget REAL, " +
                     "VehicleInterest TEXT, " +
                     "Stage TEXT, " +
-                    "Follow_Up_Date TEXT, " +
+                    "FollowUpDate TEXT, " +
                     "Notes TEXT, " +
-                    "Created_At_Date TEXT)");
+                    "CreatedAt TEXT)");
+
+            Log.d(TAG, "Database opened successfully at: " + dbPath);
         } catch (Exception e) {
-            processSQLError(e);
+            Log.e(TAG, "CRITICAL: Failed to open database: " + e.getMessage());
+            db = null; // Ensure it's explicitly null if it fails
         }
     }
 
@@ -58,116 +69,102 @@ public class DataAccessObject implements DataAccess {
 
     @Override
     public String getLeadSequential(List<Lead> leadResult) {
-        result = null;
         try {
-            Cursor cursor = db.rawQuery("SELECT * FROM Leads", null);
+            Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_LEADS, null);
             parseCursor(cursor, leadResult);
             cursor.close();
+            return null;
         } catch (Exception e) {
-            result = processSQLError(e);
+            return e.getMessage();
         }
-        return result;
     }
 
     @Override
-    public ArrayList<Lead> getLeadRandom(Lead newLead) {
-        ArrayList<Lead> leads = new ArrayList<>();
+    public ArrayList<Lead> getLeadRandom(Lead criteria) {
+        ArrayList<Lead> results = new ArrayList<>();
         try {
-            // Use selectionArgs (?) to prevent SQL injection
-            String[] selectionArgs = { String.valueOf(newLead.getLeadID()) };
-            Cursor cursor = db.rawQuery("SELECT * FROM Leads WHERE LeadID = ?", selectionArgs);
+            Cursor cursor;
+            // If ID is 0, we search by Business Keys (Name/Phone) to find the ID
+            if (criteria.getLeadID() > 0) {
+                cursor = db.rawQuery("SELECT * FROM " + TABLE_LEADS + " WHERE LeadID = ?",
+                        new String[]{String.valueOf(criteria.getLeadID())});
+            } else {
+                cursor = db.rawQuery("SELECT * FROM " + TABLE_LEADS + " WHERE FirstName = ? AND LastName = ? AND PhoneNumber = ?",
+                        new String[]{criteria.getLeadFirstName(), criteria.getLeadLastName(), criteria.getLeadPhoneNumber()});
+            }
 
-            parseCursor(cursor, leads);
+            parseCursor(cursor, results);
             cursor.close();
         } catch (Exception e) {
-            processSQLError(e);
+            Log.e(TAG, "Search error: " + e.getMessage());
         }
-        return leads;
+        return results;
     }
 
-    /**
-     * Helper method to reduce code duplication when reading from a Cursor
-     */
-    private void parseCursor(Cursor cursor, List<Lead> list) throws Exception {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        if (cursor.moveToFirst()) {
-            do {
-                long id = cursor.getLong(cursor.getColumnIndexOrThrow("LeadID"));
-                String firstName = cursor.getString(cursor.getColumnIndexOrThrow("LeadFirstName"));
-                String lastName = cursor.getString(cursor.getColumnIndexOrThrow("LeadLastName"));
-                String phone = cursor.getString(cursor.getColumnIndexOrThrow("LeadPhone"));
-                double budget = cursor.getDouble(cursor.getColumnIndexOrThrow("Budget"));
-                String vehicleInterest = cursor.getString(cursor.getColumnIndexOrThrow("VehicleInterest"));
-                String stage = cursor.getString(cursor.getColumnIndexOrThrow("Stage"));
-                String notes = cursor.getString(cursor.getColumnIndexOrThrow("Notes"));
 
-                Date followUp = formatter.parse(cursor.getString(cursor.getColumnIndexOrThrow("Follow_Up_Date")));
-                Date createdAt = formatter.parse(cursor.getString(cursor.getColumnIndexOrThrow("Created_At_Date")));
-
-                list.add(new Lead(firstName,lastName, phone, budget, vehicleInterest, stage, followUp, notes, createdAt));
-            } while (cursor.moveToNext());
-        }
-    }
 
     @Override
     public String insertLead(Lead lead) {
-        result = null;
         try {
             ContentValues values = getLeadContentValues(lead);
-            long rowId = db.insert("Leads", null, values);
-            if (rowId == -1) result = "Error inserting lead";
+
+            // IMPORTANT: Remove LeadID from values so SQLite generates a new one
+            values.remove("LeadID");
+
+            long rowId = db.insert(TABLE_LEADS, null, values);
+
+            if (rowId != -1) {
+                // SUCCESS: Now we assign the DB-generated ID back to the Lead object
+                lead.setLeadID((int) rowId);
+                return null;
+            } else {
+                return "Insert failed: rowId is -1";
+            }
         } catch (Exception e) {
-            result = processSQLError(e);
+            return "SQL Error: " + e.getMessage();
         }
-        return result;
     }
 
     @Override
     public String updateLead(Lead lead) {
-        result = null;
         try {
             ContentValues values = getLeadContentValues(lead);
-            String whereClause = "LeadID = ?";
-            String[] whereArgs = { String.valueOf(lead.getLeadID()) };
-
-            int rowsAffected = db.update("Leads", values, whereClause, whereArgs);
-            if (rowsAffected == 0) result = "Lead not found.";
+            int rows = db.update(TABLE_LEADS, values, "LeadID = ?", new String[]{String.valueOf(lead.getLeadID())});
+            return (rows > 0) ? null : "Update failed: Lead not found";
         } catch (Exception e) {
-            result = processSQLError(e);
+            return e.getMessage();
         }
-        return result;
     }
 
     @Override
     public String deleteLead(Lead lead) {
-        result = null;
         try {
-            String whereClause = "LeadID = ?";
-            String[] whereArgs = { String.valueOf(lead.getLeadID()) };
-
-            int rowsAffected = db.delete("Leads", whereClause, whereArgs);
-            if (rowsAffected == 0) result = "Lead not found.";
+            int rows = db.delete(TABLE_LEADS, "LeadID = ?", new String[]{String.valueOf(lead.getLeadID())});
+            return (rows > 0) ? null : "Delete failed: Lead not found";
         } catch (Exception e) {
-            result = processSQLError(e);
+            return e.getMessage();
         }
-        return result;
     }
 
     /**
      * Helper to map Lead object to ContentValues for Insert/Update
      */
     private ContentValues getLeadContentValues(Lead lead) {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         ContentValues values = new ContentValues();
+        // We include LeadID here for updates, but it's removed during inserts
         values.put("LeadID", lead.getLeadID());
-        values.put("LeadName", lead.getLeadName());
-        values.put("LeadPhone", lead.getLeadPhoneNumber());
+        values.put("FirstName", lead.getLeadFirstName());
+        values.put("LastName", lead.getLeadLastName());
+        values.put("PhoneNumber", lead.getLeadPhoneNumber());
         values.put("Budget", lead.getLeadBudget());
         values.put("VehicleInterest", lead.getLeadVehicleInterest());
         values.put("Stage", lead.getLeadStage());
-        values.put("Follow_Up_Date", formatter.format(lead.getLeadFollowUpDate()));
         values.put("Notes", lead.getLeadNotes());
-        values.put("Created_At_Date", formatter.format(lead.getLeadCreatedAt()));
+
+        // Format Dates to Strings for SQLite storage
+        values.put("FollowUpDate", formatter.format(lead.getLeadFollowUpDate()));
+        values.put("CreatedAt", formatter.format(lead.getLeadCreatedAt()));
+
         return values;
     }
 
@@ -175,5 +172,32 @@ public class DataAccessObject implements DataAccess {
         String errorMsg = "*** SQL Error: " + e.getMessage();
         e.printStackTrace();
         return errorMsg;
+    }
+
+    private void parseCursor(Cursor cursor, List<Lead> list) throws Exception {
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        if (cursor.moveToFirst()) {
+            do {
+                // Extract data using column names
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow("LeadID"));
+                String fName = cursor.getString(cursor.getColumnIndexOrThrow("FirstName"));
+                String lName = cursor.getString(cursor.getColumnIndexOrThrow("LastName"));
+                String phone = cursor.getString(cursor.getColumnIndexOrThrow("PhoneNumber"));
+                double budget = cursor.getDouble(cursor.getColumnIndexOrThrow("Budget"));
+                String interest = cursor.getString(cursor.getColumnIndexOrThrow("VehicleInterest"));
+                String stage = cursor.getString(cursor.getColumnIndexOrThrow("Stage"));
+                String notes = cursor.getString(cursor.getColumnIndexOrThrow("Notes"));
+
+                // Parse Dates
+                Date followUp = formatter.parse(cursor.getString(cursor.getColumnIndexOrThrow("FollowUpDate")));
+                Date createdAt = formatter.parse(cursor.getString(cursor.getColumnIndexOrThrow("CreatedAt")));
+
+                // Create Lead object using the constructor
+                Lead lead = new Lead(fName, lName, phone, budget, interest, stage, followUp, notes, createdAt);
+                lead.setLeadID(id); // Set the persistent ID found in the DB
+
+                list.add(lead);
+            } while (cursor.moveToNext());
+        }
     }
 }

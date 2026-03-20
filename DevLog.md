@@ -1,4 +1,21 @@
 # Developer Log — AutoTrack
+**Date:** March 19, 2026
+
+**Module:** Android Integration Testing (Test Suite Setup on emulator with real DB )
+
+## Itinerary
+- Configured `IntegrationTests.java` as a JUnit Suite to run all persistence-related instrumented tests in a single pass.
+- Included `DataAccessDatabaseTest` and `BusinessPersistenceSeamTest` in the suite to validate both the DAO and the Business-Persistence Seam.
+- Verified that the test environment correctly targets the Android Emulator for SQLite operations.
+
+## Issues
+- **Test Execution Environment:** Confirmed that instrumented tests (located in `androidTest`) cannot run on a local JVM and require an active Android Runtime (ART).
+  - *Resolution:* Established the workflow of launching the AVD (Android Virtual Device) prior to executing the test suite.
+- **Suite Synchronization:** Updated the `@SuiteClasses` annotation to ensure all relevant integration tests are included in the build.
+
+## Next
+- **Database Inspection:** Use the "App Inspection" tool in Android Studio to view the live SQLite tables on the emulator while the tests are running.
+---
 **Date:** March 18, 2026
 
 **Module:** Real Database Implementation (SQLite) & Android Test Environment

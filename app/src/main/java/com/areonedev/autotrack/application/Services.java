@@ -5,12 +5,12 @@ import com.areonedev.autotrack.persistence.DataAccessObject;
 public class Services {
     private static DataAccess dataAccessService = null;
 
-    public static DataAccess createDataAccess(String dbName)
+    public static DataAccess createDataAccess(String dbPath)
     {
         if (dataAccessService == null)
         {
-            dataAccessService = new DataAccessObject(dbName);
-            dataAccessService.open(Main.getDBPathName());
+            dataAccessService = new DataAccessObject(dbPath);
+            dataAccessService.open(dbPath);
         }
         return dataAccessService;
     }

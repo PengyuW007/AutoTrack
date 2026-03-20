@@ -22,21 +22,21 @@ public class DataAccessDatabaseTest extends TestCase{
 
         Services.closeDataAccess();
 
-        Log.d(TAG, "Starting Main.main...");
-        System.out.println(TAG+"Starting Integration test DataAccess (using default DB)");
-        /* Use the following two statements to run with the REAL database */
-        Services.createDataAccess(dbName);
-        dataAccess = Services.getDataAccess(dbName);
+        System.out.println("\nStarting Integration test DataAccess (using STUB DB)");
 
-        /* Use the following two statements to run with the STUB database */
-//        dataAccess = new DataAccessStub(dbName);
-//        Services.createDataAccess(dataAccess);
+        // Use the following two statements to run with the real database
+//        Services.createDataAccess(dbName);
 //        dataAccess = Services.getDataAccess(dbName);
-//        Log.d(TAG, "App initialized and DB connected.");
+        dataAccess = new DataAccessStub(dbName);
+        Services.createDataAccess(dataAccess);
+        dataAccess = Services.getDataAccess(dbName);
+        Log.d(TAG, "App initialized and DB connected.");
+
 
         DataAccessTest.dataAccessTest(dataAccess);
+
         Services.closeDataAccess();
-        Log.d(TAG, "Finished Integration test DataAccess (using default DB)");
-        System.out.println(TAG+"Finished Integration test DataAccess (using default DB)");
+
+        System.out.println("Finished Integration test DataAccess (using default DB)");
     }
 }
