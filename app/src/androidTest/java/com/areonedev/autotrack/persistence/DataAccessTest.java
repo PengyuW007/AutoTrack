@@ -62,7 +62,7 @@ public class DataAccessTest{
 
     public void tearDown() {
         Services.closeDataAccess();
-        Log.d(TAG, "Finished Persistence test DataAccess (using STUB)");
+        Log.d(TAG, "Finished Persistence test DataAccess (using REAL)");
     }
 
     public static void dataAccessTest(DataAccess dataAccess) {

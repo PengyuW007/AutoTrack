@@ -7,6 +7,7 @@ import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -58,6 +59,10 @@ public class DataAccessObject implements DataAccess {
             Log.e(TAG, "CRITICAL: Failed to open database: " + e.getMessage());
             db = null; // Ensure it's explicitly null if it fails
         }
+
+        /* Insert three leads to the DB */
+        addDummyLeads();
+
     }
 
     @Override
@@ -200,4 +205,55 @@ public class DataAccessObject implements DataAccess {
             } while (cursor.moveToNext());
         }
     }
+
+    private void addDummyLeads(){
+        Lead lead;
+        Date today, createdDate;
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2026, Calendar.MARCH, 8);
+        today = calendar.getTime();
+
+        calendar.set(2023, Calendar.JANUARY, 1);
+        createdDate = calendar.getTime();
+        lead = new Lead(
+                "Alice",                // First Name
+                "Chen",                 // Last Name
+                "204-555-8123",
+                32000,
+                "Volkswagen Jetta",
+                "NEW",
+                today,
+                "First inquiry from website",
+                createdDate);
+        insertLead(lead);
+
+        calendar.set(2024, Calendar.FEBRUARY, 2);
+        createdDate = calendar.getTime();
+        lead = new Lead(
+                "Brian",                // First Name
+                "Miller",               // Last Name
+                "204-555-1290",
+                45000,
+                "Volkswagen Tiguan",
+                "VISITED",
+                today,
+                "Visited showroom, interested in financing",
+                createdDate);
+        insertLead(lead);
+
+        calendar.set(2025, Calendar.MARCH, 3);
+        createdDate = calendar.getTime();
+        lead = new Lead(
+                "Sophia",               // First Name
+                "Martinez",             // Last Name
+                "204-555-6677",
+                52000,
+                "Volkswagen Atlas",
+                "NEGOTIATION",
+                today,
+                "Negotiating trade-in value",
+                createdDate);
+        insertLead(lead);
+    }
+
 }
