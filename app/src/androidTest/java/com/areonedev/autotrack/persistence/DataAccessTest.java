@@ -37,7 +37,7 @@ public class DataAccessTest{
         // Use the following statements to run with the stub database:
         //stub();
         // or switch to the real database:
-        real();
+        //real();
         // Note the increase in test execution time.
     }
 
@@ -79,8 +79,9 @@ public class DataAccessTest{
         // Note: Ensure your Lead constructor matches these parameters
         Lead testLead = new Lead("Test", " Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
         dataAccess.insertLead(testLead);
+        leads.clear();
         dataAccess.getLeadSequential(leads);
-        assertEquals(4, leads.size());
+        assertEquals(initialSize+1, leads.size());
 
         // 3. Verify Insertion
         leads.clear();

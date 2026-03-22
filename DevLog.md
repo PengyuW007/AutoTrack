@@ -1,4 +1,19 @@
 # Developer Log — AutoTrack
+**Date:** March 20-21, 2026
+
+**Module:** Integration Testing (Persistence)
+## Itinerary
+- Resolved non-deterministic test failures in `BusinessPersistenceSeamTest`.
+- Implemented a database reset strategy to ensure test isolation.
+## Issues
+- **State Leakage:** `testGetSequential` was failing with an unexpected 4th lead.
+  - *Cause:* SQLite persistence on the Android Emulator was preserving data from `testInsertLeadSeam` across test boundaries.
+  - *Resolution:* Added `context.deleteDatabase(dbName)` to the `@Before` setup. This forces the `DataAccessObject` to recreate the schema and re-populate default data for every test case.
+
+## Next
+- **Performance:** Monitor if frequent database deletion slows down the test suite; consider using a `TearDown` or a single `Suite` reset if execution time exceeds 30 seconds.
+- **Search Tests:** Implement `testGetLeadByName_Phone` and `testGetRandom` now that the environment is stable.
+---
 **Date:** March 19, 2026
 
 **Module:** Android Integration Testing (Test Suite Setup on emulator with real DB )

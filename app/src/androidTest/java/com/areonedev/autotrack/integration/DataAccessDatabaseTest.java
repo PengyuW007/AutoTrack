@@ -37,12 +37,19 @@ public class DataAccessDatabaseTest {
         String dbPath = context.getDatabasePath(dbName).getAbsolutePath();
 
         // 2. Initialize the REAL DataAccessObject
-        DataAccess dataAccess = new DataAccessObject(dbName);
-        dataAccess.open(dbPath);
+//        DataAccess dataAccess = new DataAccessObject(dbName);
+//        dataAccess.open(dbPath);
+//
+//        // 3. Inject into Services so the rest of the app can use it
+//        Services.createDataAccess(dataAccess);
+//        dataAccess = Services.getDataAccess(dbName);
 
-        // 3. Inject into Services so the rest of the app can use it
-        Services.createDataAccess(dataAccess);
-        dataAccess = Services.getDataAccess(dbName);
+        Services.createDataAccess(dbName);
+        DataAccess dataAccess = Services.getDataAccess(dbName);
+        if(dataAccess!=null){
+            dataAccess.open(dbPath);
+        }
+        System.out.println(dataAccess);
 
         assertNotNull("DataAccess should not be null", dataAccess);
         Log.d(TAG, "App initialized and REAL DB connected at: " + dbPath);

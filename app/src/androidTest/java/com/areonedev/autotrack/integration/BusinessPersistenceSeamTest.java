@@ -33,13 +33,23 @@ public class BusinessPersistenceSeamTest {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         String dbPath = context.getDatabasePath(dbName).getAbsolutePath();
 
-        // 2. Initialize the REAL DataAccessObject
-        DataAccess dao = new DataAccessObject(dbName);
-        dao.open(dbPath);
+//        // 2. Initialize the REAL DataAccessObject
+//        DataAccess dao = new DataAccessObject(dbName);
+//        dao.open(dbPath);
+//
+//        // 3. Inject into Services
+//        Services.closeDataAccess();
+//        Services.createDataAccess(dao);
 
-        // 3. Inject into Services
-        Services.closeDataAccess();
-        Services.createDataAccess(dao);
+        // 2. CRITICAL: Delete the existing database file to ensure a clean slate
+        // This prevents data from previous tests (like 'Test Lead') from interfering
+        context.deleteDatabase(dbName);
+
+        Services.createDataAccess(dbName);
+        DataAccess dao = Services.getDataAccess(dbName);
+        if (dao != null) {
+            dao.open(dbPath);
+        }
 
         al = new AccessLeads(); // Business controller now talks to REAL DB
     }
@@ -71,5 +81,147 @@ public class BusinessPersistenceSeamTest {
         al.getLeads(updatedLeads);
         Assert.assertEquals("Database size should have increased by 1", initialSize + 1, updatedLeads.size());
 
-        Log.d(TAG, "Successfully inserted lead with assigned ID: " + newLead.getLeadID());}
+        Log.d(TAG, "Successfully inserted lead with assigned ID: " + newLead.getLeadID());
+    }
+
+    @Test
+    public void testUpdateLeadSeam() {
+        List<Lead> leads = new ArrayList<>();
+
+        // 1. Insert a lead to update
+        Lead lead = new Lead("Original", "Name", "123", 0, "", "", new Date(), "", new Date());
+        al.insertLead(lead);
+        long id = lead.getLeadID();
+
+        // 2. Modify the lead
+        lead.setLeadFirstName("Updated");
+        lead.setLeadLastName("Name");
+        String result = al.updateLead(lead);
+        Assert.assertNull("Update should return null on success", result);
+
+        // 3. Verify the change in the DB
+        al.getLeads(leads);
+        Lead found = null;
+        for (Lead l : leads) {
+            if (l.getLeadID() == id) found = l;
+        }
+
+        Assert.assertNotNull("Updated lead should exist in DB", found);
+        Assert.assertEquals("First name should be updated in DB", "Updated", found.getLeadFirstName());
+    }
+
+    @Test
+    public void testDeleteLeadSeam() {
+        List<Lead> leads = new ArrayList<>();
+
+        // 1. Insert a lead to delete
+        Lead lead = new Lead("Delete", "Me", "999", 0, "", "", new Date(), "", new Date());
+        al.insertLead(lead);
+        al.getLeads(leads);
+        int sizeAfterInsert = leads.size();
+
+        // 2. Delete the lead
+        String result = al.deleteLead(lead);
+        Assert.assertNull("Delete should return null on success", result);
+
+        // 3. Verify it is gone
+        leads.clear();
+        al.getLeads(leads);
+        Assert.assertEquals("Size should decrease by 1", sizeAfterInsert - 1, leads.size());
+
+        for (Lead l : leads) {
+            Assert.assertNotEquals("Deleted ID should not exist", lead.getLeadID(), l.getLeadID());
+        }
+    }
+
+    @Test
+    public void testGetLeads() {
+        List<Lead> leads = new ArrayList<>();
+
+        // 1. Test empty (since we delete DB in @Before, it should be empty or have default data)
+        al.getLeads(leads);
+        int startSize = leads.size();
+
+        // 2. Add multiple leads
+        al.insertLead(new Lead("A", "B", "1", 0, "", "", new Date(), "", new Date()));
+        al.insertLead(new Lead("C", "D", "2", 0, "", "", new Date(), "", new Date()));
+
+        // 3. Verify count
+        leads.clear();
+        al.getLeads(leads);
+        Assert.assertEquals("Should have 2 more leads than start", startSize + 2, leads.size());
+    }
+
+    @Test
+    public void testGetSequential() {
+        // 1. First call should return the first lead
+        Lead first = al.getSequential();
+        Assert.assertNotNull("First sequential lead should not be null", first);
+        Assert.assertEquals("Alice", first.getLeadFirstName());
+
+        // 2. Second call should return the second lead
+        Lead second = al.getSequential();
+        Assert.assertNotNull("Second sequential lead should not be null", second);
+        Assert.assertEquals("Brian", second.getLeadFirstName());
+
+        // 3. Third call should return null (end of list)
+        Lead third = al.getSequential();
+        Assert.assertNotNull("Third call should not be null", third);
+        Assert.assertEquals("Sophia", third.getLeadFirstName());
+
+        // 4. Forth call should return null (end of list)
+        Lead forth = al.getSequential();
+        Assert.assertNull("Forth call should be null as list is exhausted", forth);
+
+        // 5. Fifth call should trigger a reload and return the first lead again
+        Lead restart = al.getSequential();
+        Assert.assertNotNull("Should restart and return first lead", restart);
+        Assert.assertEquals("Alice", restart.getLeadFirstName());
+    }
+
+    @Test
+    public void testGetLeadByName_Phone() {
+        String testName = "SearchTest";
+        String testPhone = "999-888-7777";
+
+        // 1. Insert a specific lead to find
+        Lead searchTarget = new Lead(testName, "User", testPhone, 0, "", "", new Date(), "", new Date());
+        al.insertLead(searchTarget);
+
+        // 2. Test successful search
+        Lead found = al.getLeadByName_Phone(testName + " User", testPhone);
+        Assert.assertNotNull("Should find the lead by combined name and phone", found);
+        Assert.assertEquals(testPhone, found.getLeadPhoneNumber());
+
+        // 3. Test failed search (wrong phone)
+        Lead notFound = al.getLeadByName_Phone(testName + " User", "000-000-0000");
+        Assert.assertNull("Should return null for non-existent phone number", notFound);
+
+        // 4. Test failed search (empty inputs)
+        Lead emptySearch = al.getLeadByName_Phone("", "");
+        Assert.assertNull("Should return null for empty search criteria", emptySearch);
+    }
+
+    @Test
+    public void testGetRandom() {
+        // 1. Insert a lead and get its real database ID
+        Lead target = new Lead("Random", "Target", "555", 0, "", "", new Date(), "", new Date());
+        al.insertLead(target);
+        long realID = target.getLeadID();
+        Assert.assertTrue("ID should be valid", realID > 0);
+
+        // 2. Test retrieval by ID
+        Lead found = al.getRandom(realID);
+        Assert.assertNotNull("Should find lead with ID: " + realID, found);
+        Assert.assertEquals("Random", found.getLeadFirstName());
+        Assert.assertEquals(realID, found.getLeadID());
+
+        // 3. Test invalid ID
+        Lead invalid = al.getRandom(-1);
+        Assert.assertNull("Should return null for negative ID", invalid);
+
+        // 4. Test non-existent ID
+        Lead nonExistent = al.getRandom(99999);
+        Assert.assertNull("Should return null for ID not in database", nonExistent);
+    }
 }

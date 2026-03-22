@@ -6,7 +6,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         DataAccessDatabaseTest.class,
-        //BusinessPersistenceSeamTest.class,
+        BusinessPersistenceSeamTest.class,
 })
 public class IntegrationTests {
     // This class remains empty.

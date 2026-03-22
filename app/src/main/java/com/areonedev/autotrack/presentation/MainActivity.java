@@ -22,7 +22,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     public static final String DB_NAME = "LEADS";
     //public static String[]args = {DB_PATH,DB_NAME};
-    private static final String TAG = "LEADS_DB_TEST";
+    private static final String TAG = "LEADS_DB";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

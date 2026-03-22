@@ -74,6 +74,11 @@ public class DataAccessObject implements DataAccess {
 
     @Override
     public String getLeadSequential(List<Lead> leadResult) {
+        if (db == null) return "DB Null";
+
+        // Best practice: clear the list so the caller doesn't get duplicate data
+        leadResult.clear();
+
         try {
             Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_LEADS, null);
             parseCursor(cursor, leadResult);

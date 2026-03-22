@@ -6,8 +6,6 @@ import android.util.Log;
 import com.areonedev.autotrack.persistence.DataAccess;
 import com.areonedev.autotrack.presentation.CLI;
 
-import java.util.Date;
-
 public class Main {
 
     public static final String dbName = "LEADS";
@@ -17,8 +15,8 @@ public class Main {
         startUp(context);
         CLI.run();
 
-        //shutDown();
-        //System.out.println("All done");
+//        shutDown();
+//        System.out.println("All done");
     }
 
     public static void startUp(Context context)
