@@ -9,10 +9,10 @@
 - **State Leakage:** `testGetSequential` was failing with an unexpected 4th lead.
   - *Cause:* SQLite persistence on the Android Emulator was preserving data from `testInsertLeadSeam` across test boundaries.
   - *Resolution:* Added `context.deleteDatabase(dbName)` to the `@Before` setup. This forces the `DataAccessObject` to recreate the schema and re-populate default data for every test case.
-
 ## Next
-- **Performance:** Monitor if frequent database deletion slows down the test suite; consider using a `TearDown` or a single `Suite` reset if execution time exceeds 30 seconds.
-- **Search Tests:** Implement `testGetLeadByName_Phone` and `testGetRandom` now that the environment is stable.
+- **UI Phase 1:** Design the `LeadListActivity` using a `RecyclerView`.
+- **UI Phase 2:** Implement the `AddLeadActivity` and bind the "Save" button to `AccessLeads.insertLead()`.
+- **System Testing:** Introduce Espresso tests once the first UI components are functional.
 ---
 **Date:** March 19, 2026
 
