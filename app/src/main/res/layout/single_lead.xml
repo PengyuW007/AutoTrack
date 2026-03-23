@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- 1. Lead Name -->
+        <TextView
+            android:id="@+id/text_lead_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@id/text_lead_stage"
+            android:text="Lead Name"
+            android:textColor="#212121"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- 2. Phone Number -->
+        <TextView
+            android:id="@+id/text_lead_phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/text_lead_name"
+            android:layout_marginTop="2dp"
+            android:text="Phone Number"
+            android:textColor="#757575"
+            android:textSize="14sp" />
+
+        <!-- 3. Vehicle Interest (New Field) -->
+        <TextView
+            android:id="@+id/text_lead_vehicle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/text_lead_phone"
+            android:layout_marginTop="4dp"
+            android:text="Interested in: Toyota Camry"
+            android:textColor="#424242"
+            android:textSize="13sp"
+            android:textStyle="italic" />
+
+        <!-- 4. Status/Stage (Anchored to the Right) -->
+        <TextView
+            android:id="@+id/text_lead_stage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="#E3F2FD"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:text="New"
+            android:textColor="#2196F3"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

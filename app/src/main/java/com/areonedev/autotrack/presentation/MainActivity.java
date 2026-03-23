@@ -2,6 +2,9 @@ package com.areonedev.autotrack.presentation;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,18 +14,12 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.areonedev.autotrack.R;
 import com.areonedev.autotrack.application.Main;
-import com.areonedev.autotrack.business.AccessLeads;
-import com.areonedev.autotrack.objects.Lead;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String DB_NAME = "LEADS";
+    private static final String DB_NAME = "LEADS";
     //public static String[]args = {DB_PATH,DB_NAME};
-    private static final String TAG = "LEADS_DB";
+    private static final String TAG = "Main_Activity";
+    private static final int SPLASH_TIME_OUT = 2500; // 2.5 seconds
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +44,37 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Initialization Error: " + e.getMessage());
         }
 
+        // 2. Simple Animation (Optional: Add a TextView with ID 'logo_text' in your XML)
+        TextView logoText = findViewById(R.id.logo_text); // Ensure this ID exists in activity_main.xml
+        if (logoText != null) {
+            Animation fadeIn = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
+            fadeIn.setDuration(1500);
+            logoText.startAnimation(fadeIn);
+        }
+
+        // 3. Transition to Leads Page after 5 seconds
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            try {
+                Log.d(TAG, "Transitioning to LeadsActivity...");
+                android.content.Intent intent = new android.content.Intent(MainActivity.this, LeadsActivity.class);
+                startActivity(intent);
+
+                // finish() ensures the user cannot go "back" to the splash screen
+                finish();
+
+                // Optional: Add a smooth transition animation
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            } catch (Exception e) {
+                Log.e(TAG, "Transition Error: " + e.getMessage());
+            }
+        }, 3000); // 3000 milliseconds = 3 seconds
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         // Close the database connection when the app is closed
-        Main.shutDown();
+        //Main.shutDown();
     }
 }

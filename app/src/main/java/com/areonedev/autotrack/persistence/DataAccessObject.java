@@ -55,13 +55,24 @@ public class DataAccessObject implements DataAccess {
                     "CreatedAt TEXT)");
 
             Log.d(TAG, "Database opened successfully at: " + dbPath);
+
+            /* Insert three leads to the DB */
+            Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_LEADS, null);
+
+            cursor.moveToFirst();
+            int count = cursor.getInt(0);
+            cursor.close();
+
+            if (count == 0) {
+                Log.d(TAG, "Database is empty. Adding initial dummy leads.");
+                addDummyLeads();
+            } else {
+                Log.d(TAG, "Database already contains " + count + " leads. Skipping dummy data.");
+            }
         } catch (Exception e) {
             Log.e(TAG, "CRITICAL: Failed to open database: " + e.getMessage());
             db = null; // Ensure it's explicitly null if it fails
         }
-
-        /* Insert three leads to the DB */
-        addDummyLeads();
 
     }
 
@@ -110,7 +121,6 @@ public class DataAccessObject implements DataAccess {
         }
         return results;
     }
-
 
 
     @Override
@@ -211,54 +221,51 @@ public class DataAccessObject implements DataAccess {
         }
     }
 
-    private void addDummyLeads(){
+    private void addDummyLeads() {
         Lead lead;
         Date today, createdDate;
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2026, Calendar.MARCH, 8);
+
+        // Today's date for the 'today' variable
         today = calendar.getTime();
 
+        // Alice (Old lead)
         calendar.set(2023, Calendar.JANUARY, 1);
         createdDate = calendar.getTime();
-        lead = new Lead(
-                "Alice",                // First Name
-                "Chen",                 // Last Name
-                "204-555-8123",
-                32000,
-                "Volkswagen Jetta",
-                "NEW",
-                today,
-                "First inquiry from website",
-                createdDate);
+        lead = new Lead("Darren", "Adam", "416-278-6191", 32000, "Volkswagen Jetta", "NEW", today, "First inquiry", createdDate);
         insertLead(lead);
 
+        // Brian (Old lead)
         calendar.set(2024, Calendar.FEBRUARY, 2);
         createdDate = calendar.getTime();
-        lead = new Lead(
-                "Brian",                // First Name
-                "Miller",               // Last Name
-                "204-555-1290",
-                45000,
-                "Volkswagen Tiguan",
-                "VISITED",
-                today,
-                "Visited showroom, interested in financing",
-                createdDate);
+        lead = new Lead("Darryl", "Kessel", "647-282-9967", 45000, "Volkswagen Tiguan", "VISITED", today, "Visited showroom", createdDate);
         insertLead(lead);
 
+        // Sophia (Old lead)
         calendar.set(2025, Calendar.MARCH, 3);
         createdDate = calendar.getTime();
-        lead = new Lead(
-                "Sophia",               // First Name
-                "Martinez",             // Last Name
-                "204-555-6677",
-                52000,
-                "Volkswagen Atlas",
-                "NEGOTIATION",
-                today,
-                "Negotiating trade-in value",
-                createdDate);
+        lead = new Lead("Jamie", "Alizadeh", "416-543-8045", 52000, "Volkswagen Atlas", "NEGOTIATION", today, "Negotiating", createdDate);
+        insertLead(lead);
+
+        /* --- TODAY LEADS --- */
+        calendar = Calendar.getInstance(); // Reset to now
+        createdDate = calendar.getTime();
+
+        lead = new Lead("Pengyu", "Wang", "613-802-7195", 52000, "Volkswagen Atlas", "NEGOTIATION", today, "Notes", createdDate);
+        insertLead(lead);
+
+        lead = new Lead("Irfan", "Nassir", "416-891-9798", 52000, "Volkswagen Atlas", "NEGOTIATION", today, "Notes", createdDate);
+        insertLead(lead);
+
+        /* --- YESTERDAY LEADS --- */
+        calendar = Calendar.getInstance(); // Reset to now
+        calendar.add(Calendar.DATE, -1);   // Subtract 1 day
+        createdDate = calendar.getTime();
+
+        lead = new Lead("Anna", "Ivashchenko", "905-782-9571", 52000, "Volkswagen Atlas", "NEGOTIATION", today, "Notes", createdDate);
+        insertLead(lead);
+
+        lead = new Lead("Vignejan", "Velsam", "437-855-4929", 52000, "Volkswagen Atlas", "NEGOTIATION", today, "Notes", createdDate);
         insertLead(lead);
     }
-
 }

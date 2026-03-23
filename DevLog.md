@@ -1,8 +1,31 @@
 # Developer Log — AutoTrack
+**Date:** March 22, 2026
+
+**Module:** UI Design & CRM Storyboard Implementation
+## Itinerary
+- **UI Integration:** Connected the SQLite database to the `LeadsActivity` and implemented the `LeadAdapter` with multi-view support.
+- **Date Categorization:** Developed logic to group leads by creation date, injecting "Today", "Yesterday", and "dd MMM yyyy" headers into the RecyclerView.
+- **Lead Card Enhancement:** Updated the `single_lead.xml` layout to include a right-aligned Status badge and a dedicated field for Vehicle Interest.
+- **Data Seeding:** Expanded `addDummyLeads` in the DAO to include new test records (Pengyu, Irfan, Anna, Vignejan) with specific timestamps to verify relative date grouping.
+
+## Issues
+- **RecyclerView Sync (Resolved):** Fixed an `IndexOutOfBoundsException` caused by `getItemCount()` returning the raw lead count instead of the total count including injected date headers.
+- **Timestamp Grouping (Resolved):** Leads from the same day were generating duplicate headers due to unique time-of-day values. Resolved by truncating the `CreatedAt` string to the first 10 characters (`yyyy-MM-dd`).
+- **Format Mismatch (Resolved):** The DAO was using `dd/MM/yyyy` while the Adapter required `yyyy-MM-dd` for comparison logic. Standardized all date formats to ISO `yyyy-MM-dd`.
+- **Data Stale-mate (Resolved):** New dummy leads were not appearing because the database already existed with a non-zero count. Performed a full app cache clear to trigger fresh data seeding.
+
+## Next
+- **Search Functionality:** Implement a `SearchView` in `LeadsActivity` to filter the list by name or phone number, ensuring date headers refresh dynamically.
+- **Add Lead Story:** Connect the Floating Action Button (FAB) to a new activity to allow manual lead insertion into the database.
+- **Object Refactoring:** Transition `VehicleInterest` from a `String` to a dedicated `Vehicle` object class to support more granular data (Year, Model, Trim).
+- **System Testing:** Introduce Espresso tests to verify that clicking a lead in the list opens the correct detail view.
+
+---
 **Date:** March 20-21, 2026
 
 **Module:** Integration Testing (Persistence)
 ## Itinerary
+- Successfully completed the full testing pyramid (Unit, Integration, and Business-Persistence Seam). The data layer is now verified as stable and deterministic.
 - Resolved non-deterministic test failures in `BusinessPersistenceSeamTest`.
 - Implemented a database reset strategy to ensure test isolation.
 ## Issues
