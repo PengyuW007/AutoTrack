@@ -1,6 +1,7 @@
 package com.areonedev.autotrack.integration;
 
 import com.areonedev.autotrack.business.AccessLeads;
+import com.areonedev.autotrack.objects.Vehicle;
 import com.areonedev.autotrack.persistence.DataAccessObject;
 import com.areonedev.autotrack.persistence.DataAccess;
 import com.areonedev.autotrack.objects.Lead;
@@ -61,10 +62,13 @@ public class BusinessPersistenceSeamTest {
         int initialSize = leads.size();
 
         // Create dates using java.util.Date
-        Date followUp = new Date();
-        Date created = new Date();
+        Date now = new Date();
+        Vehicle vehicle = new Vehicle("Volkswagen", "Tiguan", "2024","Comfrtline");
 
-        Lead newLead = new Lead("Integration", "User", "555-0000", 100.0, "SUV", "New", followUp, "Test Note", created);
+        // Refactored to 17-parameter constructor
+        Lead newLead = new Lead("Integration", "User", "555-0000", "int@test.com", "Sales",
+                "123 Test St", "Winnipeg", "MB", "Canada", "R3C 1A1",
+                45000.0, vehicle, null, "NEW", now, "Integration test note", now);
 
         // Verify initial state
         Assert.assertEquals("New lead should have ID 0 before insertion", 0, newLead.getLeadID());
@@ -89,7 +93,9 @@ public class BusinessPersistenceSeamTest {
         List<Lead> leads = new ArrayList<>();
 
         // 1. Insert a lead to update
-        Lead lead = new Lead("Original", "Name", "123", 0, "", "", new Date(), "", new Date());
+        Date now = new Date();
+        // 1. Insert a lead to update
+        Lead lead = new Lead("Original", "Name", "123", null, null, null, null, null, null, null, 0, null, null, "NEW", now, "", now);
         al.insertLead(lead);
         long id = lead.getLeadID();
 
@@ -115,7 +121,9 @@ public class BusinessPersistenceSeamTest {
         List<Lead> leads = new ArrayList<>();
 
         // 1. Insert a lead to delete
-        Lead lead = new Lead("Delete", "Me", "999", 0, "", "", new Date(), "", new Date());
+        Date now = new Date();
+
+        Lead lead = new Lead("Delete", "Me", "999", null, null, null, null, null, null, null, 0, null, null, "NEW", now, "", now);
         al.insertLead(lead);
         al.getLeads(leads);
         int sizeAfterInsert = leads.size();
@@ -143,8 +151,16 @@ public class BusinessPersistenceSeamTest {
         int startSize = leads.size();
 
         // 2. Add multiple leads
-        al.insertLead(new Lead("A", "B", "1", 0, "", "", new Date(), "", new Date()));
-        al.insertLead(new Lead("C", "D", "2", 0, "", "", new Date(), "", new Date()));
+        Date now = new Date();
+        Vehicle vehicle = new Vehicle("Volkswagen", "Tiguan", "2024","Comfortline");
+
+        // Refactored to 17-parameter constructor
+        al.insertLead(new Lead("Integration", "User", "555-0000", "int@test.com", "Sales",
+                "123 Test St", "Winnipeg", "MB", "Canada", "R3C 1A1",
+                45000.0, vehicle, null, "NEW", now, "Integration test note", now));
+        al.insertLead(new Lead("Integration", "User", "555-0000", "int@test.com", "Sales",
+                "123 Test St", "Winnipeg", "MB", "Canada", "R3C 1A1",
+                45000.0, vehicle, null, "NEW", now, "Integration test note", now));
 
         // 3. Verify count
         leads.clear();
@@ -157,44 +173,50 @@ public class BusinessPersistenceSeamTest {
         // 1. First call should return the first lead
         Lead first = al.getSequential();
         Assert.assertNotNull("First sequential lead should not be null", first);
-        Assert.assertEquals("Alice", first.getLeadFirstName());
+        Assert.assertEquals("Darren", first.getLeadFirstName());
 
         // 2. Second call should return the second lead
         Lead second = al.getSequential();
         Assert.assertNotNull("Second sequential lead should not be null", second);
-        Assert.assertEquals("Brian", second.getLeadFirstName());
+        Assert.assertEquals("Darryl", second.getLeadFirstName());
 
         // 3. Third call should return null (end of list)
         Lead third = al.getSequential();
         Assert.assertNotNull("Third call should not be null", third);
-        Assert.assertEquals("Sophia", third.getLeadFirstName());
+        Assert.assertEquals("Jamie", third.getLeadFirstName());
 
+        al.getSequential();
+        al.getSequential();
+        al.getSequential();
         // 4. Forth call should return null (end of list)
-        Lead forth = al.getSequential();
-        Assert.assertNull("Forth call should be null as list is exhausted", forth);
+        Lead seventh = al.getSequential();
+
+        Assert.assertNull("Last+1 call should be null as list is exhausted", seventh);
 
         // 5. Fifth call should trigger a reload and return the first lead again
         Lead restart = al.getSequential();
         Assert.assertNotNull("Should restart and return first lead", restart);
-        Assert.assertEquals("Alice", restart.getLeadFirstName());
+        Assert.assertEquals("Darren", restart.getLeadFirstName());
     }
 
     @Test
     public void testGetLeadByName_Phone() {
-        String testName = "SearchTest";
+        String testFirst = "Search";
+        String testLast = "Target";
         String testPhone = "999-888-7777";
+        Date now = new Date();
 
         // 1. Insert a specific lead to find
-        Lead searchTarget = new Lead(testName, "User", testPhone, 0, "", "", new Date(), "", new Date());
+        Lead searchTarget = new Lead(testFirst, testLast, testPhone, null, null, null, null, null, null, null, 0, null, null, "NEW", now, "", now);
         al.insertLead(searchTarget);
 
         // 2. Test successful search
-        Lead found = al.getLeadByName_Phone(testName + " User", testPhone);
+        Lead found = al.getLeadByName_Phone(testFirst + " " + testLast, testPhone);
         Assert.assertNotNull("Should find the lead by combined name and phone", found);
         Assert.assertEquals(testPhone, found.getLeadPhoneNumber());
 
         // 3. Test failed search (wrong phone)
-        Lead notFound = al.getLeadByName_Phone(testName + " User", "000-000-0000");
+        Lead notFound = al.getLeadByName_Phone(testFirst + " " + testLast + " User", "000-000-0000");
         Assert.assertNull("Should return null for non-existent phone number", notFound);
 
         // 4. Test failed search (empty inputs)
@@ -205,7 +227,8 @@ public class BusinessPersistenceSeamTest {
     @Test
     public void testGetRandom() {
         // 1. Insert a lead and get its real database ID
-        Lead target = new Lead("Random", "Target", "555", 0, "", "", new Date(), "", new Date());
+        Date now = new Date();
+        Lead target = new Lead("Random", "Target", "555", null, null, null, null, null, null, null, 0, null, null, "NEW", now, "", now);
         al.insertLead(target);
         long realID = target.getLeadID();
         Assert.assertTrue("ID should be valid", realID > 0);

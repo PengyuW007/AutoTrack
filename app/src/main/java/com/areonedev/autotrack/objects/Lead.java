@@ -5,48 +5,73 @@ import java.util.Objects;
 
 public class Lead {
 
-    private static long leadCounter = 1;
     private long leadID;
     private String firstName;
     private String lastName;
     private String phone;
+    private String leadEmail;
+    private String leadDivision;
+    private String leadAddress;
+    private String leadCity;
+    private String leadProvince;
+    private String leadCountry;
+    private String leadPostalCode;
+
     private double budget;
-    private String vehicleInterest; // Update this to Vehicle Class when needed
+    private Vehicle vehicleInterest;
+    private Vehicle tradeInVehicle;
     private String stage;
     private Date followUpDate;
-    private double score; //Score of weight at different stages
+    private double score;
     private String notes;
     private Date createdAt;
 
     // =========================
-    // Constructor
+    // Constructors
     // =========================
+
     public Lead() {
-        this.leadID = 0; // Assign unique ID and increment counter
-        this.firstName = null;
-        this.lastName = null;
-        this.phone = null;
+        this.leadID = 0;
+        this.firstName = "";
+        this.lastName = "";
+        this.phone = "";
+        this.leadEmail = "";
+        this.leadDivision = "";
+        this.leadAddress = "";
+        this.leadCity = "";
+        this.leadProvince = "ON";
+        this.leadCountry = "Canada";
+        this.leadPostalCode = "";
         this.budget = 0;
         this.vehicleInterest = null;
+        this.tradeInVehicle = null;
         this.stage = "New";
         this.followUpDate = null;
-        this.notes = null;
+        this.notes = "";
         this.createdAt = new Date();
-        this.score = 0.0; // default score
+        this.score = 0.0;
     }
 
     public Lead(
             String firstName,
             String lastName,
             String phone,
+            String email,
+            String division,
+            String address,
+            String city,
+            String province,
+            String country,
+            String postalCode,
             double budget,
-            String vehicleInterest,
+            Vehicle vehicleInterest,
+            Vehicle tradeInVehicle,
             String stage,
             Date followUpDate,
             String notes,
             Date createdAt) {
 
-        // 1. Validation: Check if BOTH names are missing
+        // Validation: Check if BOTH names are missing
         boolean isFirstEmpty = (firstName == null || firstName.trim().isEmpty());
         boolean isLastEmpty = (lastName == null || lastName.trim().isEmpty());
 
@@ -54,17 +79,23 @@ public class Lead {
             throw new IllegalArgumentException("Lead must have at least a First Name or a Last Name.");
         }
 
-        this.leadID = 0; // Assign unique ID and increment counter
-
-        // 2. Null-Safety: Assign empty strings instead of null
+        this.leadID = 0;
         this.firstName = isFirstEmpty ? "" : firstName.trim();
         this.lastName = isLastEmpty ? "" : lastName.trim();
         this.phone = (phone == null) ? "" : phone;
+        this.leadEmail = (email == null) ? "" : email;
+        this.leadDivision = (division == null) ? "" : division;
+        this.leadAddress = (address == null) ? "" : address;
+        this.leadCity = (city == null) ? "" : city;
+        this.leadProvince = (province == null) ? "ON" : province;
+        this.leadCountry = (country == null) ? "Canada" : country;
+        this.leadPostalCode = (postalCode == null) ? "" : postalCode;
+
         this.budget = budget;
-        this.vehicleInterest = (vehicleInterest == null) ? "" : vehicleInterest;
+        this.vehicleInterest = vehicleInterest;
+        this.tradeInVehicle = tradeInVehicle;
         this.stage = (stage == null) ? "New" : stage;
         this.notes = (notes == null) ? "" : notes;
-
         this.followUpDate = followUpDate;
         this.createdAt = (createdAt == null) ? new Date() : createdAt;
         this.score = 0.0;
@@ -74,137 +105,96 @@ public class Lead {
     // Getters & Setters
     // =========================
 
-    public static long getLeadCounter() {
-        return leadCounter;
-    }
+    public long getLeadID() { return leadID; }
+    public void setLeadID(long leadID) { this.leadID = leadID; }
 
-    public long getLeadID() {
-        return leadID;
-    }
+    public String getLeadFirstName() { return firstName; }
+    public void setLeadFirstName(String firstName) { this.firstName = firstName; }
+
+    public String getLeadLastName() { return lastName; }
+    public void setLeadLastName(String lastName) { this.lastName = lastName; }
 
     public String getLeadName() {
-        String first = getLeadFirstName();
-        String last = getLeadLastName();
-        return (first + " " + last).trim();
+        return (firstName + " " + lastName).trim();
     }
-
-    public String getLeadFirstName() {
-        return firstName == null ? "" : firstName;
-    }
-
-    public String getLeadLastName() {
-        return lastName == null ? "" : lastName;
-    }
-
-    public String getLeadPhoneNumber() {
-        return phone == null ? "" : phone;
-    }
-
-    public double getLeadBudget() {
-        return budget;
-    }
-
-    public String getLeadVehicleInterest() {
-        return vehicleInterest == null ? "" : vehicleInterest;
-    }
-
-    public String getLeadStage() {
-        return stage;
-    }
-
-    public Date getLeadFollowUpDate() {
-        return followUpDate;
-    }
-
-    public double getLeadScore() {
-        return score;
-    }
-
-    public String getLeadNotes() {
-        return notes == null ? "" : notes;
-    }
-
-    public Date getLeadCreatedAt() {
-        return createdAt;
-    }
-
-    public void setLeadID(long leadID) {
-        this.leadID = leadID;
-    }
-
-    public void setLeadFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLeadLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public void setLeadName(String name) {
-        if (name == null || name.trim().isEmpty()) {
-            this.firstName = "null";
-            this.lastName = "null";
+    public void setLeadName(String fullName) {
+        if (fullName == null || fullName.trim().isEmpty()) {
+            this.firstName = "";
+            this.lastName = "";
             return;
         }
 
-        String trimmedName = name.trim();
-        int firstSpace = trimmedName.indexOf(" ");
+        String trimmedName = fullName.trim();
+        int firstSpaceIndex = trimmedName.indexOf(" ");
 
-        if (firstSpace != -1) {
-            // Split into first and last
-            this.firstName = trimmedName.substring(0, firstSpace).trim();
-            this.lastName = trimmedName.substring(firstSpace + 1).trim();
-        } else {
-            // No space found: treat the whole thing as the first name
+        if (firstSpaceIndex == -1) {
+            // Only one name provided (e.g., "Cher")
             this.firstName = trimmedName;
             this.lastName = "";
+        } else {
+            // Split: First word is firstName, everything else is lastName
+            // Example: "John Quincy Adams" -> First: "John", Last: "Quincy Adams"
+            this.firstName = trimmedName.substring(0, firstSpaceIndex).trim();
+            this.lastName = trimmedName.substring(firstSpaceIndex + 1).trim();
         }
     }
+    public String getLeadPhoneNumber() { return phone; }
+    public void setLeadPhoneNumber(String phone) { this.phone = phone; }
 
-    public void setLeadPhoneNumber(String phone) {
-        this.phone = phone;
-    }
+    public String getLeadEmail() { return leadEmail; }
+    public void setLeadEmail(String leadEmail) { this.leadEmail = leadEmail; }
 
-    public void setLeadBudget(double budget) {
-        this.budget = budget;
-    }
+    public String getLeadDivision() { return leadDivision; }
+    public void setLeadDivision(String leadDivision) { this.leadDivision = leadDivision; }
 
-    public void setLeadVehicleInterest(String vehicleInterest) {
-        this.vehicleInterest = vehicleInterest;
-    }
+    public String getLeadAddress() { return leadAddress; }
+    public void setLeadAddress(String leadAddress) { this.leadAddress = leadAddress; }
 
-    public void setLeadCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
+    public String getLeadCity() { return leadCity; }
+    public void setLeadCity(String leadCity) { this.leadCity = leadCity; }
 
-    public void setLeadStage(String stage) {
-        this.stage = stage;
-    }
+    public String getLeadProvince() { return leadProvince; }
+    public void setLeadProvince(String leadProvince) { this.leadProvince = leadProvince; }
 
-    public void setLeadFollowUpDate(Date followUpDate) {
-        this.followUpDate = followUpDate;
-    }
+    public String getLeadCountry() { return leadCountry; }
+    public void setLeadCountry(String leadCountry) { this.leadCountry = leadCountry; }
 
-    public void setLeadScore(double score) {
-        this.score = score;
-    }
+    public String getLeadPostalCode() { return leadPostalCode; }
+    public void setLeadPostalCode(String leadPostalCode) { this.leadPostalCode = leadPostalCode; }
 
-    public void setLeadNotes(String notes) {
-        this.notes = notes;
-    }
+    public double getLeadBudget() { return budget; }
+    public void setLeadBudget(double budget) { this.budget = budget; }
+
+    public Vehicle getLeadVehicleInterest() { return vehicleInterest; }
+    public void setLeadVehicleInterest(Vehicle vehicleInterest) { this.vehicleInterest = vehicleInterest; }
+
+    public Vehicle getTradeInVehicle() { return tradeInVehicle; }
+    public void setTradeInVehicle(Vehicle tradeInVehicle) { this.tradeInVehicle = tradeInVehicle; }
+
+    public String getLeadStage() { return stage; }
+    public void setLeadStage(String stage) { this.stage = stage; }
+
+    public Date getLeadFollowUpDate() { return followUpDate; }
+    public void setLeadFollowUpDate(Date followUpDate) { this.followUpDate = followUpDate; }
+
+    public double getLeadScore() { return score; }
+    public void setLeadScore(double score) { this.score = score; }
+
+    public String getLeadNotes() { return notes; }
+    public void setLeadNotes(String notes) { this.notes = notes; }
+
+    public Date getLeadCreatedAt() { return createdAt; }
+    public void setLeadCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 
     // =========================
-    // equals & hashCode
-    // Important for PriorityQueue remove()
+    // Helper Methods
     // =========================
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true; // Same memory address
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Lead lead = (Lead) o;
-
-        // Logic: Match by ID
         return leadID == lead.leadID;
     }
 
@@ -213,16 +203,13 @@ public class Lead {
         return Objects.hash(leadID);
     }
 
-    // =========================
-    // toString (for debugging)
-    // =========================
-
     @Override
     public String toString() {
         return "Lead{" +
-                "id='" + leadID + '\'' +
+                "id=" + leadID +
                 ", name='" + getLeadName() + '\'' +
-                ", stage='" + stage + '\'' +
+                ", interest='" + (vehicleInterest != null ? vehicleInterest.getFullDescription() : "None") + '\'' +
+                ", tradeIn='" + (tradeInVehicle != null ? tradeInVehicle.getFullDescription() : "None") + '\'' +
                 ", score=" + score +
                 '}';
     }

@@ -14,6 +14,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.areonedev.autotrack.application.Main;
 import com.areonedev.autotrack.application.Services;
 import com.areonedev.autotrack.objects.Lead;
+import com.areonedev.autotrack.objects.Vehicle;
 
 //import junit.framework.TestCase;
 
@@ -22,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DataAccessTest{
@@ -90,8 +92,12 @@ public class DataAccessTest{
 
         // 2. Test Insertion
         // Note: Ensure your Lead constructor matches these parameters
-        Lead testLead = new Lead("Test", " Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
-        dataAccess.insertLead(testLead);
+        Vehicle testVehicle = new Vehicle("Volkswagen", "Atlas", "2024","Peak Edition");
+        Date now = new Date();
+
+        Lead testLead = new Lead("Test", "Lead", "555-0199", "test@example.com", "Sales",
+                "123 Test St", "Winnipeg", "MB", "Canada", "R3C 1A1",
+                50000.0, testVehicle, null, "NEW", now, "Test Note", now);dataAccess.insertLead(testLead);
         dataAccess.getLeadSequential(leads);
         assertEquals(4, leads.size());
 
@@ -121,13 +127,14 @@ public class DataAccessTest{
     @Test
     public void testRandom() {
         System.out.println(TAG + "Running test getLeadRandom: Verify Lead Search functionality");
+        Date now = new Date();
         List<Lead> leads = new ArrayList<>();
         dataAccess.getLeadSequential(leads);
         // Verify that we can at least access the list
         assertEquals(leads.size(), 3);
 
         // 1. NEGATIVE TEST: Search for a lead that does NOT exist
-        Lead testLead = new Lead("Non", " Existence", "000", 0, "", "", null, "", null);
+        Lead testLead = new Lead("Non", "Existence", "000", null, null, null, null, null, null, null, 0, null, null, "NEW", now, "", now);
         ArrayList<Lead> results = dataAccess.getLeadRandom(testLead);
         assertEquals("Should find 0 leads for non-existent criteria", 0, results.size());
 
@@ -136,12 +143,12 @@ public class DataAccessTest{
         assertEquals(0, results.size());
 
         // 2. Negative Test: Same name, but phone# is different
-        testLead = new Lead("Alice", "Chen", "555-1000", 0, "", "", null, "", null);
+        testLead = new Lead("Alice", "Chen", "555-1100", null, null, null, null, null, null, null, 0, null, null, "NEW", now, "", now);
         results = dataAccess.getLeadRandom(testLead);
         assertEquals("The leads list should be empty", 0, results.size());
 
         // 3. POSITIVE TEST: Search for a lead that does exist
-        testLead = new Lead("Alice", "Chen", "204-555-8123", 0, "", "", null, "", null);
+        testLead = new Lead("Alice", "Chen", "204-555-8123", null, null, null, null, null, null, null, 0, null, null, "NEW", now, "", now);
         results = dataAccess.getLeadRandom(testLead);
         assertEquals("The leads list should not be empty", 0, results.size());
         Lead l2 = leads.get(0);
@@ -167,7 +174,11 @@ public class DataAccessTest{
         dataAccess.getLeadSequential(leads);
 
         /* Insert Unique */
-        Lead testLead = new Lead("Test", "Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
+        Vehicle v = new Vehicle("Volkswagen", "Jetta", "2024","Trendline");
+        Date now = new Date();
+        Lead testLead = new Lead("New", "User", "555-9999", "new@test.com", "Sales",
+                "Street", "City", "Prov", "Country", "Postal",
+                30000.0, v, null, "NEW", now, "Note", now);
         ArrayList<Lead> results = dataAccess.getLeadRandom(testLead);
         assertEquals(0, results.size());
         assertEquals(3, leads.size());
@@ -180,7 +191,9 @@ public class DataAccessTest{
         assertEquals("Test Lead", leads.getLast().getLeadName());
 
         /* Insert Duplicate */
-        testLead = new Lead("Test", "Lead", "555-0199", 50000.0, "SUV", "New", new java.util.Date(), "Test Note", new java.util.Date());
+        testLead = new Lead("New", "User", "555-9999", "new@test.com", "Sales",
+                "Street", "City", "Prov", "Country", "Postal",
+                30000.0, v, null, "NEW", now, "Note", now);
         results = dataAccess.getLeadRandom(testLead);
         // This is a valid lead, and it does exist in DB, however shouldn't be inserted
         assertEquals(0, results.size());
@@ -228,8 +241,9 @@ public class DataAccessTest{
 
         /* Update a Non-existent lead */
         // Since leadID is immutable and auto-incrementing, a new Lead will have a unique ID not in the DB
-        Lead ghostLead = new Lead("Ghost", "User", "000", 0, "", "", null, "", null);
-        String ghostResult = dataAccess.updateLead(ghostLead);
+        Date now = new Date();
+        Lead ghost = new Lead("Ghost", "User", "000", null, null, null, null, null, null, null, 0, null, null, "NEW", now, "", now);
+        String ghostResult = dataAccess.updateLead(ghost);
         assertEquals("Updating a non-existent lead should return an error message", "Lead not found.",ghostResult);
         /* Partial Update: Change only one field */
         // Reset Alice to a valid state but change only the phone
@@ -274,8 +288,9 @@ public class DataAccessTest{
         assertEquals("Deleted lead should not be found in search results", 0, searchResults.size());
         // 4. Edge Case: Delete a lead that does not exist (Ghost Lead)
         // This lead has a new ID that was never inserted into the Stub
-        Lead ghostLead = new Lead("Ghost", "User", "000", 0, "", "", null, "", null);
-        String ghostResult = dataAccess.deleteLead(ghostLead);
+        Date now = new Date();
+        Lead ghost = new Lead("Ghost", "User", "000", null, null, null, null, null, null, null, 0, null, null, "NEW", now, "", now);
+        String ghostResult = dataAccess.deleteLead(ghost);
         assertEquals("Deleting a non-existent lead should return an error message", "Lead not found.", ghostResult);
 
         /* Double Delete, delete the same lead twice */

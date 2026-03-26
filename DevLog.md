@@ -1,4 +1,35 @@
 # Developer Log — AutoTrack
+**Date:** March 25, 2026
+
+**Module:** Refactoring Object classes
+## Itinerary
+
+- **Lead Class Refactoring:** Successfully expanded the `Lead` data model from a basic profile to a comprehensive **17-parameter constructor**. This enhancement enables the system to capture critical CRM details, including full mailing addresses, department-specific routing, and high-precision timestamps (`followUpDate` and `createdAt`).
+
+- **Vehicle Class Creation:** Designed and implemented a dedicated `Vehicle` class to replace the previous `String`-based vehicle interest field. This structured representation (`Year`, `Make`, `Model`, `Trim`) supports improved inventory filtering and enables a more professional UI presentation.
+
+- **Persistence Layer Synchronization:** Updated `DataAccessObject` (SQLite) to support the new object structures, ensuring that complex `Vehicle` objects are correctly serialized and deserialized.
+
+- **Test Suite Overhaul:** Refactored all existing test suites, including `LeadTest`, `DataAccessTest`, and `BusinessPersistenceSeamTest`, to align with the updated constructor signatures and object relationships.
+
+## Issues
+
+- **Global Breaking Changes:** The transition to a **17-parameter constructor** caused immediate compilation errors across the entire project. Every instantiation of a `Lead` object in the business logic and test modules required manual updates.
+
+- **Date Precision Conflict:** Identified a bug where *"Today"* leads appeared as *"Yesterday"*. This issue was traced to the `dd/MM/yyyy` formatter removing time precision, causing midnight-aligned timestamps to shift days due to timezone offsets.
+
+- **Integration Test Regression:** In `BusinessPersistenceSeamTest.java`, the `testGetSequential` method failed because it still asserted legacy dummy names (e.g., *"Darren"*, *"Darryl"*) that no longer matched the updated database initialization sequence.
+
+- **Vehicle Nullability:** Encountered `NullPointerException` issues in the UI layer when a lead was created without a vehicle selection. Implemented null-safety checks in `Lead` getters to return **"No Vehicle Interest"** as a fallback value.
+
+## Next
+- **UI Refinement:** Finalize `LeadAdapter` to support the new `Vehicle` object structure for single-row display formatting, using `SpannableStringBuilder` to programmatically bold the **Model** name.
+
+- **Search Logic Update:** Refactor filtering logic in `LeadsActivity` to ensure **"Search Result"** headers are correctly inserted when users filter by name or phone.
+  
+- **Insert New Leads:** Implement the "Add Lead" workflow by connecting the Floating Action Button (`+`) on the `LeadsActivity` page to a new input form.
+- **Database Integration:** Develop the logic to capture user input from the UI and persist new `Lead` and `Vehicle` objects into the SQLite database via the `AccessLeads` business controller.
+---
 **Date:** March 22, 2026
 
 **Module:** UI Design & CRM Storyboard Implementation

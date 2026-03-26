@@ -4,14 +4,15 @@ import com.areonedev.autotrack.application.Main;
 import com.areonedev.autotrack.application.Services;
 import com.areonedev.autotrack.business.AccessLeads;
 import com.areonedev.autotrack.objects.Lead;
+import com.areonedev.autotrack.objects.Vehicle;
 import com.areonedev.autotrack.persistence.DataAccessStub;
 
 import junit.framework.TestCase;
 
 import org.junit.Assert;
 
-import java.sql.SQLOutput;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class BusinessPersistenceSeamTest extends TestCase {
@@ -70,7 +71,6 @@ public class BusinessPersistenceSeamTest extends TestCase {
 
 // 5. Global Creation Count Check
 // Every time we called getLeadByName_Phone, a 'new Lead()' criteria object was created.
-        System.out.println(TAG + "Total Lead objects instantiated after search tests: " + Lead.getLeadCounter());
 
         System.out.println(TAG + " Finished testGetLeadByName_Phone.");
     }
@@ -114,7 +114,14 @@ public class BusinessPersistenceSeamTest extends TestCase {
         List<Lead> leads = new ArrayList<>();
         al.getLeads(leads);
         int initialSize = leads.size();
-        Lead newLead = new Lead("Integration", "User", "555-0000", 100.0, "SUV", "New", null, "Test", null);
+
+        Vehicle interest = new Vehicle("Volkswagen", "Tiguan", "2024","Comfortline");
+        Date now = new Date();
+        Lead newLead = new Lead(
+                "Integration", "User", "555-0000", "int@test.com", "New Cars",
+                "123 Test St", "Winnipeg", "MB", "Canada", "R3C 1A1",
+                45000.0, interest, null, "NEW", now, "Integration test note", now
+        );
         assertEquals(0,newLead.getLeadID());
         String result = al.insertLead(newLead);
         assertEquals(4,newLead.getLeadID());

@@ -21,48 +21,52 @@
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_toStartOf="@id/text_lead_stage"
+            android:ellipsize="end"
+            android:maxLines="1"
             android:text="Lead Name"
             android:textColor="#212121"
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <!-- 2. Phone Number -->
+        <!-- 2. Status/Stage (Top Right) -->
+        <TextView
+            android:id="@+id/text_lead_stage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="#E3F2FD"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
+            android:text="NEW"
+            android:textAllCaps="true"
+            android:textColor="#2196F3"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <!-- 3. Phone Number -->
         <TextView
             android:id="@+id/text_lead_phone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/text_lead_name"
             android:layout_marginTop="2dp"
-            android:text="Phone Number"
+            android:text="613-000-0000"
             android:textColor="#757575"
             android:textSize="14sp" />
 
-        <!-- 3. Vehicle Interest (New Field) -->
+        <!-- 4. Vehicle Interest (3-Row Display) -->
+        <!-- Removed italic to make the Bold Model stand out more -->
         <TextView
             android:id="@+id/text_lead_vehicle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/text_lead_phone"
-            android:layout_marginTop="4dp"
-            android:text="Interested in: Toyota Camry"
+            android:layout_marginTop="12dp"
+            android:lineSpacingExtra="2dp"
+            android:text="2024 Volkswagen\nAtlas\nExecline"
             android:textColor="#424242"
-            android:textSize="13sp"
-            android:textStyle="italic" />
-
-        <!-- 4. Status/Stage (Anchored to the Right) -->
-        <TextView
-            android:id="@+id/text_lead_stage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:background="#E3F2FD"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="4dp"
-            android:text="New"
-            android:textColor="#2196F3"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:textSize="14sp" />
 
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

@@ -2,6 +2,7 @@ package com.areonedev.autotrack.persistence;
 
 import com.areonedev.autotrack.application.Main;
 import com.areonedev.autotrack.objects.Lead;
+import com.areonedev.autotrack.objects.Vehicle;
 import com.areonedev.autotrack.persistence.DataAccess;
 
 import java.util.ArrayList;
@@ -33,45 +34,30 @@ public class DataAccessStub implements DataAccess {
 
         calendar.set(2023, Calendar.JANUARY, 1);
         createdDate = calendar.getTime();
-        lead = new Lead(
-                "Alice",                // First Name
-                "Chen",                 // Last Name
-                "204-555-8123",
-                32000,
-                "Volkswagen Jetta",
-                "NEW",
-                today,
-                "First inquiry from website",
-                createdDate);
-        insertLead(lead);
+        Vehicle jetta = new Vehicle("Volkswagen", "Jetta", "2024", "Comfortline");
+        insertLead(new Lead(
+                "Alice", "Chen", "204-555-8123", "alice@example.com", "Sales",
+                "123 Main St", "Winnipeg", "MB", "Canada", "R3C 1A1",
+                32000.0, jetta, null, "NEW", today,
+                "First inquiry from website", createdDate));
 
         calendar.set(2024, Calendar.FEBRUARY, 2);
         createdDate = calendar.getTime();
-        lead = new Lead(
-                "Brian",                // First Name
-                "Miller",               // Last Name
-                "204-555-1290",
-                45000,
-                "Volkswagen Tiguan",
-                "VISITED",
-                today,
-                "Visited showroom, interested in financing",
-                createdDate);
-        insertLead(lead);
+        Vehicle tiguan = new Vehicle("Volkswagen", "Tiguan", "2024","Comfortline R-Line Black Edition");
+        insertLead(new Lead(
+                "Brian", "Miller", "204-555-1290", "brian@example.com", "Sales",
+                "456 Broadway", "Winnipeg", "MB", "Canada", "R3C 1A2",
+                45000.0, tiguan, null, "VISITED", today,
+                "Visited showroom, interested in financing", createdDate));
 
         calendar.set(2025, Calendar.MARCH, 3);
         createdDate = calendar.getTime();
-        lead = new Lead(
-                "Sophia",               // First Name
-                "Martinez",             // Last Name
-                "204-555-6677",
-                52000,
-                "Volkswagen Atlas",
-                "NEGOTIATION",
-                today,
-                "Negotiating trade-in value",
-                createdDate);
-        insertLead(lead);
+        Vehicle atlas = new Vehicle("Volkswagen", "Atlas", "2024","Peak Edition");
+        insertLead(new Lead(
+                "Sophia", "Martinez", "204-555-6677", "sophia@example.com", "Sales",
+                "789 Portage Ave", "Winnipeg", "MB", "Canada", "R3C 1A3",
+                52000.0, atlas, null, "NEGOTIATION", today,
+                "Negotiating trade-in value", createdDate));
         System.out.println("Successfully connected "+dbType +" database " +dbPath);
     }
 
