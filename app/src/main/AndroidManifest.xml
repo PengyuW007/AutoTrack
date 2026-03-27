@@ -25,6 +25,8 @@
         <activity
             android:name=".presentation.LeadsActivity"
             android:exported="false" />
+
+        <activity android:name=".presentation.LeadsCreationActivity" />
     </application>
 
 </manifest>

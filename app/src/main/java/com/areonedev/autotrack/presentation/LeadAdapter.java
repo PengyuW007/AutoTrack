@@ -33,10 +33,10 @@ public class LeadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_HEADER) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.date_header, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_date_header, parent, false);
             return new HeaderViewHolder(view);
         } else {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.single_lead, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_single_lead, parent, false);
             return new LeadViewHolder(view);
         }
     }

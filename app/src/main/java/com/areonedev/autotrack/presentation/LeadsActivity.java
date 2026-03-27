@@ -2,7 +2,9 @@ package com.areonedev.autotrack.presentation;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
+import android.content.Intent;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -26,7 +28,7 @@ public class LeadsActivity extends AppCompatActivity {
     private BottomNavigationView bottomNav;
     private FloatingActionButton fab;
     private SearchView searchView;
-
+    private View emptyStateView; // Added for "No Results"
     private AccessLeads accessLeads;
     private List<Lead> leadList;
     private LeadAdapter adapter;
@@ -48,11 +50,6 @@ public class LeadsActivity extends AppCompatActivity {
 
         // 4. Setup Listeners (Search, Navigation, FAB)
         setupListeners();
-
-        // Handle FAB Click (Add Lead)
-        fab.setOnClickListener(v -> {
-            // TODO: Open AddLeadActivity
-        });
     }
 
     private void intiViews(){
@@ -60,6 +57,7 @@ public class LeadsActivity extends AppCompatActivity {
         bottomNav = findViewById(R.id.bottom_navigation);
         fab = findViewById(R.id.fab_add_lead);
         searchView = findViewById(R.id.searchView);
+        emptyStateView = findViewById(R.id.empty_state_view); // Ensure this ID exists in your XML
 
         // Configure RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -78,6 +76,7 @@ public class LeadsActivity extends AppCompatActivity {
             // Initialize and set the adapter
             adapter = new LeadAdapter(leadList);
             recyclerView.setAdapter(adapter);
+            toggleEmptyState(leadList.isEmpty());
         } else {
             Log.e(TAG, "Failed to load leads: " + error);
             Toast.makeText(this, "Error loading leads", Toast.LENGTH_SHORT).show();
@@ -104,6 +103,12 @@ public class LeadsActivity extends AppCompatActivity {
             }
         });
 
+        fab.setOnClickListener(v -> {
+            // This will open the activity to create a new lead
+            Intent intent = new Intent(LeadsActivity.this, LeadsCreationActivity.class);
+            startActivity(intent);
+        });
+
         // Bottom Navigation Logic
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -120,27 +125,43 @@ public class LeadsActivity extends AppCompatActivity {
             }
             return false;
         });
-
-        // FAB Logic
-        fab.setOnClickListener(v -> {
-            // TODO: Intent intent = new Intent(this, AddLeadActivity.class);
-            // startActivity(intent);
-            Toast.makeText(this, "Add Lead clicked", Toast.LENGTH_SHORT).show();
-        });
     }
 
     private void performSearch(String query) {
-        // Use the search logic you already tested in your Business Layer
-        Lead foundLead = accessLeads.getLeadByName_Phone(query, query);
+        if (query == null || query.trim().isEmpty()) {
+            if (adapter != null) {
+                adapter.updateList(new ArrayList<>(leadList));
+            }
+            toggleEmptyState(leadList.isEmpty());
+            return;
+        }
 
-        if (foundLead != null) {
-            List<Lead> searchResults = new ArrayList<>();
-            searchResults.add(foundLead);
-            adapter.updateList(searchResults);
-        } else {
-            // If no exact match, we could implement a partial search later
-            // For now, we show an empty list or a toast
-            adapter.updateList(new ArrayList<>());
+        String filterPattern = query.toLowerCase().trim();
+        List<Lead> filteredResults = new ArrayList<>();
+
+        // Partial match search across Name, Phone, and Email
+        for (Lead lead : leadList) {
+            boolean matchesName = lead.getLeadName().toLowerCase().contains(filterPattern);
+            boolean matchesPhone = lead.getLeadPhoneNumber().contains(filterPattern);
+            boolean matchesEmail = (lead.getLeadEmail() != null &&
+                    lead.getLeadEmail().toLowerCase().contains(filterPattern));
+
+            if (matchesName || matchesPhone || matchesEmail) {
+                filteredResults.add(lead);
+            }
+        }
+
+        // Update the RecyclerView Adapter with the filtered results
+        if (adapter != null) {
+            adapter.updateList(filteredResults);
+        }
+        toggleEmptyState(filteredResults.isEmpty());
+    }
+
+    private void toggleEmptyState(boolean isEmpty) {
+        if (emptyStateView != null) {
+            emptyStateView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+            recyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
         }
     }
 
