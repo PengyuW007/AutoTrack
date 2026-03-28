@@ -14,7 +14,7 @@ import com.areonedev.autotrack.objects.Vehicle;
 import java.util.Date;
 
 public class LeadsCreationActivity extends AppCompatActivity {
-    private EditText etFirstName, etLastName, etPhone, etEmail, etMake, etModel, etYear,etTrim;
+    private EditText etFirstName, etLastName, etPhone, etEmail, etMake, etModel, etYear,etTrim,etNotes;
     private Button btnSave;
     private AccessLeads accessLeads;
 
@@ -23,10 +23,29 @@ public class LeadsCreationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leads_creation);
 
+
+        // 1. Initialize Toolbar
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // 1. Enable the Return Button in the Action Bar
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+            getSupportActionBar().setTitle("Add New Lead");
+        }
+
         accessLeads = new AccessLeads();
         initViews();
 
         btnSave.setOnClickListener(v -> validateAndSave());
+    }
+
+    // 2. Handle the Return Button Click
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed(); // Returns to LeadsActivity
+        return true;
     }
 
     private void initViews() {
@@ -37,13 +56,15 @@ public class LeadsCreationActivity extends AppCompatActivity {
         etMake = findViewById(R.id.etMake);
         etModel = findViewById(R.id.etModel);
         etYear = findViewById(R.id.etYear);
+        etTrim = findViewById(R.id.etTrim);
+        etNotes = findViewById(R.id.etNotes);
         btnSave = findViewById(R.id.btnSaveLead);
     }
 
     private void validateAndSave() {
         String first = etFirstName.getText().toString().trim();
         String last = etLastName.getText().toString().trim();
-        String phone = etPhone.getText().toString().trim();
+        String phone = formatPhoneNumber(etPhone.getText().toString().trim());
         String email = etEmail.getText().toString().trim();
 
         // Basic Validation
@@ -65,20 +86,37 @@ public class LeadsCreationActivity extends AppCompatActivity {
         }
     }
 
+    private String formatPhoneNumber(String phone) {
+        // Remove all non-digits (e.g., spaces, dashes, parentheses)
+        String clean = phone.replaceAll("[^\\d]", "");
+
+        // If we have exactly 10 digits, format as xxx-xxx-xxxx
+        if (clean.length() == 10) {
+            return clean.substring(0, 3) + "-" +
+                    clean.substring(3, 6) + "-" +
+                    clean.substring(6);
+        }
+
+        // If it's not 10 digits, return the cleaned numeric string or original
+        return clean.isEmpty() ? phone : clean;
+    }
+
     private void saveNewLead(String first, String last, String phone, String email) {
         Date now = new Date();
-        Vehicle interest = new Vehicle(
-                etMake.getText().toString(),
-                etModel.getText().toString(),
-                etYear.getText().toString(),
-                etTrim.getText().toString()
-        );
+        // Use null-safe checks for the Vehicle object
+        String make = etMake.getText() != null ? etMake.getText().toString() : "";
+        String model = etModel.getText() != null ? etModel.getText().toString() : "";
+        String year = etYear.getText() != null ? etYear.getText().toString() : "";
+        String trim = etTrim.getText() != null ? etTrim.getText().toString() : "";
+        String notes = etNotes.getText() != null ? etNotes.getText().toString() : "Added via App";
+
+        Vehicle interest = new Vehicle(make, model, year, trim);
 
         // Construct the 17-parameter Lead
         Lead newLead = new Lead(
                 first, last, phone, email, "Sales",
                 "", "", "", "", "", // Address fields empty for now
-                0.0, interest, null, "NEW", now, "Added via App", now
+                0.0, interest, null, "NEW", now, notes, now
         );
 
         String result = accessLeads.insertLead(newLead);

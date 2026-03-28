@@ -1,4 +1,42 @@
 # Developer Log — AutoTrack
+---
+**Date:** March 27-28, 2026
+
+**Module:** Lead Management CRUD & UI Standardization Finalized
+
+## Itinerary
+
+- **UI Standardization:** Synchronized the visual identity of `LeadsCreationActivity` and `LeadDetailsActivity` by implementing a consistent `androidx.appcompat.widget.Toolbar` with functional **Up navigation** and white-titled headers.
+
+- **Dual-Mode Detail View:** Engineered a hybrid layout in `LeadDetailsActivity` that toggles between a high-readability **View Mode** (using `CardView` for structured data presentation) and an **Edit Mode** (using `EditText` for inline modifications) via a Toolbar menu action.
+
+- **CRUD Logic Integration:**
+  - **Create:** Connected the **Save Lead** workflow to the `AccessLeads` business controller with integrated duplicate checking.
+  - **Read:** Implemented serialized object passing to display all **17 lead parameters** in the detail view.
+  - **Update:** Enabled real-time modification of lead and vehicle data, including automatic `leadUpdatedAt` timestamp refreshing.
+  - **Delete:** Integrated a destructive action workflow with `AlertDialog` confirmation to ensure safe deletion and data integrity.
+
+- **Data Normalization:** Refactored the `formatPhoneNumber` utility to strip non-numeric characters and enforce a standardized **xxx-xxx-xxxx** format across all persistence operations.
+
+## Issues
+
+- **Toolbar Type Mismatch:** Resolved a critical error caused by importing `android.widget.Toolbar` instead of the AndroidX variant, which prevented the **Edit (wrench) icon** from inflating correctly.
+
+- **Serialization Errors:** Fixed a `Cannot resolve method putExtra` compilation error by ensuring both `Lead` and `Vehicle` domain objects implement `java.io.Serializable`.
+
+- **UX Visibility Constraint:** Adjusted UI logic so the **Delete** button appears only in **Edit Mode**, reducing the risk of accidental deletions during normal viewing.
+
+- **Metadata Reordering:** Updated the layout hierarchy to display **Last Updated** above the **Created** timestamp, improving visibility of recent activity for users.
+
+## Next
+
+- **List Synchronization:** Implement a result-callback or lifecycle-based refresh in `LeadsActivity` so the main list immediately reflects updates or deletions made in the detail view.
+
+- **Input Masking:** Add a `TextWatcher` to phone input fields to provide real-time formatting (automatic dash insertion) during typing.
+
+- **Address Expansion:** Extend the UI to support additional address parameters (**City, Province, Postal Code**) currently defined in the 17-parameter `Lead` constructor.
+
+---
 **Date:** March 25, 2026
 
 **Module:** Refactoring Object classes

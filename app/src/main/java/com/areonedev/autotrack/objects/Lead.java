@@ -1,10 +1,12 @@
 package com.areonedev.autotrack.objects;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
-public class Lead {
-
+public class Lead implements Serializable {
+    // It is good practice to add a serialVersionUID
+    private static final long serialVersionUID = 1L;
     private long leadID;
     private String firstName;
     private String lastName;

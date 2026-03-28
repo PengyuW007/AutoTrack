@@ -74,7 +74,11 @@ public class LeadsActivity extends AppCompatActivity {
             Collections.sort(leadList, (l1, l2) -> l2.getLeadCreatedAt().compareTo(l1.getLeadCreatedAt()));
 
             // Initialize and set the adapter
-            adapter = new LeadAdapter(leadList);
+            adapter = new LeadAdapter(leadList, lead -> {
+                Intent intent = new Intent(LeadsActivity.this, LeadDetailsActivity.class);
+                intent.putExtra("SELECTED_LEAD", lead); // Pass the lead object
+                startActivity(intent);
+            });
             recyclerView.setAdapter(adapter);
             toggleEmptyState(leadList.isEmpty());
         } else {

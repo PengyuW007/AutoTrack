@@ -1,6 +1,9 @@
 package com.areonedev.autotrack.objects;
 
-public class Vehicle {
+import java.io.Serializable;
+
+public class Vehicle implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String make;        // e.g., Volkswagen
     private String model;       // e.g., Atlas
     private String year;        // e.g., 2024

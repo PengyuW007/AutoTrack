@@ -22,10 +22,16 @@ public class LeadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM = 1;
 
+    public interface OnLeadClickListener {
+        void onLeadClick(Lead lead);
+    }
+
+    private OnLeadClickListener clickListener;
     // This list holds both Strings (Headers) and Leads (Cards)
     private List<Object> displayItems = new ArrayList<>();
 
-    public LeadAdapter(List<Lead> leads) {
+    public LeadAdapter(List<Lead> leads, OnLeadClickListener clickListener) {
+        this.clickListener = clickListener;
         processLeadsDates(leads);
     }
 
@@ -80,6 +86,12 @@ public class LeadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
                 lvh.vehicle.setText(builder);
 
+                // --- CLICK LISTENER ---
+                lvh.itemView.setOnClickListener(v -> {
+                    if (clickListener != null) {
+                        clickListener.onLeadClick(lead);
+                    }
+                });
 //                builder.append(row1).append("\n");
 //
 //                int start = builder.length();
@@ -92,6 +104,7 @@ public class LeadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //
 //                builder.append(row3);
 //                lvh.vehicle.setText(builder);
+
             } else {
                 lvh.vehicle.setText("No Vehicle Interest");
             }
