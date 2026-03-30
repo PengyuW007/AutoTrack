@@ -120,7 +120,10 @@ public class LeadsActivity extends AppCompatActivity {
                 return true; // Already here
             } else if (id == R.id.nav_calendar) {
                 // TODO: Start CalendarActivity
-                Toast.makeText(this, "Calendar coming soon!", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Calendar coming soon!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(LeadsActivity.this, CalendarActivity.class);
+                startActivity(intent);
+                overridePendingTransition(0, 0); // Smooth transition
                 return true;
             } else if (id == R.id.nav_notifications) {
                 // TODO: Start NotificationsActivity

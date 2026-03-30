@@ -1,7 +1,10 @@
 package com.areonedev.autotrack.business;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import com.areonedev.autotrack.application.Main;
 import com.areonedev.autotrack.application.Services;
@@ -81,6 +84,30 @@ public class AccessLeads {
             }
         }
         return null;
+    }
+
+    public List<Lead> getLeadsByDate(Date date) {
+        List<Lead> allLeads = new ArrayList<>();
+        List<Lead> filteredLeads = new ArrayList<>();
+
+        // Fetch all leads from the database
+        dataAccess.getLeadSequential(allLeads);
+
+        if (date != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            String targetDate = sdf.format(date);
+
+            for (Lead lead : allLeads) {
+                // A "Task" is just a Lead with a follow-up date matching the selected day
+                if (lead.getLeadFollowUpDate() != null) {
+                    String leadDate = sdf.format(lead.getLeadFollowUpDate());
+                    if (targetDate.equals(leadDate)) {
+                        filteredLeads.add(lead);
+                    }
+                }
+            }
+        }
+        return filteredLeads;
     }
 
     public String insertLead(Lead currLead) {

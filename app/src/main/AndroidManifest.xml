@@ -32,6 +32,10 @@
             android:name=".presentation.LeadDetailsActivity"
             android:label="Lead Details"
             android:parentActivityName=".presentation.LeadsActivity" />
+
+        <activity
+            android:name=".presentation.CalendarActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

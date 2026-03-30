@@ -1,5 +1,41 @@
 # Developer Log — AutoTrack
 ---
+**Date:** March 29-30, 2026
+
+**Module:** Calendar & Unified Agenda System Finalized
+
+## Itinerary
+
+- **Unified Daily Agenda:** Merged the previous **Priority** and **General** task windows into a single Daily Agenda view. Integrated `PriorityManager` so all leads are automatically sorted by score (**highest priority first**).
+
+- **7-Day Swippable Navigation:** Implemented `shiftWeek(int days)` logic, enabling users to move forward or backward by exactly **7 days** using header arrow controls.
+
+- **Interactive Week Strip:**
+  - **Clickable Days:** Enabled users to tap any day in the 7-day strip to instantly refresh the agenda for the selected date.
+  - **Visual Highlighting:** Implemented dual highlighting:
+    - **Today:** Light blue circular indicator
+    - **Selected Date:** Solid primary blue circular indicator
+
+- **Task Interaction Enhancements:**
+  - **Click-to-Detail Navigation:** Restored the Intent bridge in `TaskAdapter`, allowing each agenda task to open `LeadDetailsActivity`.
+  - **Dynamic Styling:** Implemented contextual styling:
+    - **Gray-out:** CLOSED leads
+    - **Red-alert styling:** High-priority leads (`Score > 75`)
+
+- **Type Safety & Refactoring:** Standardized all date handling to `java.util.Date` across `WeekAdapter` and `CalendarActivity`, resolving lambda type-inference issues and constructor mismatch errors.
+
+## Issues
+
+- **RecyclerView Color Leakage ("Red-Leak" Bug):** Fixed a recycling issue where high-priority styling persisted across reused rows. Added explicit color resets in the `onBindViewHolder` `else` block.
+
+- **Layout Constraint Limitation:** Addressed the absence of a native `simple_list_item_3` layout by combining **Lead Name** and **Score** into a single formatted display string.
+
+## Next
+
+- **Lead Details Display Fix:** Verify backend unpacking logic to ensure the `LEAD_OBJECT` passed from the Calendar module is correctly rendered in `layoutViewMode` within `activity_lead_details.xml`.
+
+- **Database Sanitization:** Perform a full reset of the SQLite `Leads` table to ensure all records conform to the `dd/MM/yyyy` scheduling format required by Calendar queries.
+---
 **Date:** March 27-28, 2026
 
 **Module:** Lead Management CRUD & UI Standardization Finalized

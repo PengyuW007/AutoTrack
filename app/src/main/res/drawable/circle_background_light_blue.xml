@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <!-- This creates the blue circle -->
+    <solid android:color="#E3F2FD" /> <!-- Very light blue background -->
+    <stroke
+        android:width="2dp"
+        android:color="?attr/colorPrimary" /> <!-- Darker blue border -->
+    <size
+        android:width="32dp"
+        android:height="32dp" />
+</shape>

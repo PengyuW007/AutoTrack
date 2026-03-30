@@ -17,6 +17,10 @@ public class ScoringService {
         // 3️⃣ Budget weight
         score += lead.getLeadBudget() / 1000;
 
+        // 4️⃣ Engagement weight (The part you are currently coding)
+        // This will subtract points if the lead is "Cold" or "Blocked"
+        score += getEngagementWeight(lead);
+
         return score;
     }
 
@@ -41,6 +45,7 @@ public class ScoringService {
                 return 10;
         }
     }
+
 
     private double getTimeWeight(Lead lead) {
 
@@ -84,8 +89,13 @@ public class ScoringService {
             return -15;
         }
 
-        // 屏蔽/不理可通过 lead.notes 或新增字段标记
-        // if (lead.isBlocked()) return -100;
+        // Check if lead is marked as "Cold" or "Blocked" in notes
+        if (lead.getLeadNotes() != null) {
+            String notes = lead.getLeadNotes().toLowerCase();
+            if (notes.contains("blocked")) return -100;
+            if (notes.contains("cold")) return -25;
+            if (notes.contains("hot")) return 15; // Bonus for "Hot" leads
+        }
 
         return 0;
     }

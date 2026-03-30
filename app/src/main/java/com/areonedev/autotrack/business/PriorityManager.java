@@ -15,15 +15,26 @@ public class PriorityManager {
     // =========================
     public PriorityManager(ScoringService scoringService) {
         this.scoringService = scoringService;
-
         // Comparator: score 越高优先级越高
-        this.priorityQueue = new PriorityQueue<>(new Comparator<Lead>() {
-            @Override
-            public int compare(Lead l1, Lead l2) {
-                // 逆序，大分数排前面
-                return Double.compare(l2.getLeadScore(), l1.getLeadScore());
+        this.priorityQueue = new PriorityQueue<>((l1, l2) -> Double.compare(l2.getLeadScore(), l1.getLeadScore()));
+    }
+
+    /**
+     * New Method for Calendar:
+     * Takes a list of leads (e.g., from a specific date),
+     * scores them, and returns them in priority order.
+     */
+    public List<Lead> getPrioritizedList(List<Lead> inputLeads) {
+        priorityQueue.clear();
+        if (inputLeads != null) {
+            for (Lead lead : inputLeads) {
+                addOrUpdateLead(lead);
             }
-        });
+        }
+        // Convert the sorted queue to a list for the RecyclerView
+        List<Lead> sortedList = new ArrayList<>(priorityQueue);
+        sortedList.sort((l1, l2) -> Double.compare(l2.getLeadScore(), l1.getLeadScore()));
+        return sortedList;
     }
 
     // =========================
