@@ -29,7 +29,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
     private LinearLayout layoutViewMode, layoutEditMode;
 
     // View Mode Components
-    private TextView tvViewName, tvViewPhone, tvViewEmail, tvViewVehicle, tvViewNotes, tvDetDate, tvDetUpdatedDate;
+    private TextView tvViewName, tvViewPhone, tvViewEmail, tvViewAddress, tvViewVehicle, tvViewNotes, tvDetDate, tvDetUpdatedDate;
 
     // Edit Mode Components
     private EditText etFirstName, etLastName, etPhone, etEmail, etMake, etModel, etYear, etTrim, etNotes;
@@ -81,6 +81,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
         tvViewName = findViewById(R.id.tvViewName);
         tvViewPhone = findViewById(R.id.tvViewPhone);
         tvViewEmail = findViewById(R.id.tvViewEmail);
+        tvViewAddress = findViewById(R.id.tvViewAddress);
         tvViewVehicle = findViewById(R.id.tvViewVehicle);
         tvViewNotes = findViewById(R.id.tvViewNotes);
         tvDetDate = findViewById(R.id.tvDetDate);
@@ -103,15 +104,28 @@ public class LeadDetailsActivity extends AppCompatActivity {
     }
 
     private void refreshUI() {
-        // 1. Populate View Mode (Cards)
+        if (currentLead == null) return;
+
+        // --- PART 1: CONTACT INFO ---
         tvViewName.setText(currentLead.getLeadFirstName() + " " + currentLead.getLeadLastName());
         tvViewPhone.setText(currentLead.getLeadPhoneNumber());
         tvViewEmail.setText(currentLead.getLeadEmail());
+        tvViewAddress.setText(currentLead.getLeadAddress()+"\n"+currentLead.getLeadCity()+", "+currentLead.getLeadProvince()+", "+currentLead.getLeadPostalCode());
         tvViewNotes.setText(currentLead.getLeadNotes());
 
+        // --- PART 2: VEHICLE INTEREST ---
         Vehicle v = currentLead.getLeadVehicleInterest();
         if (v != null) {
             tvViewVehicle.setText(String.format("%s %s %s %s", v.getYear(), v.getMake(), v.getModel(), v.getTrim()));
+        }else{
+            tvViewVehicle.setText("Vehicle Interest: No specific model selected");
+        }
+
+        // --- PART 3: NOTES BOARD ---
+        if (currentLead.getLeadNotes() != null && !currentLead.getLeadNotes().isEmpty()) {
+            tvViewNotes.setText(currentLead.getLeadNotes());
+        } else {
+            tvViewNotes.setText("No notes available for this lead.");
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());

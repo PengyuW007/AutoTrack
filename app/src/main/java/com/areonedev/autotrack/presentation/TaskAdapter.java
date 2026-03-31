@@ -75,25 +75,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
             // Import android.content.Intent
             Intent intent = new Intent(v.getContext(), LeadDetailsActivity.class);
             // Ensure Lead implements Serializable or Parcelable
-            intent.putExtra("LEAD_OBJECT", lead);
+            intent.putExtra("SELECTED_LEAD", lead);
             v.getContext().startActivity(intent);
         });
-
-        // Visual cue for priority
-//        if (isPriority) {
-//            holder.tvName.setTextColor(Color.RED);
-//            holder.tvName.setTypeface(null, Typeface.BOLD);
-//        } else {
-//            holder.tvName.setTextColor(Color.BLACK);
-//            holder.tvName.setTypeface(null, Typeface.NORMAL);
-//        }
-//
-//        // Navigate to Lead Details on click
-//        holder.itemView.setOnClickListener(v -> {
-//            Intent intent = new Intent(v.getContext(), LeadDetailsActivity.class);
-//            intent.putExtra("LEAD_OBJECT", lead);
-//            v.getContext().startActivity(intent);
-//        });
     }
 
     @Override

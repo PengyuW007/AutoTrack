@@ -46,6 +46,7 @@
                         <TextView android:id="@+id/tvViewName" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="18sp" android:textStyle="bold" android:layout_marginTop="8dp" tools:text="Pengyu Chen"/>
                         <TextView android:id="@+id/tvViewPhone" android:layout_width="match_parent" android:layout_height="wrap_content" tools:text="123-456-7890"/>
                         <TextView android:id="@+id/tvViewEmail" android:layout_width="match_parent" android:layout_height="wrap_content" tools:text="pengyu@example.com"/>
+                        <TextView android:id="@+id/tvViewAddress" android:layout_width="match_parent" android:layout_height="wrap_content" tools:text="My Address"/>
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 
