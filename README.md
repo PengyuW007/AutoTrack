@@ -1,13 +1,13 @@
 # AutoTrack: Automotive Personal CRM
 
-AutoTrack is a specialized Customer Relationship Management (CRM) application designed for automotive sales professionals. It helps sales consultants track leads, manage vehicle interests, and schedule follow-ups through a clean, date-categorized interface.
-
+AutoTrack is a specialized Customer Relationship Management (CRM) application designed for automotive sales professionals. Unlike traditional static CRMs, AutoTrack acts as a **Scientific Sales Co-pilot**, utilizing data-driven algorithms to dictate the "Mission" for every lead based on engagement and timing.
 ## ✨ Key Features
-- **Intelligent Lead Scoring:** The core of "AutoTrack." The app utilizes a priority-based algorithm (similar to a Priority Queue) to calculate a lead's importance based on budget, interest level, and engagement history.
-- **Smart Lead Grouping:** Automatically categorizes leads by creation date (Today, Yesterday, or specific dates) for better daily workflow.
-- **Automated Reminders:** Provides proactive follow-up prompts based on lead priority, ensuring sales reps focus on the highest-value opportunities first.
+- **Scientific Follow-up Algorithm:** A centralized business logic engine that assigns specific "Missions" (e.g., Day 1 Gratitude, Day 8 Market Update, 1-Year Anniversary) based on the lead's position in the sales funnel.
+- **Intelligent Lead Scoring:** Utilizes a priority-based algorithm to calculate a lead's importance (0-100+) based on budget, interest level, and engagement history.
+- **48-Hour Safety Net:** An automated escalation trigger that flags leads who have interacted but haven't been addressed within the critical 48-hour window.
+- **Unified Daily Agenda:** A date-categorized interface that merges scheduled tasks with AI-driven follow-up suggestions.
 - **Persistence:** Local SQLite database integration ensuring data is available offline and persists across sessions.
-## 🛠 Tech Stack
+- ## 🛠 Tech Stack
 - **Language:** Java / Android SDK
 - **Architecture:** Layered Architecture (Presentation, Business, Persistence, Objects)
 - **Database:** SQLite (via custom Data Access Objects)
