@@ -9,13 +9,13 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.areonedev.autotrack.R;
 import com.areonedev.autotrack.business.AccessLeads;
+import com.areonedev.autotrack.business.ScoringService;
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Vehicle;
 
@@ -34,7 +34,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
     // Edit Mode Components
     private EditText etFirstName, etLastName, etPhone, etEmail, etMake, etModel, etYear, etTrim, etNotes;
     private Button btnUpdate, btnDelete;
-
+    private ScoringService scoringService;
     private Lead currentLead;
     private AccessLeads accessLeads;
     private boolean isEditMode = false;
@@ -44,6 +44,8 @@ public class LeadDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lead_details);
 
+        scoringService = new ScoringService();
+
         accessLeads = new AccessLeads();
         currentLead = (Lead) getIntent().getSerializableExtra("SELECTED_LEAD");
 
@@ -52,6 +54,9 @@ public class LeadDetailsActivity extends AppCompatActivity {
 
         if (currentLead != null) {
             refreshUI();
+        }else {
+            Toast.makeText(this, "Error: Lead data not found", Toast.LENGTH_SHORT).show();
+            finish(); // Close activity if no data
         }
 
         btnUpdate.setOnClickListener(v -> handleUpdate());
@@ -105,6 +110,12 @@ public class LeadDetailsActivity extends AppCompatActivity {
 
     private void refreshUI() {
         if (currentLead == null) return;
+
+        // Get the scientific mission
+        String mission = scoringService.getScientificMission(currentLead);
+        // Display Mission + Notes
+        String notesDisplay = "🎯 MISSION: " + mission + "\n\n" + "--- BOARD OF NOTES ---\n" + (currentLead.getLeadNotes() != null ? currentLead.getLeadNotes() : "No notes.");
+        tvViewNotes.setText(notesDisplay);
 
         // --- PART 1: CONTACT INFO ---
         tvViewName.setText(currentLead.getLeadFirstName() + " " + currentLead.getLeadLastName());
@@ -207,18 +218,32 @@ public class LeadDetailsActivity extends AppCompatActivity {
     }
 
     private void showDeleteConfirmation() {
+        // Ensure we have a valid lead to delete
+        if (currentLead == null) {
+            Toast.makeText(this, "Error: No lead selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         new AlertDialog.Builder(this)
                 .setTitle("Delete Lead")
-                .setMessage("Are you sure you want to delete this lead?")
+                .setMessage("Are you sure you want to delete " + currentLead.getLeadFirstName() + "? This action cannot be undone.")
                 .setPositiveButton("Delete", (dialog, which) -> {
+                    // Call the business logic layer to delete
                     String result = accessLeads.deleteLead(currentLead);
+
                     if (result == null) {
-                        finish(); // Return to list
+                        // Success!
+                        Toast.makeText(this, "Lead deleted successfully", Toast.LENGTH_SHORT).show();
+
+                        // Set a result code so the previous activity (Calendar/AllLeads) knows to refresh
+                        setResult(RESULT_OK);
+                        finish();
                     } else {
-                        Toast.makeText(this, "Delete failed", Toast.LENGTH_SHORT).show();
+                        // Failure: Show the specific error message from the database/business layer
+                        Toast.makeText(this, "Delete failed: " + result, Toast.LENGTH_LONG).show();
                     }
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .show();
     }
 

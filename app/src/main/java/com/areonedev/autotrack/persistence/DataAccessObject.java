@@ -355,10 +355,10 @@ public class DataAccessObject implements DataAccess {
                 "303 Main St", "Mississauga", "ON", "Canada", "L5B 1M2",
                 28000, jetta, null, "VISITED", today, "Looking for a commuter", yesterday));
 
-        // Inside addDummyLeads()
-        today = new Date(); // This is the actual 'today'
-        insertLead(new Lead("Test", "Priority", "000-000-0000", "test@test.com", "New Cars",
-                "Address", "City", "ON", "Canada", "M5H 2N2",
-                100000, atlas, null, "NEGOTIATION", today, "I should appear in PE", today));
+//        // Inside addDummyLeads()
+//        today = new Date(); // This is the actual 'today'
+//        insertLead(new Lead("Test 2", "Priority", "000-000-0000", "test@test.com", "New Cars",
+//                "Address", "City", "ON", "Canada", "M5H 2N2",
+//                100000, atlas, null, "NEGOTIATION", today, "I should appear in PE", today));
     }
 }

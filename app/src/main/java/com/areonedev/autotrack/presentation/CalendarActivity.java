@@ -1,6 +1,7 @@
 package com.areonedev.autotrack.presentation;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -93,7 +94,8 @@ public class CalendarActivity extends AppCompatActivity {
 
         // 3. Bind to the unified RecyclerView
         // We pass the scoringService so the Adapter can display the calculated score
-        rvGeneralTasks.setAdapter(new TaskAdapter(sortedLeads, false, scoringService));
+        View emptyView = findViewById(R.id.llEmptyState);
+        rvGeneralTasks.setAdapter(new TaskAdapter(sortedLeads, scoringService,emptyView));
 
         // 4. Update the Agenda Header text
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMM dd", Locale.getDefault());
@@ -154,5 +156,15 @@ public class CalendarActivity extends AppCompatActivity {
             }
             return id == R.id.nav_calendar;
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh the agenda whenever you return to this screen (e.g., after a deletion)
+        if (selectedDate != null) {
+            // Use the existing method that fetches and sorts the leads
+            updateTaskPanels(selectedDate);
+        }
     }
 }

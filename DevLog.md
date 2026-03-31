@@ -1,5 +1,31 @@
 # Developer Log — AutoTrack
 ---
+**Date:** March 31, 2026
+
+**Module:** Business Logic & Scientific Follow-up Algorithm
+
+## Itinerary
+
+- **Centralized Mission Engine:** Refactored the "Scientific Follow-up" logic out of the UI layer and into `ScoringService.java`. This ensures a "Single Source of Truth" where the business layer dictates the mission based on lead data.
+- **8-Stage Follow-up Algorithm:** Successfully implemented the time-based cadence:
+  - **Short-term:** Day 1 (Gratitude), Day 3 (New Ideas).
+  - **Mid-term:** Day 8 (Market Update), Day 15 (Resources), Day 30 (Checking In).
+  - **Long-term:** 3 Months (Seasonal), 6 Months (Relationship), 1 Year (Anniversary).
+- **Priority Escalation:** Integrated the **48-Hour Reply Rule**. If a lead has a high engagement score but hasn't been contacted in >48 hours, the mission automatically escalates to **🚨 URGENT**.
+- **Hybrid Logic:** Merged Lead Stages with the Timeline. Active "Negotiation" or "Test Drive" stages now override generic time-based reminders to keep the sales rep focused on closing.
+- **Empty State UI:** Integrated a dynamic "No Missions Scheduled" background in the Calendar Activity that toggles automatically when a date has no tasks.
+
+## Issues
+
+- **NullPointerException (Resolved):** Fixed a crash in `LeadDetailsActivity` caused by an uninitialized `ScoringService`. Centralizing the logic in the service layer resolved the dependency conflict.
+- **Date Library Conflict:** Resolved a "Private Access" error by standardizing all calculations to `java.util.Date` and `java.util.concurrent.TimeUnit`, removing conflicting Google Protobuf imports.
+
+## Next
+
+- **Lead Detail Integration:** Update the `LeadDetailsActivity` CardView to display the "Current Mission" alongside existing lead data.
+- **Notification System:** Begin development of the `NotificationActivity` and background services to alert sales reps when a "48-Hour Urgent" mission or a "Day 1 Gratitude" task is triggered.
+
+---
 **Date:** March 29-30, 2026
 
 **Module:** Calendar & Unified Agenda System Finalized
