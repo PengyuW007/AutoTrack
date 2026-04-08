@@ -47,8 +47,8 @@ public class Lead implements Serializable {
         this.budget = 0;
         this.vehicleInterest = null;
         this.tradeInVehicle = null;
-        this.stage = "New";
-        this.followUpDate = null;
+        this.stage = "NEW";
+        this.followUpDate = new Date();
         this.notes = "";
         this.createdAt = new Date();
         this.score = 0.0;
@@ -68,10 +68,11 @@ public class Lead implements Serializable {
             double budget,
             Vehicle vehicleInterest,
             Vehicle tradeInVehicle,
-            String stage,
-            Date followUpDate,
-            String notes,
-            Date createdAt) {
+            //String stage,
+            //Date followUpDate,
+            String notes
+            //Date createdAt
+            ) {
 
         // Validation: Check if BOTH names are missing
         boolean isFirstEmpty = (firstName == null || firstName.trim().isEmpty());
@@ -96,9 +97,9 @@ public class Lead implements Serializable {
         this.budget = budget;
         this.vehicleInterest = vehicleInterest;
         this.tradeInVehicle = tradeInVehicle;
-        this.stage = (stage == null) ? "New" : stage;
+        this.stage = (stage == null) ? "NEW" : stage;
         this.notes = (notes == null) ? "" : notes;
-        this.followUpDate = followUpDate;
+        this.followUpDate = (followUpDate == null) ? new Date() : followUpDate;
         this.createdAt = (createdAt == null) ? new Date() : createdAt;
         this.score = 0.0;
     }

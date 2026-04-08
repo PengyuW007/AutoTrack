@@ -86,18 +86,31 @@ public class CalendarActivity extends AppCompatActivity {
      */
     private void updateTaskPanels(Date date) {
         // 1. Get all leads scheduled for this date from the business layer
-        List<Lead> dayLeads = accessLeads.getLeadsByDate(date);
+        //List<Lead> dayLeads = accessLeads.getLeadsByDate(date);
+        List<Lead> allLeads = accessLeads.getAllLeads();
+        List<Lead> dayMissions = new ArrayList<>();
 
-        // 2. Use PriorityManager to calculate scores and sort them (Highest Score first)
+        // 2. Filter leads based on the Scientific Milestone logic
+        for (Lead lead : allLeads) {
+            // Ask the service: "Does this lead have a mission on this specific calendar date?"
+            String mission = scoringService.getScientificMission(lead, date);
+
+            // If mission is not null, it means today is a milestone (Day 0, 1, 3, 8, etc.)
+            if (mission != null) {
+                dayMissions.add(lead);
+            }
+        }
+
+        // 3. Use PriorityManager to calculate scores and sort them (Highest Score first)
         PriorityManager priorityManager = new PriorityManager(scoringService);
-        List<Lead> sortedLeads = priorityManager.getPrioritizedList(dayLeads);
+        List<Lead> sortedLeads = priorityManager.getPrioritizedList(dayMissions);
 
-        // 3. Bind to the unified RecyclerView
+        // 4. Bind to the unified RecyclerView
         // We pass the scoringService so the Adapter can display the calculated score
         View emptyView = findViewById(R.id.llEmptyState);
-        rvGeneralTasks.setAdapter(new TaskAdapter(sortedLeads, scoringService,emptyView));
+        rvGeneralTasks.setAdapter(new TaskAdapter(sortedLeads, scoringService,emptyView,date));
 
-        // 4. Update the Agenda Header text
+        // 5. Update the Agenda Header text
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMM dd", Locale.getDefault());
         tvAgendaHeader.setText("Agenda for " + sdf.format(date));
     }

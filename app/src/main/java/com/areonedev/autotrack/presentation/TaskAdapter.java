@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.areonedev.autotrack.business.ScoringService;
 import com.areonedev.autotrack.objects.Lead;
-//import com.google.type.Date;
 
 import java.util.Date;
 import java.util.Calendar;
@@ -23,13 +22,15 @@ import java.util.concurrent.TimeUnit;
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     private List<Lead> leads;
     private ScoringService scoringService;
+    private Date selectedDate;
     private final int THRESHOLD = 100;
     private View emptyView;
 
-    public TaskAdapter(List<Lead> leads,ScoringService scoringService,View emptyView) {
+    public TaskAdapter(List<Lead> leads,ScoringService scoringService,View emptyView,Date selectedDate) {
         this.leads = leads;
         this.scoringService = scoringService;
         this.emptyView = emptyView;
+        this.selectedDate = selectedDate;
         toggleEmptyState(); // Check visibility immediately on creation
     }
 
@@ -43,8 +44,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         }
     }
 
-    public void updateData(List<Lead> newLeads) {
+    public void updateData(List<Lead> newLeads,Date newSelectedDate) {
         this.leads = newLeads;
+        this.selectedDate = newSelectedDate;
         notifyDataSetChanged();
         toggleEmptyState();
     }
@@ -65,7 +67,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         // Calculate the Score and Mission for this specific lead
         double score = scoringService.calculateScore(lead);
         String missionTitle = getMissionTitle(lead);
-        String missionDesc = scoringService.getScientificMission(lead);
+        String missionDesc = scoringService.getScientificMission(lead,selectedDate);
+
+        // Fallback if the mission returns null (though your filter should prevent this)
+        if (missionDesc == null) missionDesc = "Routine Follow-up";
 
         // Line 1: Name + Mission Title (e.g., "John Doe | 🏎️ Test Drive")
         holder.tvName.setText(String.format("%s %s | %s", lead.getLeadFirstName(), lead.getLeadLastName(), missionTitle));
@@ -74,13 +79,31 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
         String performanceText = String.format("Mission: %s [%s]", missionDesc, lead.getLeadStage());
         holder.tvStage.setText(performanceText);
 
+        // 1. Get "Today" at midnight
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.MILLISECOND, 0);
+
+        // 2. Get "Selected Date" at midnight
+        Calendar selectedCal = Calendar.getInstance();
+        selectedCal.setTime(selectedDate);
+        selectedCal.set(Calendar.HOUR_OF_DAY, 0);
+        selectedCal.set(Calendar.MINUTE, 0);
+        selectedCal.set(Calendar.SECOND, 0);
+        selectedCal.set(Calendar.MILLISECOND, 0);
+
+        // 3. Determine if this is a past task
+        boolean isPastTask = selectedCal.before(today);
         // Logic for Completed vs. Priority
         boolean isCompleted = "CLOSED".equalsIgnoreCase(lead.getLeadStage()); // Example condition
 
-        if (isCompleted) {
+        if (isCompleted||isPastTask) {
             holder.tvName.setTextColor(Color.GRAY);
             holder.tvStage.setTextColor(Color.LTGRAY);
             holder.itemView.setAlpha(0.6f); // Make the whole row look faded
+            holder.tvName.setTypeface(null, Typeface.NORMAL);
         } else {
             holder.itemView.setAlpha(1.0f);
             if (score >= THRESHOLD) {
@@ -90,6 +113,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
                 holder.tvName.setTextColor(Color.BLACK);
                 holder.tvName.setTypeface(null, Typeface.NORMAL);
             }
+            holder.tvStage.setTextColor(Color.DKGRAY);
         }
 
         holder.itemView.setOnClickListener(v -> {

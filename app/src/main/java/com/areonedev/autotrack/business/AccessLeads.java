@@ -86,6 +86,12 @@ public class AccessLeads {
         return null;
     }
 
+    public List<Lead> getAllLeads() {
+        List<Lead> allLeads = new ArrayList<>();
+        dataAccess.getLeadSequential(allLeads);
+        return allLeads;
+    }
+
     public List<Lead> getLeadsByDate(Date date) {
         List<Lead> allLeads = new ArrayList<>();
         List<Lead> filteredLeads = new ArrayList<>();

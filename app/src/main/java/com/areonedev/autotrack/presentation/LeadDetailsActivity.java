@@ -1,6 +1,7 @@
 package com.areonedev.autotrack.presentation;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,6 +13,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.areonedev.autotrack.R;
 import com.areonedev.autotrack.business.AccessLeads;
@@ -21,12 +24,14 @@ import com.areonedev.autotrack.objects.Vehicle;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class LeadDetailsActivity extends AppCompatActivity {
 
     // Layout Containers
     private LinearLayout layoutViewMode, layoutEditMode;
+    private RecyclerView rvTimeline;
 
     // View Mode Components
     private TextView tvViewName, tvViewPhone, tvViewEmail, tvViewAddress, tvViewVehicle, tvViewNotes, tvDetDate, tvDetUpdatedDate;
@@ -54,7 +59,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
 
         if (currentLead != null) {
             refreshUI();
-        }else {
+        } else {
             Toast.makeText(this, "Error: Lead data not found", Toast.LENGTH_SHORT).show();
             finish(); // Close activity if no data
         }
@@ -92,6 +97,8 @@ public class LeadDetailsActivity extends AppCompatActivity {
         tvDetDate = findViewById(R.id.tvDetDate);
         tvDetUpdatedDate = findViewById(R.id.tvDetUpdatedDate);
 
+        rvTimeline = findViewById(R.id.rvLeadTimeline);
+
         // Edit Mode EditTexts
         etFirstName = findViewById(R.id.etDetFirstName);
         etLastName = findViewById(R.id.etDetLastName);
@@ -111,39 +118,49 @@ public class LeadDetailsActivity extends AppCompatActivity {
     private void refreshUI() {
         if (currentLead == null) return;
 
-        // Get the scientific mission
-        String mission = scoringService.getScientificMission(currentLead);
-        // Display Mission + Notes
-        String notesDisplay = "🎯 MISSION: " + mission + "\n\n" + "--- BOARD OF NOTES ---\n" + (currentLead.getLeadNotes() != null ? currentLead.getLeadNotes() : "No notes.");
+        // 1. Handle the Mission + Notes Board
+        String mission = scoringService.getScientificMission(currentLead, new Date());
+        String displayMission = (mission != null) ? mission : "No urgent task today.";
+
+        // Combine Mission and Notes into one display for the "Board of Notes"
+        String notesDisplay = "🎯 MISSION: " + displayMission + "\n\n" +
+                "--- BOARD OF NOTES ---\n" +
+                (currentLead.getLeadNotes() != null ? currentLead.getLeadNotes() : "No notes.");
         tvViewNotes.setText(notesDisplay);
 
-        // --- PART 1: CONTACT INFO ---
+        // 2. Setup the Timeline (The Task Ledger)
+        // This calls the helper method you already have below
+        setupTimeline();
+
+        // 3. Populate Contact Info
         tvViewName.setText(currentLead.getLeadFirstName() + " " + currentLead.getLeadLastName());
         tvViewPhone.setText(currentLead.getLeadPhoneNumber());
         tvViewEmail.setText(currentLead.getLeadEmail());
-        tvViewAddress.setText(currentLead.getLeadAddress()+"\n"+currentLead.getLeadCity()+", "+currentLead.getLeadProvince()+", "+currentLead.getLeadPostalCode());
-        tvViewNotes.setText(currentLead.getLeadNotes());
 
-        // --- PART 2: VEHICLE INTEREST ---
+        String address = currentLead.getLeadAddress() + "\n" +
+                currentLead.getLeadCity() + ", " +
+                currentLead.getLeadProvince() + ", " +
+                currentLead.getLeadPostalCode();
+        tvViewAddress.setText(address);
+
+        // 4. Populate Vehicle Interest
         Vehicle v = currentLead.getLeadVehicleInterest();
         if (v != null) {
             tvViewVehicle.setText(String.format("%s %s %s %s", v.getYear(), v.getMake(), v.getModel(), v.getTrim()));
-        }else{
-            tvViewVehicle.setText("Vehicle Interest: No specific model selected");
-        }
-
-        // --- PART 3: NOTES BOARD ---
-        if (currentLead.getLeadNotes() != null && !currentLead.getLeadNotes().isEmpty()) {
-            tvViewNotes.setText(currentLead.getLeadNotes());
         } else {
-            tvViewNotes.setText("No notes available for this lead.");
+            tvViewVehicle.setText("No specific model selected");
         }
 
+        // 5. Set Dates
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());
-        tvDetUpdatedDate.setText("Last Updated: " + sdf.format(currentLead.getLeadFollowUpDate()));
-        tvDetDate.setText("Created: " + sdf.format(currentLead.getLeadCreatedAt()));
+        if (currentLead.getLeadFollowUpDate() != null) {
+            tvDetUpdatedDate.setText("Last Updated: " + sdf.format(currentLead.getLeadFollowUpDate()));
+        }
+        if (currentLead.getLeadCreatedAt() != null) {
+            tvDetDate.setText("Created: " + sdf.format(currentLead.getLeadCreatedAt()));
+        }
 
-        // 2. Populate Edit Mode (Form)
+        // 6. Populate Edit Mode Fields (Hidden until Edit is clicked)
         etFirstName.setText(currentLead.getLeadFirstName());
         etLastName.setText(currentLead.getLeadLastName());
         etPhone.setText(currentLead.getLeadPhoneNumber());
@@ -154,6 +171,37 @@ public class LeadDetailsActivity extends AppCompatActivity {
             etModel.setText(v.getModel());
             etYear.setText(v.getYear());
             etTrim.setText(v.getTrim());
+        }
+    }
+
+    private void setupTimeline() {
+        // 1. Safety Check: Ensure the view exists in the XML
+        if (rvTimeline == null) {
+            Log.e("LeadDetails", "CRITICAL: rvLeadTimeline not found in XML.");
+            return;
+        }
+
+        // 2. Safety Check: Ensure we have a lead and a creation date
+        if (currentLead == null || currentLead.getLeadCreatedAt() == null) {
+            Log.e("LeadDetails", "Lead data or CreatedAt date is null. Cannot generate timeline.");
+            return;
+        }
+
+        // 3. Set Layout Manager ONLY if it hasn't been set yet
+        if (rvTimeline.getLayoutManager() == null) {
+            rvTimeline.setLayoutManager(new LinearLayoutManager(this));
+        }
+
+        // 4. Generate the 1-year scientific plan
+        List<ScoringService.ScientificTask> timeline = scoringService.getFullTimeline(currentLead);
+
+        // 5. Bind to Adapter
+        if (timeline != null && !timeline.isEmpty()) {
+            TimelineAdapter adapter = new TimelineAdapter(timeline);
+            rvTimeline.setNestedScrollingEnabled(false);
+            rvTimeline.setAdapter(adapter);
+        } else {
+            Log.w("LeadDetails", "Timeline generated was empty.");
         }
     }
 

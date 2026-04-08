@@ -102,23 +102,37 @@ public class LeadsCreationActivity extends AppCompatActivity {
     }
 
     private void saveNewLead(String first, String last, String phone, String email) {
-        Date now = new Date();
-        // Use null-safe checks for the Vehicle object
-        String make = etMake.getText() != null ? etMake.getText().toString() : "";
-        String model = etModel.getText() != null ? etModel.getText().toString() : "";
-        String year = etYear.getText() != null ? etYear.getText().toString() : "";
-        String trim = etTrim.getText() != null ? etTrim.getText().toString() : "";
-        String notes = etNotes.getText() != null ? etNotes.getText().toString() : "Added via App";
+        // 1. Get Vehicle info from UI
+        String make = etMake.getText() != null ? etMake.getText().toString().trim() : "";
+        String model = etModel.getText() != null ? etModel.getText().toString().trim() : "";
+        String year = etYear.getText() != null ? etYear.getText().toString().trim() : "";
+        String trim = etTrim.getText() != null ? etTrim.getText().toString().trim() : "";
 
+        // 2. Get Notes
+        String notes = etNotes.getText() != null && !etNotes.getText().toString().isEmpty()
+                ? etNotes.getText().toString()
+                : "Added via App";
+
+        // 3. Create the Vehicle Interest object
         Vehicle interest = new Vehicle(make, model, year, trim);
 
-        // Construct the 17-parameter Lead
+        // 4. Construct the Lead using your NEW 14-parameter constructor
+        // Notice: We no longer pass "NEW", followUpDate, or createdAt.
+        // The Lead class handles those automatically now!
         Lead newLead = new Lead(
-                first, last, phone, email, "Sales",
-                "", "", "", "", "", // Address fields empty for now
-                0.0, interest, null, "NEW", now, notes, now
+                first,
+                last,
+                phone,
+                email,
+                "Sales", // Division
+                "", "", "", "", "", // Address fields (Street, City, Prov, Country, Postal)
+                0.0,      // Budget
+                interest, // Vehicle Interest
+                null,     // Trade-In Vehicle
+                notes     // Notes
         );
 
+        // 5. Insert into Database
         String result = accessLeads.insertLead(newLead);
 
         if (result == null) {

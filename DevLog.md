@@ -1,4 +1,42 @@
 # Developer Log — AutoTrack
+
+---
+**Date:** April 7, 2026
+
+**Module:** Lead Details UI & Interactive Task Ledger
+
+## Itinerary
+
+- **Task Ledger Integration:** Finalized `LeadDetailsActivity` by integrating the **1-year Scientific Follow-up timeline (Task Ledger)**, enabling structured long-term engagement tracking within the lead profile.
+
+- **Independent Scroll Window:** Configured the `RecyclerView` to support **internal scrolling within the Lead Card**, allowing users to browse the full 1-year history inside a fixed-height window without expanding the entire activity layout.
+
+- **Dynamic Mission Header:** Integrated `ScoringService` into the **Board of Notes** section to display the current high-priority engagement mission (e.g., *Day 3: New Ideas*) as a persistent contextual header.
+
+- **UI Polish:** Add **color-coded timeline status indicators**:
+  - **Red:** Overdue or urgent tasks
+  - **Gray:** Completed tasks  
+    to improve glanceability and interaction efficiency.
+
+## Issues
+
+- **Resource Corruption (Resolved):** Fixed a native crash (`DeadObjectException`) and `libprotobuf` error caused by an invalid UTF-8 character in the `ic_radio_button_unchecked.xml` path data. Corrected the XML encoding to restore Binder stability.
+
+- **Binder Transaction Failure (Resolved):** Resolved an *Invalid Argument* error during `setAdapter()` initialization by ensuring the item layout height was set to `wrap_content` and properly configuring nested scrolling behavior.
+
+- **Layout Inflation Error (Resolved):** Fixed a mismatch between Java view IDs (`ivTimelineStatus`) and XML layout IDs in `TimelineAdapter`, which previously caused a `NullPointerException` during view binding.
+
+## Next
+
+- **Task Completion Logic:** Implement a checkbox listener in `TimelineAdapter` to allow users to mark scientific tasks as **completed**, updating the lead engagement score in real time.
+
+- **Chronological Reversal:** Implemented **latest-first sorting logic**, ensuring that the most recent or upcoming milestones appear at the top of the timeline for immediate visibility.
+
+- **Vehicle Interest Expansion:** Extend the vehicle information display to include a **Trade-In value estimator** and a direct link to the inventory database.
+
+- **Interactive Contact Intents:** Added **click-to-action functionality** for contact fields:
+  - **Phone:** Tapping the phone number launches the system dialer using `ACTION_DIAL`.
+  - **Email:** Tapping the email address opens the default mail client using `ACTION_SENDTO`, with metadata automatically populated.
 ---
 **Date:** March 31, 2026
 

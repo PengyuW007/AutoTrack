@@ -230,13 +230,28 @@ public class DataAccessObject implements DataAccess {
     private void parseCursor(Cursor cursor, List<Lead> list) throws Exception {
         if (cursor.moveToFirst()) {
             do {
-                long id = cursor.getLong(cursor.getColumnIndexOrThrow("LeadID"));
+                // Use the No-Args constructor to avoid triggering "Today" defaults
+                Lead lead = new Lead();
+
+                lead.setLeadID(cursor.getLong(cursor.getColumnIndexOrThrow("LeadID")));
+                lead.setLeadFirstName(cursor.getString(cursor.getColumnIndexOrThrow("FirstName")));
+                lead.setLeadLastName(cursor.getString(cursor.getColumnIndexOrThrow("LastName")));
+                lead.setLeadPhoneNumber(cursor.getString(cursor.getColumnIndexOrThrow("PhoneNumber")));
+                lead.setLeadEmail(cursor.getString(cursor.getColumnIndexOrThrow("Email")));
+                lead.setLeadDivision(cursor.getString(cursor.getColumnIndexOrThrow("Division")));
+                lead.setLeadAddress(cursor.getString(cursor.getColumnIndexOrThrow("Address")));
+                lead.setLeadCity(cursor.getString(cursor.getColumnIndexOrThrow("City")));
+                lead.setLeadProvince(cursor.getString(cursor.getColumnIndexOrThrow("Province")));
+                lead.setLeadCountry(cursor.getString(cursor.getColumnIndexOrThrow("Country")));
+                lead.setLeadPostalCode(cursor.getString(cursor.getColumnIndexOrThrow("PostalCode")));
+                lead.setLeadBudget(cursor.getDouble(cursor.getColumnIndexOrThrow("Budget")));
+                lead.setLeadStage(cursor.getString(cursor.getColumnIndexOrThrow("Stage")));
+                lead.setLeadNotes(cursor.getString(cursor.getColumnIndexOrThrow("Notes")));
 
                 // 1. Reconstruct Vehicle Interest
-                Vehicle vi = null;
                 int viMakeIdx = cursor.getColumnIndexOrThrow("VI_Make");
                 if (!cursor.isNull(viMakeIdx)) {
-                    vi = new Vehicle(
+                    Vehicle vi = new Vehicle(
                             cursor.getString(viMakeIdx),
                             cursor.getString(cursor.getColumnIndexOrThrow("VI_Model")),
                             cursor.getString(cursor.getColumnIndexOrThrow("VI_Year")),
@@ -247,13 +262,13 @@ public class DataAccessObject implements DataAccess {
                             cursor.getString(cursor.getColumnIndexOrThrow("VI_VIN")),
                             cursor.getString(cursor.getColumnIndexOrThrow("VI_Trans"))
                     );
+                    lead.setLeadVehicleInterest(vi);
                 }
 
-// 2. Reconstruct Trade-In
-                Vehicle ti = null;
+                // 2. Reconstruct Trade-In
                 int tiMakeIdx = cursor.getColumnIndexOrThrow("TI_Make");
                 if (!cursor.isNull(tiMakeIdx)) {
-                    ti = new Vehicle(
+                    Vehicle ti = new Vehicle(
                             cursor.getString(tiMakeIdx),
                             cursor.getString(cursor.getColumnIndexOrThrow("TI_Model")),
                             cursor.getString(cursor.getColumnIndexOrThrow("TI_Year")),
@@ -264,101 +279,82 @@ public class DataAccessObject implements DataAccess {
                             cursor.getString(cursor.getColumnIndexOrThrow("TI_VIN")),
                             cursor.getString(cursor.getColumnIndexOrThrow("TI_Trans"))
                     );
+                    lead.setTradeInVehicle(ti);
                 }
 
-                // 3. Parse Dates
-                Date followUp = null;
+                // 3. Parse Dates from DB strings
                 String fDateStr = cursor.getString(cursor.getColumnIndexOrThrow("FollowUpDate"));
-                if (fDateStr != null && !fDateStr.isEmpty()) followUp = formatter.parse(fDateStr);
+                if (fDateStr != null && !fDateStr.isEmpty()) {
+                    lead.setLeadFollowUpDate(formatter.parse(fDateStr));
+                }
 
-                Date createdAt = formatter.parse(cursor.getString(cursor.getColumnIndexOrThrow("CreatedAt")));
+                String cDateStr = cursor.getString(cursor.getColumnIndexOrThrow("CreatedAt"));
+                if (cDateStr != null && !cDateStr.isEmpty()) {
+                    lead.setLeadCreatedAt(formatter.parse(cDateStr));
+                }
 
-                // 4. Create Lead Object
-                Lead lead = new Lead(
-                        cursor.getString(cursor.getColumnIndexOrThrow("FirstName")),
-                        cursor.getString(cursor.getColumnIndexOrThrow("LastName")),
-                        cursor.getString(cursor.getColumnIndexOrThrow("PhoneNumber")),
-                        cursor.getString(cursor.getColumnIndexOrThrow("Email")),
-                        cursor.getString(cursor.getColumnIndexOrThrow("Division")),
-                        cursor.getString(cursor.getColumnIndexOrThrow("Address")),
-                        cursor.getString(cursor.getColumnIndexOrThrow("City")),
-                        cursor.getString(cursor.getColumnIndexOrThrow("Province")),
-                        cursor.getString(cursor.getColumnIndexOrThrow("Country")),
-                        cursor.getString(cursor.getColumnIndexOrThrow("PostalCode")),
-                        cursor.getDouble(cursor.getColumnIndexOrThrow("Budget")),
-                        vi,
-                        ti,
-                        cursor.getString(cursor.getColumnIndexOrThrow("Stage")),
-                        followUp,
-                        cursor.getString(cursor.getColumnIndexOrThrow("Notes")),
-                        createdAt
-                );
-
-                lead.setLeadID(id);
                 list.add(lead);
             } while (cursor.moveToNext());
         }
     }
 
     private void addDummyLeads() {
-        Date today = new Date();
-        Calendar calendar = Calendar.getInstance();
-
-        // 1. Create reusable Vehicle objects using the PARTIAL constructor (Make, Model, Year)
+        // 1. Setup Vehicles
         Vehicle atlas = new Vehicle("Volkswagen", "Atlas", "2024", "Execline");
         Vehicle tiguan = new Vehicle("Volkswagen", "Tiguan", "2024", "Highline R-Line");
         Vehicle jetta = new Vehicle("Volkswagen", "Jetta", "2024", "Highline");
+        Vehicle oldCivic = new Vehicle("Honda", "Civic", "2018", "Highline");
 
-        // Trade-in vehicles
-        Vehicle oldCivic = new Vehicle("Honda", "Civic", "2018","Highline");
-        Vehicle oldRav4 = new Vehicle("Toyota", "RAV4", "2015","Highline");
+        Calendar calendar = Calendar.getInstance();
 
         /* --- HISTORICAL LEADS --- */
+        // We use the No-Args constructor here because we need to MANUALLY set
+        // the dates to April 1st/2nd. The second constructor would force them to "Today".
 
-        // Darren (Old lead)
-        calendar.set(2023, Calendar.JANUARY, 1);
-        insertLead(new Lead("Darren", "Adam", "416-278-6191", "darren@example.com", "New Cars",
-                "123 Bay St", "Toronto", "ON", "Canada", "M5H 2N2",
-                32000, jetta, oldCivic, "NEW", today, "First inquiry", calendar.getTime()));
+        // Darren (April 1st)
+        Lead darren = new Lead();
+        darren.setLeadFirstName("Darren");
+        darren.setLeadLastName("Adam");
+        darren.setLeadPhoneNumber("416-278-6191");
+        darren.setLeadVehicleInterest(jetta);
+        darren.setTradeInVehicle(oldCivic);
+        calendar.set(2026, Calendar.APRIL, 1);
+        darren.setLeadCreatedAt(calendar.getTime());
+        darren.setLeadFollowUpDate(calendar.getTime());
+        darren.setLeadStage("NEW");
+        insertLead(darren);
 
-        // Darryl (Old lead)
-        calendar.set(2024, Calendar.FEBRUARY, 2);
-        insertLead(new Lead("Darryl", "Kessel", "647-282-9967", "darryl@example.com", "New Cars",
-                "456 Yonge St", "Toronto", "ON", "Canada", "M4Y 1W9",
-                45000, tiguan, null, "VISITED", today, "Visited showroom", calendar.getTime()));
+        // Darryl (April 2nd)
+        Lead darryl = new Lead();
+        darryl.setLeadFirstName("Darryl");
+        darryl.setLeadLastName("Kessel");
+        darryl.setLeadPhoneNumber("647-282-9967");
+        darryl.setLeadVehicleInterest(tiguan);
+        calendar.set(2026, Calendar.APRIL, 2);
+        darryl.setLeadCreatedAt(calendar.getTime());
+        darryl.setLeadFollowUpDate(calendar.getTime());
+        darryl.setLeadStage("VISITED");
+        insertLead(darryl);
 
-        // Jamie (Old lead)
-        calendar.set(2025, Calendar.MARCH, 3);
-        insertLead(new Lead("Jamie", "Alizadeh", "416-543-8045", "jamie@example.com", "New Cars",
-                "789 Queen St", "Toronto", "ON", "Canada", "M6J 1G1",
-                52000, atlas, oldRav4, "NEGOTIATION", today, "Negotiating", calendar.getTime()));
 
-        /* --- TODAY LEADS --- */
-// Use a fresh date object for "Now" (March 25)
-        Date now = new Date();
+        /* --- CURRENT LEADS (Using your SECOND constructor) --- */
+        // These will automatically be set to Stage="NEW" and Date="Today"
+        // because of the logic inside your new constructor.
 
-        insertLead(new Lead("Pengyu", "Wang", "613-802-7195", "pengyu@example.com", "New Cars",
-                "101 Elgin St", "Ottawa", "ON", "Canada", "K1P 5K7",
-                52000, atlas, null, "NEGOTIATION", today, "Interested in Atlas", now));
+        // Pengyu Wang
+        Lead pengyu = new Lead(
+                "Pengyu", "Wang", "613-802-7195", "pengyu@example.com",
+                "New Cars", "101 Elgin St", "Ottawa", "ON", "Canada", "K1P 5K7",
+                52000, atlas, null, "Interested in the new Atlas"
+        );
+        insertLead(pengyu);
 
-        insertLead(new Lead("Irfan", "Nassir", "416-891-9798", "irfan@example.com", "Fleet",
-                "202 King St", "Toronto", "ON", "Canada", "M5V 1J2",
-                52000, atlas, null, "NEW", today, "Fleet inquiry", now));
-
-        /* --- YESTERDAY LEADS --- */
-// Reset calendar to exactly 24 hours ago
-        calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, -1);
-        Date yesterday = calendar.getTime();
-
-        insertLead(new Lead("Anna", "Ivashchenko", "905-782-9571", "anna@example.com", "Pre-owned",
-                "303 Main St", "Mississauga", "ON", "Canada", "L5B 1M2",
-                28000, jetta, null, "VISITED", today, "Looking for a commuter", yesterday));
-
-//        // Inside addDummyLeads()
-//        today = new Date(); // This is the actual 'today'
-//        insertLead(new Lead("Test 2", "Priority", "000-000-0000", "test@test.com", "New Cars",
-//                "Address", "City", "ON", "Canada", "M5H 2N2",
-//                100000, atlas, null, "NEGOTIATION", today, "I should appear in PE", today));
+        // Irfan Nassir
+        Lead irfan = new Lead(
+                "Irfan", "Nassir", "416-891-9798", "irfan@example.com",
+                "Fleet", "202 King St", "Toronto", "ON", "Canada", "M5V 1J2",
+                60000, tiguan, null, "Looking for fleet pricing"
+        );
+        insertLead(irfan);
     }
 }
