@@ -1,5 +1,38 @@
-# Developer Log — AutoTrack
+Developer Log — AutoTrack
+---
+**Date:** April 8, 2026
 
+**Module:** Lead Details & Data Assets Integration
+
+## Itinerary
+
+- **Task Object Refactoring:** Migrated the internal `ScientificTask` class to a standalone `Task.java` object within the `com.areonedev.autotrack.objects` package, improving modularity and enabling reuse across timeline and agenda components.
+
+- **Timeline Display Logic:** Finalized the **Today-on-Top sorting logic**. The timeline now filters future tasks and displays only **today’s mission** together with historical tasks in **reverse chronological order**.
+
+- **Interactive Task Ledger:** Implemented click interaction for timeline items. Users can now toggle task completion status directly within the Lead Detail board, with immediate visual feedback.
+
+- **Isolated Scroll Window:** Configured the `RecyclerView` to scroll independently within a fixed-height window (**250dp**). This prevents layout shifting and keeps the main Lead Details page visually stable.
+
+- **Inventory Data Integration:** Added structured vehicle dataset files to the **assets** folder (Make, Year, Model, Category), establishing the foundation for upcoming **vehicle selection** and **trade-in estimation** features.
+
+## Issues
+
+- **Task Leakage (Resolved):** Fixed a scheduling logic issue where leads appeared on the Agenda during non-milestone days (e.g., Day 9 and Day 11). The system now strictly follows the intended cadence (Day 1, Day 3, etc.).
+
+- **Scroll Conflict (Resolved):** Removed the global `NestedScrollView` so the internal `RecyclerView` can properly capture touch gestures and scroll independently.
+
+- **XML Syntax Error (Resolved):** Corrected
+  `android:text="Task & Activities"`
+  to
+  `android:text="Task &amp; Activities"`
+  to resolve a resource compilation failure.
+
+## Next
+
+- **Direct Contact Actions:** Finalize Intent logic for phone and email icons to support **one-tap calling** and **one-tap emailing** from the Lead Details board.
+
+- **UI Polish:** Add a **Lead Created** milestone at the bottom of the timeline to serve as the historical anchor for engagement tracking.
 ---
 **Date:** April 7, 2026
 
