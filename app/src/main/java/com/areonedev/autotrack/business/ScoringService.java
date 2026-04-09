@@ -35,33 +35,54 @@ public class ScoringService {
         List<ScientificTask> timeline = new ArrayList<>();
         if (lead == null || lead.getLeadCreatedAt() == null) return timeline;
 
-        int[] milestones = {0, 1, 3, 8, 15, 30, 90, 180, 365};
+        // The scientific milestones
+        int[] milestones = { 1, 3, 8, 15, 30, 90, 180, 365 };
 
         Date today = new Date();
-        // Normalize today to midnight for comparison
         Calendar todayCal = Calendar.getInstance();
         todayCal.setTime(today);
         resetTime(todayCal);
 
-        for (int day : milestones) {
-            Calendar milestoneCal = Calendar.getInstance();
-            milestoneCal.setTime(lead.getLeadCreatedAt());
-            milestoneCal.add(Calendar.DAY_OF_YEAR, day);
-            resetTime(milestoneCal);
+        Calendar createdCal = Calendar.getInstance();
+        createdCal.setTime(lead.getLeadCreatedAt());
+        resetTime(createdCal);
 
-            String mission = getMissionNameByDay(day);
-            // Determine if it's completed (if the milestone date is today or in the past)
-            boolean isCompleted = !milestoneCal.getTime().after(todayCal.getTime());
+        // Calculate how many days have passed since the lead was created
+        long diffInMillies = todayCal.getTimeInMillis() - createdCal.getTimeInMillis();
+        long currentDaysPassed = TimeUnit.MILLISECONDS.toDays(diffInMillies);
 
-            timeline.add(new ScientificTask(mission, milestoneCal.getTime(), isCompleted));
+        // Loop backwards through milestones to put the newest (Today) at the top
+        for (int i = milestones.length - 1; i >= 0; i--) {
+            int milestoneDay = milestones[i];
+
+            // ONLY show tasks that are scheduled for Today or were in the Past
+            if (milestoneDay <= currentDaysPassed) {
+                Calendar milestoneCal = Calendar.getInstance();
+                milestoneCal.setTime(lead.getLeadCreatedAt());
+                milestoneCal.add(Calendar.DAY_OF_YEAR, milestoneDay);
+                resetTime(milestoneCal);
+
+                String mission = getMissionNameByDay(milestoneDay);
+
+                // LOGIC:
+                // If the milestone is strictly BEFORE today, it is "Completed" (History).
+                // If the milestone is EXACTLY today, it is "Undone" (Today's Task).
+                boolean isCompleted = milestoneCal.getTime().before(todayCal.getTime());
+
+                timeline.add(new ScientificTask(mission, milestoneCal.getTime(), isCompleted));
+            }
         }
+
+        // Finally, add the "Lead Created" event at the very bottom as history
+        timeline.add(new ScientificTask("🆕 Lead Created", createdCal.getTime(), true));
+
         return timeline;
     }
 
     // Helper to keep names consistent
     private String getMissionNameByDay(int day) {
         switch (day) {
-            case 0: case 1: return "🙏 Gratitude: Thank You & Info Swap";
+            case 1: return "🙏 Gratitude: Thank You & Info Swap";
             case 3: return "💡 New Ideas: Follow up thoughts";
             case 8: return "📈 Market Update: Inventory/Trade-in";
             case 15: return "🎥 Resource: Hidden feature video";
@@ -108,9 +129,8 @@ public class ScoringService {
             return "🏎️ Post-Drive: Get feedback on performance.";
 
         // 4. The Scientific Timeline (Exact Milestones)
-        // Jamie and Pengyu were "sticky" because they likely fell into a range logic.
         // By using exact '==' checks, they will only appear on these specific days.
-        if (days == 0 || days == 1) return "🙏 Gratitude: Send 'Thank You' & contact info swap.";
+        if (days == 1) return "🙏 Gratitude: Send 'Thank You' & contact info swap.";
         if (days == 3) return "💡 New Ideas: Any new thoughts since your visit?";
         if (days == 8) return "📈 Market Update: Mention similar trade-in/availability.";
         if (days == 15) return "🎥 Resource: Send 'hidden feature' video or finance tip.";

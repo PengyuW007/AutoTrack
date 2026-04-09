@@ -90,7 +90,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Scientific Follow-up Timeline"
+                            android:text="Tasks &amp; Activities"
                             android:textColor="?attr/colorPrimary"
                             android:textStyle="bold" />
 
