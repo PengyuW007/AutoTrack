@@ -12,16 +12,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.areonedev.autotrack.R;
 import com.areonedev.autotrack.business.ScoringService;
+import com.areonedev.autotrack.objects.Task;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
 public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHolder> {
-    private List<ScoringService.ScientificTask> tasks;
+    private List<Task> tasks;
     private SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
 
-    public TimelineAdapter(List<ScoringService.ScientificTask> tasks) {
+    public TimelineAdapter(List<Task> tasks) {
         this.tasks = tasks;
     }
 
@@ -35,7 +36,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ScoringService.ScientificTask task = tasks.get(position);
+        Task task = tasks.get(position);
 
         if (task == null || task.date == null) return;
 
@@ -52,6 +53,15 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
             holder.tvDate.setTextColor(Color.RED);
             holder.ivCheck.setImageResource(R.drawable.ic_radio_button_unchecked);
         }
+
+        // CLICK LOGIC: Toggle completion
+        holder.itemView.setOnClickListener(v -> {
+            // Toggle the state
+            task.setCompleted(!task.isCompleted());
+
+            // Refresh only this item for smooth animation
+            notifyItemChanged(position);
+        });
     }
 
     @Override

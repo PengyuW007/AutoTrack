@@ -1,6 +1,7 @@
 package com.areonedev.autotrack.business;
 
 import com.areonedev.autotrack.objects.Lead;
+import com.areonedev.autotrack.objects.Task;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -31,8 +32,8 @@ public class ScoringService {
         return score;
     }
 
-    public List<ScientificTask> getFullTimeline(Lead lead) {
-        List<ScientificTask> timeline = new ArrayList<>();
+    public List<Task> getFullTimeline(Lead lead) {
+        List<Task> timeline = new ArrayList<>();
         if (lead == null || lead.getLeadCreatedAt() == null) return timeline;
 
         // The scientific milestones
@@ -69,12 +70,12 @@ public class ScoringService {
                 // If the milestone is EXACTLY today, it is "Undone" (Today's Task).
                 boolean isCompleted = milestoneCal.getTime().before(todayCal.getTime());
 
-                timeline.add(new ScientificTask(mission, milestoneCal.getTime(), isCompleted));
+                timeline.add(new Task(mission, milestoneCal.getTime(), isCompleted));
             }
         }
 
         // Finally, add the "Lead Created" event at the very bottom as history
-        timeline.add(new ScientificTask("🆕 Lead Created", createdCal.getTime(), true));
+        timeline.add(new Task("🆕 Lead Created", createdCal.getTime(), true));
 
         return timeline;
     }
@@ -227,15 +228,5 @@ public class ScoringService {
     }
 
     // Simple inner class or separate file to hold the display data
-    public static class ScientificTask {
-        public String title;
-        public Date date;
-        public boolean isCompleted; // True if date is today or in the past
 
-        public ScientificTask(String title, Date date, boolean isCompleted) {
-            this.title = title;
-            this.date = date;
-            this.isCompleted = isCompleted;
-        }
-    }
 }

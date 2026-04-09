@@ -21,6 +21,7 @@ import com.areonedev.autotrack.business.AccessLeads;
 import com.areonedev.autotrack.business.ScoringService;
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Vehicle;
+import com.areonedev.autotrack.objects.Task;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -193,12 +194,12 @@ public class LeadDetailsActivity extends AppCompatActivity {
         }
 
         // 4. Generate the 1-year scientific plan
-        List<ScoringService.ScientificTask> timeline = scoringService.getFullTimeline(currentLead);
+        List<Task> timeline = scoringService.getFullTimeline(currentLead);
 
         // 5. Bind to Adapter
         if (timeline != null && !timeline.isEmpty()) {
             TimelineAdapter adapter = new TimelineAdapter(timeline);
-            rvTimeline.setNestedScrollingEnabled(false);
+            rvTimeline.setNestedScrollingEnabled(true);
             rvTimeline.setAdapter(adapter);
         } else {
             Log.w("LeadDetails", "Timeline generated was empty.");
