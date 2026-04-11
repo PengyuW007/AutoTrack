@@ -41,12 +41,93 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     app:cardCornerRadius="8dp">
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Contact" android:textColor="?attr/colorPrimary" android:textStyle="bold" />
-                        <TextView android:id="@+id/tvViewName" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="18sp" android:textStyle="bold" android:layout_marginTop="8dp" tools:text="Pengyu Chen"/>
-                        <TextView android:id="@+id/tvViewPhone" android:layout_width="match_parent" android:layout_height="wrap_content" tools:text="123-456-7890"/>
-                        <TextView android:id="@+id/tvViewEmail" android:layout_width="match_parent" android:layout_height="wrap_content" tools:text="pengyu@example.com"/>
-                        <TextView android:id="@+id/tvViewAddress" android:layout_width="match_parent" android:layout_height="wrap_content" tools:text="My Address"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Contact"
+                            android:textColor="?attr/colorPrimary"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvViewName"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            tools:text="Pengyu Chen" />
+
+                        <!-- Icon Action Bar -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:gravity="center"
+                            android:orientation="horizontal">
+
+                            <!-- Phone Container -->
+                            <FrameLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1">
+                                <ImageView
+                                    android:id="@+id/ivPhoneIcon"
+                                    android:layout_width="50dp"
+                                    android:layout_height="50dp"
+                                    android:layout_gravity="center"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:padding="8dp"
+                                    android:src="@android:drawable/ic_menu_call"
+                                    app:tint="?attr/colorPrimary" />
+                            </FrameLayout>
+
+                            <!-- SMS Container -->
+                            <FrameLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1">
+                                <ImageView
+                                    android:id="@+id/ivSmsIcon"
+                                    android:layout_width="50dp"
+                                    android:layout_height="50dp"
+                                    android:layout_gravity="center"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:padding="8dp"
+                                    android:src="@android:drawable/sym_action_chat"
+                                    app:tint="?attr/colorPrimary" />
+                            </FrameLayout>
+
+                            <!-- Email Container -->
+                            <FrameLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1">
+                                <ImageView
+                                    android:id="@+id/ivEmailIcon"
+                                    android:layout_width="50dp"
+                                    android:layout_height="50dp"
+                                    android:layout_gravity="center"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:padding="8dp"
+                                    android:src="@android:drawable/ic_dialog_email"
+                                    app:tint="?attr/colorPrimary" />
+                            </FrameLayout>
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tvViewAddress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:textColor="#666666"
+                            tools:text="123 Main St, Vancouver, BC" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
 

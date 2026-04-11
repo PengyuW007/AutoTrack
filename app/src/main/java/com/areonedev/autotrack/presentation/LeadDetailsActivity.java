@@ -1,12 +1,15 @@
 package com.areonedev.autotrack.presentation;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.net.Uri;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +39,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
 
     // View Mode Components
     private TextView tvViewName, tvViewPhone, tvViewEmail, tvViewAddress, tvViewVehicle, tvViewNotes, tvDetDate, tvDetUpdatedDate;
+    private ImageView ivPhone, ivEmail, ivSms;
 
     // Edit Mode Components
     private EditText etFirstName, etLastName, etPhone, etEmail, etMake, etModel, etYear, etTrim, etNotes;
@@ -57,6 +61,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
 
         setupToolbar();
         initViews();
+        setupContactActions();
 
         if (currentLead != null) {
             refreshUI();
@@ -90,13 +95,17 @@ public class LeadDetailsActivity extends AppCompatActivity {
 
         // View Mode TextViews
         tvViewName = findViewById(R.id.tvViewName);
-        tvViewPhone = findViewById(R.id.tvViewPhone);
-        tvViewEmail = findViewById(R.id.tvViewEmail);
+        //tvViewPhone = findViewById(R.id.tvViewPhone);
+        //tvViewEmail = findViewById(R.id.tvViewEmail);
         tvViewAddress = findViewById(R.id.tvViewAddress);
         tvViewVehicle = findViewById(R.id.tvViewVehicle);
         tvViewNotes = findViewById(R.id.tvViewNotes);
         tvDetDate = findViewById(R.id.tvDetDate);
         tvDetUpdatedDate = findViewById(R.id.tvDetUpdatedDate);
+
+        ivPhone = findViewById(R.id.ivPhoneIcon);
+        ivEmail = findViewById(R.id.ivEmailIcon);
+        ivSms = findViewById(R.id.ivSmsIcon);
 
         rvTimeline = findViewById(R.id.rvLeadTimeline);
 
@@ -114,6 +123,42 @@ public class LeadDetailsActivity extends AppCompatActivity {
         // Buttons
         btnUpdate = findViewById(R.id.btnUpdateLead);
         btnDelete = findViewById(R.id.btnDeleteLead);
+    }
+
+    private void setupContactActions() {
+        // 1. Phone Popup + Dial
+        ivPhone.setOnClickListener(v -> {
+            if (currentLead == null || currentLead.getLeadPhoneNumber() == null) return;
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Call Lead")
+                    .setMessage("Call " + currentLead.getLeadFirstName() + " at " + currentLead.getLeadPhoneNumber() + "?")
+                    .setPositiveButton("Call", (dialog, which) -> {
+                        Intent intent = new Intent(Intent.ACTION_DIAL);
+                        intent.setData(Uri.parse("tel:" + currentLead.getLeadPhoneNumber()));
+                        startActivity(intent);
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        });
+
+        // 2. Email Board
+        ivEmail.setOnClickListener(v -> {
+            if (currentLead == null || currentLead.getLeadEmail() == null) return;
+
+            Intent intent = new Intent(Intent.ACTION_SENDTO);
+            intent.setData(Uri.parse("mailto:" + currentLead.getLeadEmail()));
+            startActivity(Intent.createChooser(intent, "Send Email"));
+        });
+
+        // 3. SMS Chat Window
+        ivSms.setOnClickListener(v -> {
+            if (currentLead == null || currentLead.getLeadPhoneNumber() == null) return;
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("sms:" + currentLead.getLeadPhoneNumber()));
+            startActivity(intent);
+        });
     }
 
     private void refreshUI() {
@@ -135,8 +180,8 @@ public class LeadDetailsActivity extends AppCompatActivity {
 
         // 3. Populate Contact Info
         tvViewName.setText(currentLead.getLeadFirstName() + " " + currentLead.getLeadLastName());
-        tvViewPhone.setText(currentLead.getLeadPhoneNumber());
-        tvViewEmail.setText(currentLead.getLeadEmail());
+        //tvViewPhone.setText(currentLead.getLeadPhoneNumber());
+        //tvViewEmail.setText(currentLead.getLeadEmail());
 
         String address = currentLead.getLeadAddress() + "\n" +
                 currentLead.getLeadCity() + ", " +
