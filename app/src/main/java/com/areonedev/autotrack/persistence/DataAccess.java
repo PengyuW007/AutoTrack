@@ -24,6 +24,8 @@ public interface DataAccess {
 
     /*** Notification ***/
     String insertNotification(Notification notification);
+    String updateNotification(Notification notification);
+    String deleteNotification(Notification notification);
 
     List<Notification> getAllNotifications();
 

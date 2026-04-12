@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.areonedev.autotrack.R;
 import com.areonedev.autotrack.business.AccessLeads;
+import com.areonedev.autotrack.business.AccessNotifications;
 import com.areonedev.autotrack.objects.Notification;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -24,6 +25,7 @@ public class NotificationsActivity extends AppCompatActivity {
     private List<Notification> notificationList;
     private BottomNavigationView bottomNavigationView;
     private AccessLeads accessLeads;
+    private AccessNotifications accessNotifications;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +33,14 @@ public class NotificationsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_notifications);
 
         initViews();
+
+        // Initialize data access
+        accessLeads = new AccessLeads();
+        accessNotifications = new AccessNotifications();
+        notificationList = new ArrayList<>();
+
+        loadNotifications();
+
         setupNavigation();
         loadNotifications();
     }
@@ -42,17 +52,13 @@ public class NotificationsActivity extends AppCompatActivity {
         // Set LayoutManager for RecyclerView
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
 
-        // Initialize data access
-        accessLeads = new AccessLeads();
-        notificationList = new ArrayList<>();
+
     }
 
     private void loadNotifications() {
         // 1. Initialize the list
-        notificationList = new ArrayList<>();
-
-        // 2. Add dummy data for testing (since database method is not yet implemented)
-        addDummyNotifications();
+        notificationList.clear();
+        //String error = accessNotifications.getAllNotifications();
 
         // 3. Sort: Newest at the top (Descending by Date)
         Collections.sort(notificationList, (n1, n2) ->

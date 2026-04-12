@@ -5,52 +5,65 @@ import android.content.Context;
 import android.content.Intent;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
+import android.util.Log;
+
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Notification;
+
 import java.util.Date;
 
 public class LeadInteractionReceiver extends BroadcastReceiver {
+    private static final String TAG = "LeadReceiver";
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        AccessLeads accessLeads = new AccessLeads();
         String incomingNumber = null;
-        String type = "";
+        String interactionType = "";
 
-        // 1. Detect Incoming Call
-        if (intent.getAction().equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
+        // 1. Handle Incoming Call
+        if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(intent.getAction())) {
             String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
             if (TelephonyManager.EXTRA_STATE_RINGING.equals(state)) {
                 incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
-                type = "Call";
+                interactionType = "Call";
             }
         }
 
-        // 2. Detect Incoming SMS
-        if (intent.getAction().equals("android.provider.Telephony.SMS_RECEIVED")) {
+        // 2. Handle Incoming SMS
+        if ("android.provider.Telephony.SMS_RECEIVED".equals(intent.getAction())) {
             Object[] pdus = (Object[]) intent.getExtras().get("pdus");
             if (pdus != null) {
-                SmsMessage[] msgs = new SmsMessage[pdus.length];
-                for (int i = 0; i < msgs.length; i++) {
-                    msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
-                    incomingNumber = msgs[i].getOriginatingAddress();
-                    type = "SMS";
+                for (Object pdu : pdus) {
+                    SmsMessage sms = SmsMessage.createFromPdu((byte[]) pdu);
+                    incomingNumber = sms.getOriginatingAddress();
+                    interactionType = "SMS";
                 }
             }
         }
 
-        // 3. Match with Lead and Save Notification
+        // 3. Process the interaction if a number was captured
         if (incomingNumber != null) {
-            // You need to implement this method in AccessLeads to search by phone
-            Lead lead = accessLeads.getLeadByPhone(incomingNumber);
+            processInteraction(incomingNumber, interactionType);
+        }
+    }
 
-            if (lead != null) {
-                String title = type + " from " + lead.getLeadFirstName() + " " + lead.getLeadLastName();
-                Notification note = new Notification(title, new Date());
+    private void processInteraction(String phoneNumber, String type) {
+        AccessLeads accessLeads = new AccessLeads();
+        // Use your existing method to find the lead
+        Lead lead = accessLeads.getLeadByPhone(phoneNumber);
 
-                // Save to your SQLite database
-                accessLeads.saveNotification(note);
-            }
+        if (lead != null) {
+            // Create a descriptive title: "Call from John Doe"
+            String title = type + " from " + lead.getLeadFirstName() + " " + lead.getLeadLastName();
+            Notification notification = new Notification(title, new Date());
+
+            // Save to database via the new AccessNotifications class
+            AccessNotifications accessNotifications = new AccessNotifications();
+            accessNotifications.insertNotification(notification);
+
+            Log.d(TAG, "Logged " + type + " for lead: " + lead.getLeadFirstName());
+        } else {
+            Log.d(TAG, "Interaction from unknown number: " + phoneNumber);
         }
     }
 }

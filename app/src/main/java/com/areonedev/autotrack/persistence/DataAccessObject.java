@@ -88,6 +88,8 @@ public class DataAccessObject implements DataAccess {
             count = cursor.getInt(0);
             if (count == 0) {
                 addDummyNotifications();
+            }else {
+                Log.d(TAG, "Database already contains " + count + " notifications. Skipping dummy data.");
             }
             cursor.close();
 
@@ -392,6 +394,16 @@ public class DataAccessObject implements DataAccess {
     }
 
     @Override
+    public String updateNotification(Notification notification) {
+        return "";
+    }
+
+    @Override
+    public String deleteNotification(Notification notification) {
+        return "";
+    }
+
+    @Override
     public List<Notification> getAllNotifications() {
         List<Notification> notifications = new ArrayList<>();
         if (db == null) return notifications;
@@ -416,6 +428,5 @@ public class DataAccessObject implements DataAccess {
     private void addDummyNotifications(){
         insertNotification(new Notification("Incoming Call from Pengyu Wang", new Date()));
         insertNotification(new Notification("New SMS from Darren Adam", new Date(System.currentTimeMillis() - 3600000)));
-
     }
 }
