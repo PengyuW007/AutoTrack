@@ -2,15 +2,12 @@ package com.areonedev.autotrack.objects;
 
 import java.util.Date;
 
-public class Task {
-    public String title;
-    public Date date;
+public class Task extends Event {
     public boolean isCompleted; // True if date is today or in the past
 
-    public Task(String title, Date date, boolean isCompleted) {
-        this.title = title;
-        this.date = date;
-        this.isCompleted = isCompleted;
+    public Task(String title, Date date) {
+        super(title, date);
+        this.isCompleted = false;
     }
 
     public boolean isCompleted() {

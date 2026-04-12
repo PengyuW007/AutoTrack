@@ -2,6 +2,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Permissions -->
+    <!-- Permissions for Phone and SMS detection -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+
+    <!-- Hardware features (Required to fix the warning) -->
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+
+    <!-- Permission for Email account access (if needed for syncing) -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,6 +25,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AutoTrack"
         tools:targetApi="31">
+
+        <!-- Register the Receiver to listen for Phone and SMS events -->
+        <receiver
+            android:name=".business.LeadInteractionReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter android:priority="999">
+                <action android:name="android.intent.action.PHONE_STATE" />
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".presentation.MainActivity"
             android:exported="true">
@@ -36,6 +61,10 @@
         <activity
             android:name=".presentation.CalendarActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".presentation.NotificationsActivity"
+            android:label="Notifications"/>
     </application>
 
 </manifest>

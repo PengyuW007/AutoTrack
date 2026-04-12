@@ -127,7 +127,10 @@ public class LeadsActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.nav_notifications) {
                 // TODO: Start NotificationsActivity
-                Toast.makeText(this, "Notifications coming soon!", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Notifications coming soon!", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(LeadsActivity.this, NotificationsActivity.class);
+                startActivity(intent);
+                overridePendingTransition(0, 0); // Smooth transition
                 return true;
             }
             return false;

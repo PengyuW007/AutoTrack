@@ -14,6 +14,7 @@ import java.util.Locale;
 
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Vehicle;
+import com.areonedev.autotrack.objects.Notification;
 
 public class DataAccessObject implements DataAccess {
     private SQLiteDatabase db;
@@ -23,6 +24,7 @@ public class DataAccessObject implements DataAccess {
     private static final String TAG = "DataAccessObject";
     private static final String EOF = "  ";
     private static final String TABLE_LEADS = "Leads";
+    private static final String TABLE_NOTIFICATIONS = "Notifications";
 
     public DataAccessObject(String dbName) {
         this.dbName = dbName;
@@ -57,6 +59,13 @@ public class DataAccessObject implements DataAccess {
                     "TI_Price REAL, TI_Color TEXT, TI_InStock INTEGER, TI_VIN TEXT, TI_Trans TEXT" +
                     ")");
 
+            // 4. Create Notifications Table
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_NOTIFICATIONS + " (" +
+                    "NotificationID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "Title TEXT, " +
+                    "Timestamp INTEGER" + // Store Date as long (milliseconds)
+                    ")");
+
             Log.d(TAG, "Database opened successfully at: " + dbPath);
 
             /* Insert three leads to the DB */
@@ -72,6 +81,16 @@ public class DataAccessObject implements DataAccess {
             } else {
                 Log.d(TAG, "Database already contains " + count + " leads. Skipping dummy data.");
             }
+
+            cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_NOTIFICATIONS, null);
+            cursor.moveToFirst();
+
+            count = cursor.getInt(0);
+            if (count == 0) {
+                addDummyNotifications();
+            }
+            cursor.close();
+
         } catch (Exception e) {
             Log.e(TAG, "CRITICAL: Failed to open database: " + e.getMessage());
             db = null; // Ensure it's explicitly null if it fails
@@ -356,5 +375,47 @@ public class DataAccessObject implements DataAccess {
                 60000, tiguan, null, "Looking for fleet pricing"
         );
         insertLead(irfan);
+    }
+
+    @Override
+    public String insertNotification(Notification notification) {
+        try {
+            ContentValues values = new ContentValues();
+            values.put("Title", notification.getTitle());
+            values.put("Timestamp", notification.getDate().getTime());
+
+            long rowId = db.insert(TABLE_NOTIFICATIONS, null, values);
+            return (rowId != -1) ? null : "Insert notification failed";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @Override
+    public List<Notification> getAllNotifications() {
+        List<Notification> notifications = new ArrayList<>();
+        if (db == null) return notifications;
+
+        try {
+            Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NOTIFICATIONS + " ORDER BY Timestamp DESC", null);
+            if (cursor.moveToFirst()) {
+                do {
+                    String title = cursor.getString(cursor.getColumnIndexOrThrow("Title"));
+                    long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow("Timestamp"));
+
+                    notifications.add(new Notification(title, new Date(timestamp)));
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Error fetching notifications: " + e.getMessage());
+        }
+        return notifications;
+    }
+
+    private void addDummyNotifications(){
+        insertNotification(new Notification("Incoming Call from Pengyu Wang", new Date()));
+        insertNotification(new Notification("New SMS from Darren Adam", new Date(System.currentTimeMillis() - 3600000)));
+
     }
 }

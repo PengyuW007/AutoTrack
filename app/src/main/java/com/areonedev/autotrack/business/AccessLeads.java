@@ -86,6 +86,21 @@ public class AccessLeads {
         return null;
     }
 
+    public Lead getLeadByPhone(String phone) {
+        List<Lead> allLeads = new ArrayList<>();
+        dataAccess.getLeadSequential(allLeads);
+
+        if (phone != null && !phone.trim().isEmpty()) {
+            for (Lead lead : allLeads) {
+                // Compare the incoming phone with the database phone
+                if (lead.getLeadPhoneNumber() != null && lead.getLeadPhoneNumber().equals(phone)) {
+                    return lead;
+                }
+            }
+        }
+        return null;
+    }
+
     public List<Lead> getAllLeads() {
         List<Lead> allLeads = new ArrayList<>();
         dataAccess.getLeadSequential(allLeads);

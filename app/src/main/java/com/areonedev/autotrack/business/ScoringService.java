@@ -70,12 +70,16 @@ public class ScoringService {
                 // If the milestone is EXACTLY today, it is "Undone" (Today's Task).
                 boolean isCompleted = milestoneCal.getTime().before(todayCal.getTime());
 
-                timeline.add(new Task(mission, milestoneCal.getTime(), isCompleted));
+                Task task = new Task(mission, milestoneCal.getTime());
+                task.setCompleted(isCompleted);
+                timeline.add(task);
             }
         }
 
         // Finally, add the "Lead Created" event at the very bottom as history
-        timeline.add(new Task("🆕 Lead Created", createdCal.getTime(), true));
+        Task createdTask = new Task("🆕 Lead Created", createdCal.getTime());
+        createdTask.setCompleted(true); // Historical anchor is always completed
+        timeline.add(createdTask);
 
         return timeline;
     }

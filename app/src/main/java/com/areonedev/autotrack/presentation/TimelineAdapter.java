@@ -38,10 +38,10 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Task task = tasks.get(position);
 
-        if (task == null || task.date == null) return;
+        if (task == null || task.getDate() == null) return;
 
-        holder.tvTitle.setText(task.title);
-        holder.tvDate.setText(sdf.format(task.date));
+        holder.tvTitle.setText(task.getTitle());
+        holder.tvDate.setText(sdf.format(task.getDate()));
 
         if (task.isCompleted) {
             // Use standard android.graphics.Color
