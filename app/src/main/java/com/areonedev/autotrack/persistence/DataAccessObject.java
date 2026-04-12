@@ -63,7 +63,8 @@ public class DataAccessObject implements DataAccess {
             db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_NOTIFICATIONS + " (" +
                     "NotificationID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "Title TEXT, " +
-                    "Timestamp INTEGER" + // Store Date as long (milliseconds)
+                    "Timestamp INTEGER, " +
+                    "LeadID INTEGER" + // <--- Add this to link to TABLE_LEADS
                     ")");
 
             Log.d(TAG, "Database opened successfully at: " + dbPath);
@@ -189,6 +190,7 @@ public class DataAccessObject implements DataAccess {
             return e.getMessage();
         }
     }
+
 
     /**
      * Helper to map Lead object to ContentValues for Insert/Update
@@ -319,6 +321,12 @@ public class DataAccessObject implements DataAccess {
         }
     }
 
+    private Lead getLeadByID(long id) {
+        Lead criteria = new Lead();
+        criteria.setLeadID(id);
+        ArrayList<Lead> results = getLeadRandom(criteria);
+        return (results != null && !results.isEmpty()) ? results.get(0) : null;
+    }
     private void addDummyLeads() {
         // 1. Setup Vehicles
         Vehicle atlas = new Vehicle("Volkswagen", "Atlas", "2024", "Execline");
@@ -379,15 +387,91 @@ public class DataAccessObject implements DataAccess {
         insertLead(irfan);
     }
 
+
+    @Override
+    public String getNotificationSequential(List<Notification> notificationResult) {
+        if (db == null) return "DB Null";
+
+        // Clear the list to prevent duplicates on refresh
+        notificationResult.clear();
+
+        try {
+            // Fetch all notifications sorted by newest first
+            Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NOTIFICATIONS + " ORDER BY Timestamp DESC", null);
+
+            if (cursor.moveToFirst()) {
+                do {
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow("NotificationID"));
+                    String title = cursor.getString(cursor.getColumnIndexOrThrow("Title"));
+                    long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow("Timestamp"));
+                    long leadId = cursor.getLong(cursor.getColumnIndexOrThrow("LeadID"));
+
+                    // Resolve the Lead object first
+                    Lead lead = getLeadByID(leadId);
+
+                    Notification note = new Notification(lead, title, new Date(timestamp));
+                    note.setEventID(id);
+                    notificationResult.add(note);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            return null;
+        } catch (Exception e) {
+            Log.e(TAG, "Sequential fetch error: " + e.getMessage());
+            return e.getMessage();
+        }
+    }
+
+    @Override
+    public ArrayList<Notification> getNotificationRandom(Notification criteria) {
+        ArrayList<Notification> results = new ArrayList<>();
+        if (db == null) return results;
+
+        try {
+            Cursor cursor;
+            if (criteria.getTitle() != null && !criteria.getTitle().isEmpty()) {
+                cursor = db.rawQuery("SELECT * FROM " + TABLE_NOTIFICATIONS + " WHERE Title LIKE ?",
+                        new String[]{"%" + criteria.getTitle() + "%"});
+            } else {
+                cursor = db.rawQuery("SELECT * FROM " + TABLE_NOTIFICATIONS + " WHERE NotificationID = ?",
+                        new String[]{String.valueOf(criteria.getEventID())});
+            }
+
+            if (cursor.moveToFirst()) {
+                do {
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow("NotificationID"));
+                    String title = cursor.getString(cursor.getColumnIndexOrThrow("Title"));
+                    long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow("Timestamp"));
+                    long leadId = cursor.getLong(cursor.getColumnIndexOrThrow("LeadID"));
+
+                    Lead lead = getLeadByID(leadId);
+                    Notification note = new Notification(lead, title, new Date(timestamp));
+                    note.setEventID(id);
+                    results.add(note);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } catch (Exception e) {
+            Log.e("DAO", "Random search error: " + e.getMessage());
+        }
+        return results;
+    }
+
     @Override
     public String insertNotification(Notification notification) {
         try {
             ContentValues values = new ContentValues();
             values.put("Title", notification.getTitle());
             values.put("Timestamp", notification.getDate().getTime());
+            // Get ID from the linked Lead object
+            values.put("LeadID", notification.getLead() != null ? notification.getLead().getLeadID() : -1);
 
             long rowId = db.insert(TABLE_NOTIFICATIONS, null, values);
-            return (rowId != -1) ? null : "Insert notification failed";
+            if (rowId != -1) {
+                notification.setEventID(rowId);
+                return null;
+            }
+            return "Insert notification failed";
         } catch (Exception e) {
             return e.getMessage();
         }
@@ -395,38 +479,58 @@ public class DataAccessObject implements DataAccess {
 
     @Override
     public String updateNotification(Notification notification) {
-        return "";
+        try {
+            ContentValues values = new ContentValues();
+            values.put("Title", notification.getTitle());
+            values.put("Timestamp", notification.getDate().getTime());
+            values.put("LeadID", notification.getLead() != null ? notification.getLead().getLeadID() : -1);
+
+            int rows = db.update(TABLE_NOTIFICATIONS, values, "NotificationID = ?",
+                    new String[]{String.valueOf(notification.getEventID())});
+
+            return (rows > 0) ? null : "Update failed: Notification not found";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 
     @Override
     public String deleteNotification(Notification notification) {
-        return "";
+        try {
+            int rows = db.delete(TABLE_NOTIFICATIONS, "NotificationID = ?",
+                    new String[]{String.valueOf(notification.getEventID())});
+            return (rows > 0) ? null : "Delete failed: Notification not found";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 
     @Override
     public List<Notification> getAllNotifications() {
         List<Notification> notifications = new ArrayList<>();
-        if (db == null) return notifications;
-
-        try {
-            Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NOTIFICATIONS + " ORDER BY Timestamp DESC", null);
-            if (cursor.moveToFirst()) {
-                do {
-                    String title = cursor.getString(cursor.getColumnIndexOrThrow("Title"));
-                    long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow("Timestamp"));
-
-                    notifications.add(new Notification(title, new Date(timestamp)));
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-        } catch (Exception e) {
-            Log.e(TAG, "Error fetching notifications: " + e.getMessage());
-        }
+        // Reuse the sequential method because it already handles:
+        // 1. Database connection checks
+        // 2. Lead resolution (getLeadByID)
+        // 3. Mapping DB IDs to Event IDs
+        // 4. Sorting by Timestamp
+        getNotificationSequential(notifications);
         return notifications;
     }
 
     private void addDummyNotifications(){
-        insertNotification(new Notification("Incoming Call from Pengyu Wang", new Date()));
-        insertNotification(new Notification("New SMS from Darren Adam", new Date(System.currentTimeMillis() - 3600000)));
+        // We must fetch actual leads first to link them to the dummy notifications
+        List<Lead> leads = new ArrayList<>();
+        getLeadSequential(leads);
+
+        if (!leads.isEmpty()) {
+            // Link to the first lead (e.g., Darren Adam)
+            insertNotification(new Notification(leads.get(0), "Incoming Call from " + leads.get(0).getLeadFirstName(), new Date()));
+
+            if (leads.size() > 2) {
+                // Link to the third lead (e.g., Pengyu Wang)
+                insertNotification(new Notification(leads.get(2), "New SMS from " + leads.get(2).getLeadFirstName(),
+                        new Date(System.currentTimeMillis() - 3600000)));
+            }
+        }
     }
 }

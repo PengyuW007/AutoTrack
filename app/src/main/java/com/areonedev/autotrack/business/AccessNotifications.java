@@ -21,6 +21,31 @@ public class AccessNotifications {
         this.currNotification = 0;
     }
 
+    public String getNotifications(List<Notification>notifications){
+        notifications.clear();
+        return dataAccess.getNotificationSequential(notifications);
+    }
+
+    public Notification getSequential(){
+        String result = null;
+
+        if (notification == null || notifications.isEmpty()) {
+            // the following line was added as a result of a failing test in AccessCoursesTest!
+            notifications = new ArrayList<>();
+            dataAccess.getNotificationSequential(notifications);
+            currNotification = 0; // Reset counter for a fresh list
+        }
+        if (currNotification < notifications.size()) {
+            notification = notifications.get(currNotification);
+            currNotification++;
+        } else {
+            //now hit the end of the list, so reset the counter
+            notification = null;
+            notifications = null;
+        }
+        return notification;
+    }
+
     public List<Notification> getAllNotifications() {
         return dataAccess.getAllNotifications();
     }

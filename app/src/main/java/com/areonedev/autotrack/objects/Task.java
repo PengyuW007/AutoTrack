@@ -3,11 +3,19 @@ package com.areonedev.autotrack.objects;
 import java.util.Date;
 
 public class Task extends Event {
-    public boolean isCompleted; // True if date is today or in the past
+    private boolean isCompleted;
 
-    public Task(String title, Date date) {
-        super(title, date);
+    // Constructor for new tasks
+    public Task(Lead lead, String title, Date date) {
+        super(lead, title, date);
         this.isCompleted = false;
+    }
+
+    // Constructor for existing tasks loaded from the Database
+    public Task(long id, Lead lead, String title, Date date, boolean isCompleted) {
+        super(lead, title, date);
+        this.setEventID(id);
+        this.isCompleted = isCompleted;
     }
 
     public boolean isCompleted() {

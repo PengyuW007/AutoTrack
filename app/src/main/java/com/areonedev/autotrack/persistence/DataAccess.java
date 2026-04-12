@@ -23,6 +23,9 @@ public interface DataAccess {
     String deleteLead(Lead lead);
 
     /*** Notification ***/
+    String getNotificationSequential(List<Notification>notificationResult);
+    ArrayList<Notification>getNotificationRandom(Notification notification);
+
     String insertNotification(Notification notification);
     String updateNotification(Notification notification);
     String deleteNotification(Notification notification);

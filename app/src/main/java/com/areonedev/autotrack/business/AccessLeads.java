@@ -86,16 +86,18 @@ public class AccessLeads {
         return null;
     }
 
-    public Lead getLeadByPhone(String phone) {
+    public Lead getLeadByContactInfo(String contactInfo) {
         List<Lead> allLeads = new ArrayList<>();
         dataAccess.getLeadSequential(allLeads);
 
-        if (phone != null && !phone.trim().isEmpty()) {
-            for (Lead lead : allLeads) {
-                // Compare the incoming phone with the database phone
-                if (lead.getLeadPhoneNumber() != null && lead.getLeadPhoneNumber().equals(phone)) {
-                    return lead;
-                }
+        for (Lead lead : allLeads) {
+            // Check Phone
+            if (lead.getLeadPhoneNumber() != null && lead.getLeadPhoneNumber().equals(contactInfo)) {
+                return lead;
+            }
+            // Check Email (Case-insensitive)
+            if (lead.getLeadEmail() != null && lead.getLeadEmail().equalsIgnoreCase(contactInfo)) {
+                return lead;
             }
         }
         return null;

@@ -43,7 +43,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
         holder.tvTitle.setText(task.getTitle());
         holder.tvDate.setText(sdf.format(task.getDate()));
 
-        if (task.isCompleted) {
+        if (task.isCompleted()) {
             // Use standard android.graphics.Color
             holder.tvTitle.setTextColor(Color.GRAY);
             holder.tvDate.setTextColor(Color.GRAY);

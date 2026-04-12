@@ -2,6 +2,7 @@ package com.areonedev.autotrack.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,12 +20,11 @@ import java.util.Collections;
 import java.util.List;
 
 public class NotificationsActivity extends AppCompatActivity {
-
+    private static final String TAG = "NotificationActivity";
     private RecyclerView rvNotifications;
     private NotificationAdapter adapter;
     private List<Notification> notificationList;
     private BottomNavigationView bottomNavigationView;
-    private AccessLeads accessLeads;
     private AccessNotifications accessNotifications;
 
     @Override
@@ -35,7 +35,6 @@ public class NotificationsActivity extends AppCompatActivity {
         initViews();
 
         // Initialize data access
-        accessLeads = new AccessLeads();
         accessNotifications = new AccessNotifications();
         notificationList = new ArrayList<>();
 
@@ -51,22 +50,25 @@ public class NotificationsActivity extends AppCompatActivity {
 
         // Set LayoutManager for RecyclerView
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
-
-
+        bottomNavigationView.setSelectedItemId(R.id.nav_notifications);
     }
 
     private void loadNotifications() {
         // 1. Initialize the list
         notificationList.clear();
-        //String error = accessNotifications.getAllNotifications();
+        String error = accessNotifications.getNotifications(notificationList);
 
-        // 3. Sort: Newest at the top (Descending by Date)
-        Collections.sort(notificationList, (n1, n2) ->
-                n2.getDate().compareTo(n1.getDate()));
+        if (error == null) {
+            // 3. Sort: Newest at the top (Descending by Date)
+            Collections.sort(notificationList, (n1, n2) -> n2.getDate().compareTo(n1.getDate()));
 
-        // 4. Set the adapter
-        adapter = new NotificationAdapter(notificationList);
-        rvNotifications.setAdapter(adapter);
+            // 4. Set the adapter
+            adapter = new NotificationAdapter(notificationList);
+            rvNotifications.setAdapter(adapter);
+        } else {
+            Log.e(TAG, "Failed to load notifications: " + error);
+            Toast.makeText(this, "Error loading notifications", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupNavigation() {
