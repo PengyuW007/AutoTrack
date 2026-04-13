@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 Log.e(TAG, "Transition Error: " + e.getMessage());
             }
-        }, 3000); // 3000 milliseconds = 3 seconds
+        }, SPLASH_TIME_OUT); // 3000 milliseconds = 3 seconds
 
     }
 

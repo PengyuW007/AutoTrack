@@ -114,26 +114,54 @@ public class LeadsActivity extends AppCompatActivity {
         });
 
         // Bottom Navigation Logic
-        bottomNav.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
-            if (id == R.id.nav_leads) {
-                return true; // Already here
-            } else if (id == R.id.nav_calendar) {
-                // TODO: Start CalendarActivity
-                //Toast.makeText(this, "Calendar coming soon!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(LeadsActivity.this, CalendarActivity.class);
-                startActivity(intent);
-                overridePendingTransition(0, 0); // Smooth transition
-                return true;
-            } else if (id == R.id.nav_notifications) {
-                // TODO: Start NotificationsActivity
-                //Toast.makeText(this, "Notifications coming soon!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(LeadsActivity.this, NotificationsActivity.class);
-                startActivity(intent);
-                overridePendingTransition(0, 0); // Smooth transition
+        // Search Logic
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                performSearch(query);
                 return true;
             }
-            return false;
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText.isEmpty()) {
+                    loadLeadsFromDB();
+                } else {
+                    performSearch(newText);
+                }
+                return true;
+            }
+        });
+
+        fab.setOnClickListener(v -> {
+            Intent intent = new Intent(LeadsActivity.this, LeadsCreationActivity.class);
+            startActivity(intent);
+        });
+
+        // Bottom Navigation Logic - FIXED
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_leads) {
+                return true; // Already here
+            }
+
+            Intent intent;
+            if (id == R.id.nav_calendar) {
+                // Point to MainActivity where your calendar logic lives
+                intent = new Intent(LeadsActivity.this, CalendarActivity.class);
+            } else if (id == R.id.nav_notifications) {
+                intent = new Intent(LeadsActivity.this, NotificationsActivity.class);
+            } else {
+                return false;
+            }
+
+            // CRITICAL: This flag prevents the "Freeze" by reusing the existing activity
+            // instance instead of killing and restarting the DB connection.
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+            overridePendingTransition(0, 0);
+            return true;
         });
     }
 

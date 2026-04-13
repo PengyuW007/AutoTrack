@@ -1,5 +1,6 @@
 package com.areonedev.autotrack.presentation;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
@@ -163,11 +164,26 @@ public class CalendarActivity extends AppCompatActivity {
         bottomNav.setSelectedItemId(R.id.nav_calendar);
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_leads) {
-                finish(); // Return to the main Leads list
+            if (id == R.id.nav_calendar) {
                 return true;
             }
-            return id == R.id.nav_calendar;
+            Intent intent;
+            if (id == R.id.nav_leads) {
+                intent = new Intent(CalendarActivity.this, LeadsActivity.class);
+            } else if (id == R.id.nav_notifications) {
+                // ADDED: Logic to navigate to Notifications
+                intent = new Intent(CalendarActivity.this, NotificationsActivity.class);
+            } else {
+                return false;
+            }
+
+            // Use REORDER_TO_FRONT to prevent freezing/re-initializing the database
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+
+            // Optional: Use 0,0 transition for a "tab-like" feel
+            overridePendingTransition(0, 0);
+            return true;
         });
     }
 

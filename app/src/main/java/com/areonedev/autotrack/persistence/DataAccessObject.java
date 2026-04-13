@@ -390,13 +390,10 @@ public class DataAccessObject implements DataAccess {
 
     @Override
     public String getNotificationSequential(List<Notification> notificationResult) {
-        if (db == null) return "DB Null";
-
-        // Clear the list to prevent duplicates on refresh
+        if (db == null) return "Database connection lost";
         notificationResult.clear();
 
         try {
-            // Fetch all notifications sorted by newest first
             Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NOTIFICATIONS + " ORDER BY Timestamp DESC", null);
 
             if (cursor.moveToFirst()) {
@@ -406,19 +403,27 @@ public class DataAccessObject implements DataAccess {
                     long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow("Timestamp"));
                     long leadId = cursor.getLong(cursor.getColumnIndexOrThrow("LeadID"));
 
-                    // Resolve the Lead object first
+                    // 1. Resolve the Lead
                     Lead lead = getLeadByID(leadId);
 
+                    // 2. SAFETY CHECK: If lead is null, create a "Dummy" lead so the app doesn't crash
+                    if (lead == null) {
+                        lead = new Lead();
+                        lead.setLeadFirstName("Unknown");
+                        lead.setLeadLastName("Contact");
+                    }
+
+                    // 3. Create the notification
                     Notification note = new Notification(lead, title, new Date(timestamp));
                     note.setEventID(id);
                     notificationResult.add(note);
                 } while (cursor.moveToNext());
             }
             cursor.close();
-            return null;
+            return null; // Success
         } catch (Exception e) {
-            Log.e(TAG, "Sequential fetch error: " + e.getMessage());
-            return e.getMessage();
+            Log.e("DAO", "Error: " + e.getMessage());
+            return e.getMessage(); // This is what triggers your Toast error
         }
     }
 

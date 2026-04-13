@@ -38,66 +38,69 @@ public class NotificationsActivity extends AppCompatActivity {
         accessNotifications = new AccessNotifications();
         notificationList = new ArrayList<>();
 
-        loadNotifications();
+        // Initialize adapter once with empty list to prevent "No adapter attached" error
+        adapter = new NotificationAdapter(notificationList);
+        rvNotifications.setAdapter(adapter);
 
         setupNavigation();
-        loadNotifications();
     }
 
     private void initViews() {
         rvNotifications = findViewById(R.id.rvNotifications);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-        // Set LayoutManager for RecyclerView
         rvNotifications.setLayoutManager(new LinearLayoutManager(this));
-        bottomNavigationView.setSelectedItemId(R.id.nav_notifications);
     }
 
     private void loadNotifications() {
-        // 1. Initialize the list
-        notificationList.clear();
-        String error = accessNotifications.getNotifications(notificationList);
+        // Use a background thread to prevent the UI from freezing
+        new Thread(() -> {
+            List<Notification> tempList = new ArrayList<>();
+            String error = accessNotifications.getNotifications(tempList);
 
-        if (error == null) {
-            // 3. Sort: Newest at the top (Descending by Date)
-            Collections.sort(notificationList, (n1, n2) -> n2.getDate().compareTo(n1.getDate()));
+            // Switch back to UI thread to update the view
+            runOnUiThread(() -> {
+                if (error == null) {
+                    notificationList.clear();
+                    notificationList.addAll(tempList);
 
-            // 4. Set the adapter
-            adapter = new NotificationAdapter(notificationList);
-            rvNotifications.setAdapter(adapter);
-        } else {
-            Log.e(TAG, "Failed to load notifications: " + error);
-            Toast.makeText(this, "Error loading notifications", Toast.LENGTH_SHORT).show();
-        }
+                    // Sort: Newest at the top
+                    Collections.sort(notificationList, (n1, n2) -> n2.getDate().compareTo(n1.getDate()));
+
+                    adapter.notifyDataSetChanged();
+                } else {
+                    Log.e(TAG, "Failed to load notifications: " + error);
+                    Toast.makeText(this, "Error: " + error, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }).start();
     }
 
     private void setupNavigation() {
-        // 1. Set the correct item as selected in the bottom bar
         bottomNavigationView.setSelectedItemId(R.id.nav_notifications);
 
-        // 2. Handle navigation clicks
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
             if (id == R.id.nav_notifications) {
-                // Already here, do nothing
                 return true;
-            } else if (id == R.id.nav_leads) {
-                // Navigate to Leads
-                Intent intent = new Intent(NotificationsActivity.this, LeadsActivity.class);
-                startActivity(intent);
-                overridePendingTransition(0, 0);
-                finish(); // Optional: finish to keep backstack clean
-                return true;
+            }  Intent intent;
+            if (id == R.id.nav_leads) {
+                intent = new Intent(this, LeadsActivity.class);
             } else if (id == R.id.nav_calendar) {
-                // Navigate to Calendar/Agenda
-                Intent intent = new Intent(NotificationsActivity.this, MainActivity.class);
-                startActivity(intent);
-                overridePendingTransition(0, 0);
-                finish();
-                return true;
+                intent = new Intent(this, CalendarActivity.class);
+            } else {
+                return false;
             }
-            return false;
+
+            // Use REORDER_TO_FRONT to prevent the "Freeze" and reuse the existing page
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(intent);
+
+            // Smooth tab-like transition
+            overridePendingTransition(0, 0);
+
+            return true;
         });
     }
 
