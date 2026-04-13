@@ -8,8 +8,8 @@ import com.areonedev.autotrack.presentation.CLI;
 
 public class Main {
 
-    public static final String dbName = "LEADS";
-    private static String dbPathName = "LEADS.db";
+    public static final String dbName = "AutoTrack";
+    private static String dbPathName = "AutoTrack.db";
 
     public static void main(Context context) {
         startUp(context);

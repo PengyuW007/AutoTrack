@@ -16,7 +16,7 @@ import com.areonedev.autotrack.R;
 import com.areonedev.autotrack.application.Main;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String DB_NAME = "LEADS";
+    private static final String DB_NAME = "AutoTrack";
     //public static String[]args = {DB_PATH,DB_NAME};
     private static final String TAG = "Main_Activity";
     private static final int SPLASH_TIME_OUT = 2500; // 2.5 seconds
