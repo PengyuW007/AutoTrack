@@ -33,19 +33,20 @@ Developer Log — AutoTrack
 
 ## Next
 
-- **Animation Removal:** Disable default Android window transition animations to create a faster, "instant-load" user experience.
+- **Task Logic Audit:** Re-evaluate and fix the remaining inconsistencies in the 1-year scientific follow-up cadence to ensure tasks trigger on the correct days.
 
-- **Brand Identity:** Redesign and replace the default Android launcher icon with the finalized AutoTrack logo across all mipmap densities.
+- **Lead Detail Refinement:** Replace the manual "Vehicle Interest" text input with a searchable database lookup linked to the newly imported Vehicle CSV data.
 
 - **Calendar Polishing:**
   - Implement visual highlighting for "Today" in the week strip.
   - Add a "Jump to Today" shortcut to quickly reset the view after scrolling.
 
-- **Lead Detail Refinement:** Replace the manual "Vehicle Interest" text input with a searchable database lookup linked to the newly imported Vehicle CSV data.
-
-- **Task Logic Audit:** Re-evaluate and fix the remaining inconsistencies in the 1-year scientific follow-up cadence to ensure tasks trigger on the correct days.
-
 - **Notification Tagging:** Enhance the `LeadInteractionReceiver` to intelligently tag notifications with specific interaction types (e.g., "Missed Call," "Inbound SMS") based on system intent data.
+
+- **Animation Removal:** Disable default Android window transition animations to create a faster, "instant-load" user experience.
+
+- **Brand Identity:** Redesign and replace the default Android launcher icon with the finalized AutoTrack logo across all mipmap densities.
+
 ---
 **Date:** April 8, 2026
 
