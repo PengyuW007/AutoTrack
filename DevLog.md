@@ -1,5 +1,52 @@
 Developer Log — AutoTrack
 ---
+**Date:** April 9-13, 2026
+
+**Module:** Notification Activity Completed & Object Architecture Refinement
+
+**Status:** Core Features Completed
+
+## Itinerary
+
+- **Notification Activity Completion:** Finalized the `NotificationActivity` and `NotificationAdapter`. The system now successfully displays a chronological log of all lead interactions (Calls, SMS, Emails).
+
+- **Object Model Refactoring:**
+  - Refactored `Notification` and `Task` classes to inherit from a unified `Event` base class.
+  - Updated constructors to require a `Lead` object, ensuring strict relational integrity across the app.
+  - Implemented "Lead Hydration" logic in the DAO to resolve `LeadID` foreign keys into full `Lead` objects during data retrieval.
+
+- **Vehicle Data Integration:** Successfully imported the **Vehicle CSV dataset** into the SQLite database. Transitioned from a free-text "Vehicle Interest" string to a structured relational model, laying the groundwork for searchable inventory selection.
+
+- **Navigation Flow Stabilization:**
+  - Resolved the "Activity Freezing" issue by implementing `FLAG_ACTIVITY_REORDER_TO_FRONT` across the Bottom Navigation Bar.
+  - Fixed navigation loops between `LeadsActivity`, `CalendarActivity`, and `NotificationsActivity` by standardizing the `OnItemSelectedListener` logic.
+
+- **Automated Interaction Tracking:** Integrated `LeadInteractionReceiver` with the database. Incoming communications now trigger a background lookup to identify the lead by phone/email and automatically generate a linked notification.
+
+## Issues
+
+- **Database Schema Mismatch (Resolved):** Fixed a crash caused by a missing `LeadID` column in the `Notifications` table. Implemented a table recreation script to align the SQLite schema with the refactored `Notification` object.
+
+- **Navigation Deadlock (Resolved):** Fixed a bug where `MainActivity` (Calendar) would force-redirect to `LeadsActivity`, preventing users from accessing the calendar view.
+
+- **Icon Rendering (Resolved):** Identified that legacy system PNG icons were appearing faded/muddy. Replaced them with modern Vector Drawables and applied `app:tint` for high-contrast visibility.
+
+## Next
+
+- **Animation Removal:** Disable default Android window transition animations to create a faster, "instant-load" user experience.
+
+- **Brand Identity:** Redesign and replace the default Android launcher icon with the finalized AutoTrack logo across all mipmap densities.
+
+- **Calendar Polishing:**
+  - Implement visual highlighting for "Today" in the week strip.
+  - Add a "Jump to Today" shortcut to quickly reset the view after scrolling.
+
+- **Lead Detail Refinement:** Replace the manual "Vehicle Interest" text input with a searchable database lookup linked to the newly imported Vehicle CSV data.
+
+- **Task Logic Audit:** Re-evaluate and fix the remaining inconsistencies in the 1-year scientific follow-up cadence to ensure tasks trigger on the correct days.
+
+- **Notification Tagging:** Enhance the `LeadInteractionReceiver` to intelligently tag notifications with specific interaction types (e.g., "Missed Call," "Inbound SMS") based on system intent data.
+---
 **Date:** April 8, 2026
 
 **Module:** Lead Details & Data Assets Integration
