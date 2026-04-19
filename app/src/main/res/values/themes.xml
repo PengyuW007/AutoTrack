@@ -3,6 +3,8 @@
     <style name="Base.Theme.AutoTrack" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+            <item name="android:windowAnimationStyle">@null</item>
+            <item name="android:windowDisablePreview">true</item>
     </style>
 
     <style name="Theme.AutoTrack" parent="Base.Theme.AutoTrack" />

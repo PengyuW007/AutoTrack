@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Transitioning to LeadsActivity...");
                 android.content.Intent intent = new android.content.Intent(MainActivity.this, LeadsActivity.class);
                 startActivity(intent);
-
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 // finish() ensures the user cannot go "back" to the splash screen
                 finish();
 
