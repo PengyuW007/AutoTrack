@@ -15,6 +15,7 @@ import com.areonedev.autotrack.business.ScoringService;
 import com.areonedev.autotrack.objects.Task;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,6 +25,23 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
 
     public TimelineAdapter(List<Task> tasks) {
         this.tasks = tasks;
+        sortTasksDescending();
+    }
+
+    private void sortTasksDescending() {
+        if (tasks != null && tasks.size() > 1) {
+            tasks.sort((t1, t2) -> {
+                if (t1.getDate() == null || t2.getDate() == null) return 0;
+                // Descending order: t2 compared to t1
+                return t2.getDate().compareTo(t1.getDate());
+            });
+        }
+    }
+
+    public void updateTasks(List<Task> newTasks) {
+        this.tasks = newTasks;
+        sortTasksDescending();
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -43,23 +61,49 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
         holder.tvTitle.setText(task.getTitle());
         holder.tvDate.setText(sdf.format(task.getDate()));
 
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0);
+        today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0);
+        today.set(Calendar.MILLISECOND, 0);
+
+        Calendar taskDate = Calendar.getInstance();
+        taskDate.setTime(task.getDate());
+        // We don't reset taskDate time because we want to know if it was anytime before today
+
         if (task.isCompleted()) {
-            // Use standard android.graphics.Color
+            // 1. COMPLETED: Gray out regardless of date
             holder.tvTitle.setTextColor(Color.GRAY);
             holder.tvDate.setTextColor(Color.GRAY);
             holder.ivCheck.setImageResource(R.drawable.ic_check_circle_gray);
-        } else {
-            holder.tvTitle.setTextColor(Color.BLACK);
+            holder.itemView.setBackgroundColor(Color.TRANSPARENT); // Reset background
+        } else if (taskDate.before(today)) {
+            // 2. OVERDUE: Time passed but not completed (Highlight Red/Warning)
+            holder.tvTitle.setTextColor(Color.RED);
+            holder.tvTitle.setText("⚠️ OVERDUE: " + task.getTitle());
             holder.tvDate.setTextColor(Color.RED);
             holder.ivCheck.setImageResource(R.drawable.ic_radio_button_unchecked);
+
+            // Optional: Add a light red tint to the background to grab attention
+            holder.itemView.setBackgroundColor(Color.parseColor("#FFF0F0"));
+        } else {
+            // 3. PENDING (Future or Today): Standard view
+            holder.tvTitle.setTextColor(Color.BLACK);
+            holder.itemView.setBackgroundColor(Color.TRANSPARENT);
+
+            if (task.getTitle().contains("URGENT")) {
+                holder.tvDate.setTextColor(Color.RED);
+            } else {
+                holder.tvDate.setTextColor(Color.parseColor("#4CAF50")); // Green for upcoming
+            }
+            int greenColor = Color.parseColor("#4CAF50");
+            holder.ivCheck.setImageResource(R.drawable.ic_radio_button_unchecked);
+            holder.ivCheck.setColorFilter(greenColor);
         }
 
-        // CLICK LOGIC: Toggle completion
+        // CLICK LOGIC: Only the Sales Rep manually toggles completion
         holder.itemView.setOnClickListener(v -> {
-            // Toggle the state
             task.setCompleted(!task.isCompleted());
-
-            // Refresh only this item for smooth animation
             notifyItemChanged(position);
         });
     }

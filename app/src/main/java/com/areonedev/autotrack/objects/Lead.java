@@ -27,6 +27,8 @@ public class Lead implements Serializable {
     private double score;
     private String notes;
     private Date createdAt;
+    private Date lastInteractionDate;
+    private String lastInteractionBy; // "LEAD" or "SALES"
 
     // =========================
     // Constructors
@@ -51,6 +53,8 @@ public class Lead implements Serializable {
         this.followUpDate = new Date();
         this.notes = "";
         this.createdAt = new Date();
+        this.lastInteractionDate = null; // No interaction yet
+        this.lastInteractionBy = "";
         this.score = 0.0;
     }
 
@@ -188,6 +192,12 @@ public class Lead implements Serializable {
 
     public Date getLeadCreatedAt() { return createdAt; }
     public void setLeadCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
+    public Date getLastInteractionDate() { return lastInteractionDate; }
+    public void setLastInteractionDate(Date lastInteractionDate) { this.lastInteractionDate = lastInteractionDate; }
+
+    public String getLastInteractionBy() { return lastInteractionBy; }
+    public void setLastInteractionBy(String lastInteractionBy) { this.lastInteractionBy = lastInteractionBy; }
 
     // =========================
     // Helper Methods

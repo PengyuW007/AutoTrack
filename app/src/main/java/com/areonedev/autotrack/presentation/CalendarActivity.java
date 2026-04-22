@@ -134,6 +134,10 @@ public class CalendarActivity extends AppCompatActivity {
             btnNextWeek.setOnClickListener(v -> shiftWeek(7));
         }
 
+        if(tvMonthYear!=null){
+            tvMonthYear.setOnClickListener(v -> jumpToToday());
+        }
+
         // Layout Managers
         rvWeek.setLayoutManager(new GridLayoutManager(this, 7));
         rvGeneralTasks.setLayoutManager(new LinearLayoutManager(this));
@@ -155,8 +159,10 @@ public class CalendarActivity extends AppCompatActivity {
             weekCal.add(Calendar.DAY_OF_MONTH, 1);
         }
 
+        Date today = Calendar.getInstance().getTime();
+
         //Pass selectedDate (which is a Date object) to the updated constructor
-        WeekAdapter adapter = new WeekAdapter(days, selectedDate, date -> onDateSelected(date));
+        WeekAdapter adapter = new WeekAdapter(days, selectedDate, today,date -> onDateSelected(date));
         rvWeek.setAdapter(adapter);
     }
 
@@ -195,5 +201,19 @@ public class CalendarActivity extends AppCompatActivity {
             // Use the existing method that fetches and sorts the leads
             updateTaskPanels(selectedDate);
         }
+    }
+
+    private void jumpToToday() {
+        // 1. Reset the calendar instance to right now
+        currentCal = Calendar.getInstance();
+
+        // 2. Set the selected date to today
+        selectedDate = currentCal.getTime();
+
+        // 3. Refresh the Week Strip (this will now show the current week)
+        loadWeekView();
+
+        // 4. Refresh the task panels for today
+        updateTaskPanels(selectedDate);
     }
 }
