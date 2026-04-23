@@ -11,7 +11,12 @@ public class Notification extends Event {
 
     // Constructor for existing notifications loaded from the Database
     public Notification(long id, Lead lead, String title, Date date) {
-        super(lead, title, date);
+        super(lead, title, date); // id of notification is auto-generated
         this.setEventID(id); // Using the setter from Event
     }
+
+    public long getLeadID(){
+        return lead.getLeadID();
+    }
+
 }

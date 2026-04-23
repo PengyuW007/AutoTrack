@@ -1,5 +1,6 @@
 package com.areonedev.autotrack.presentation;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,6 +70,13 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         } else {
             holder.tvLeadName.setText(fullTitle);
         }
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), LeadDetailsActivity.class);
+            // Pass the leadId stored in the Notification object
+            intent.putExtra("LEAD_ID", note.getLeadID());
+            v.getContext().startActivity(intent);
+        });
     }
 
     @Override

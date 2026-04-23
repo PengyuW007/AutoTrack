@@ -59,6 +59,14 @@ public class LeadDetailsActivity extends AppCompatActivity {
         accessLeads = new AccessLeads();
         currentLead = (Lead) getIntent().getSerializableExtra("SELECTED_LEAD");
 
+        if (currentLead == null) {
+            long leadId = getIntent().getLongExtra("LEAD_ID", -1);
+            if (leadId != -1) {
+                // Fetch the lead from your database using the ID
+                currentLead = accessLeads.getRandom(leadId);
+            }
+        }
+
         setupToolbar();
         initViews();
         setupContactActions();
