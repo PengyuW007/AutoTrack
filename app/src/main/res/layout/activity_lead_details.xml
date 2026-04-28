@@ -168,28 +168,49 @@
                         android:orientation="vertical"
                         android:padding="16dp">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Tasks &amp; Activities"
-                            android:textColor="?attr/colorPrimary"
-                            android:textStyle="bold" />
+                        <!-- Header Row: Title and Add Button -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
 
+                            <TextView
+                                android:id="@+id/tvTasksTitle"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:text="Tasks &amp; Activities"
+                                android:textColor="?attr/colorPrimary"
+                                android:textStyle="bold"
+                                android:textSize="16sp" />
+
+                            <ImageButton
+                                android:id="@+id/btnAddTask"
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:src="@android:drawable/ic_input_add"
+                                android:contentDescription="Add Task"
+                                app:tint="?attr/colorPrimary" />
+                        </RelativeLayout>
+
+                        <!-- Timeline List -->
                         <androidx.recyclerview.widget.RecyclerView
                             android:id="@+id/rvLeadTimeline"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:scrollbars="vertical"
-                            android:fadeScrollbars="false"
-                            android:nestedScrollingEnabled="true"
+                            android:layout_marginTop="12dp"
+                            android:nestedScrollingEnabled="false"
                             tools:listitem="@layout/item_timeline"
-                            tools:itemCount="5" />
+                            tools:itemCount="3" />
+
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
 
-            <!-- EDIT MODE: Form Layout (Includes Delete Button) -->
+            <!-- EDIT MODE: Form Layout -->
             <LinearLayout
                 android:id="@+id/layoutEditMode"
                 android:layout_width="match_parent"
@@ -212,7 +233,6 @@
 
                 <Button android:id="@+id/btnUpdateLead" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Save Changes" android:layout_marginTop="16dp" />
 
-                <!-- Delete Button only visible in Edit Mode -->
                 <Button android:id="@+id/btnDeleteLead"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="match_parent"

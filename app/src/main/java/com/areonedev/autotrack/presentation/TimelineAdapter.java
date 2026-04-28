@@ -58,8 +58,15 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
 
         if (task == null || task.getDate() == null) return;
 
+        // 1. Update Date Format to show Time (HH:mm)
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault());
+
         holder.tvTitle.setText(task.getTitle());
-        holder.tvDate.setText(sdf.format(task.getDate()));
+        holder.tvDate.setText(dateTimeFormat.format(task.getDate()));
+
+        // 2. Identify High-Intent Tasks (Appointments/Test Drives)
+        String titleLower = task.getTitle().toLowerCase();
+        boolean isHighIntent = titleLower.contains("appointment") || titleLower.contains("test drive");
 
         Calendar today = Calendar.getInstance();
         today.set(Calendar.HOUR_OF_DAY, 0);
@@ -69,42 +76,50 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
 
         Calendar taskDate = Calendar.getInstance();
         taskDate.setTime(task.getDate());
-        // We don't reset taskDate time because we want to know if it was anytime before today
 
+        // 3. Apply Visual States
         if (task.isCompleted()) {
-            // 1. COMPLETED: Gray out regardless of date
+            // COMPLETED: Gray out
             holder.tvTitle.setTextColor(Color.GRAY);
             holder.tvDate.setTextColor(Color.GRAY);
             holder.ivCheck.setImageResource(R.drawable.ic_check_circle_gray);
-            holder.itemView.setBackgroundColor(Color.TRANSPARENT); // Reset background
+            holder.itemView.setBackgroundColor(Color.TRANSPARENT);
         } else if (taskDate.before(today)) {
-            // 2. OVERDUE: Time passed but not completed (Highlight Red/Warning)
+            // OVERDUE: Red
             holder.tvTitle.setTextColor(Color.RED);
             holder.tvTitle.setText("⚠️ OVERDUE: " + task.getTitle());
             holder.tvDate.setTextColor(Color.RED);
             holder.ivCheck.setImageResource(R.drawable.ic_radio_button_unchecked);
-
-            // Optional: Add a light red tint to the background to grab attention
             holder.itemView.setBackgroundColor(Color.parseColor("#FFF0F0"));
         } else {
-            // 3. PENDING (Future or Today): Standard view
+            // PENDING: Standard or High-Intent Highlight
             holder.tvTitle.setTextColor(Color.BLACK);
             holder.itemView.setBackgroundColor(Color.TRANSPARENT);
 
-            if (task.getTitle().contains("URGENT")) {
+            if (isHighIntent) {
+                // Highlight Appointments/Test Drives in Blue or Purple to show they are special
+                holder.tvTitle.setTextColor(Color.parseColor("#4CAF50"));
+                holder.tvDate.setTextColor(Color.parseColor("#4CAF50"));
+            } else if (task.getTitle().contains("URGENT")) {
                 holder.tvDate.setTextColor(Color.RED);
             } else {
-                holder.tvDate.setTextColor(Color.parseColor("#4CAF50")); // Green for upcoming
+                holder.tvDate.setTextColor(Color.parseColor("#4CAF50")); // Green
             }
-            int greenColor = Color.parseColor("#4CAF50");
+
             holder.ivCheck.setImageResource(R.drawable.ic_radio_button_unchecked);
-            holder.ivCheck.setColorFilter(greenColor);
+            holder.ivCheck.setColorFilter(Color.parseColor("#4CAF50"));
         }
 
-        // CLICK LOGIC: Only the Sales Rep manually toggles completion
+        // 4. CLICK LOGIC: Toggle completion and notify activity to recalculate score
         holder.itemView.setOnClickListener(v -> {
             task.setCompleted(!task.isCompleted());
             notifyItemChanged(position);
+
+            // IMPORTANT: You should implement a callback here to LeadDetailsActivity
+            // to call accessLeads.updateLead(currentLead) so the score update is saved.
+            if (onTaskStatusChangedListener != null) {
+                onTaskStatusChangedListener.onTaskStatusChanged(task);
+            }
         });
     }
 
@@ -124,5 +139,16 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
             tvDate = itemView.findViewById(R.id.tvTimelineDate);
             ivCheck = itemView.findViewById(R.id.ivTimelineStatus);
         }
+    }
+
+    // Add this interface to handle database updates from the Adapter
+    public interface OnTaskStatusChangedListener {
+        void onTaskStatusChanged(Task task);
+    }
+
+    private OnTaskStatusChangedListener onTaskStatusChangedListener;
+
+    public void setOnTaskStatusChangedListener(OnTaskStatusChangedListener listener) {
+        this.onTaskStatusChangedListener = listener;
     }
 }

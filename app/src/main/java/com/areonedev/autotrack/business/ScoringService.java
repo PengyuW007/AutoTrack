@@ -3,25 +3,26 @@ package com.areonedev.autotrack.business;
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Task;
 
+import android.os.Build;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.Collections;
 
 public class ScoringService {
     private final int THRESHOLD = 100;
-    private final int[] SILENT_MILESTONES = { 3, 8, 15, 30, 90, 180, 365 };
+    private final int[] SILENT_MILESTONES = {3, 8, 15, 30, 90, 180, 365};
 
     public double calculateScore(Lead lead) {
         double score = 0;
-        // 1️⃣ Stage Weight
+        // 1️⃣ Stage Weight (Linear)
         score += getStageWeight(lead.getLeadStage());
-        // 2️⃣ Follow-up urgency (Time since last interaction)
+        // 2️⃣ Follow-up urgency
         score += getTimeWeight(lead);
-        // 3️⃣ Budget weight
-        score += lead.getLeadBudget() / 1000.0;
-        // 4️⃣ Engagement weight
+        // 3️⃣ Engagement weight (Now uses the passed leadTasks)
         score += getEngagementWeight(lead);
 
         return score;
@@ -73,6 +74,20 @@ public class ScoringService {
             }
         }
 
+        // --- 2. ADD MANUAL USER TASKS
+        // This ensures the "Appointment", "Test Drive", etc., appear in the window
+        if (lead.getLeadTasks() != null && !lead.getLeadTasks().isEmpty()) {
+            timeline.addAll(lead.getLeadTasks());
+        }
+
+        // --- 3. SORT BY DATE
+        // This ensures the timeline flows correctly from past to future
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            timeline.sort((t1, t2) -> t1.getDate().compareTo(t2.getDate()));
+        } else {
+            Collections.sort(timeline, (t1, t2) -> t1.getDate().compareTo(t2.getDate()));
+        }
+
         return timeline;
     }
 
@@ -115,36 +130,51 @@ public class ScoringService {
 
         // Score-based Overrides (e.g. Negotiation)
         double score = calculateScore(lead);
-        if (score >= THRESHOLD && "NEGOTIATION".equals(lead.getLeadStage())) {
-            return "🤝 Closing: Address final objections (High Priority Score: " + (int)score + ")";
+        if (score >= THRESHOLD) {
+            return "🔥 High Priority: Nurture " + lead.getLeadStage() + " (Score: " + (int) score + ")";
         }
 
-        return null;
+        return "Standard Follow-up: " + lead.getLeadStage();
     }
 
     private String getMissionNameByDay(int day) {
         switch (day) {
-            case 3: return "💡 New Ideas: Follow up thoughts";
-            case 8: return "📈 Market Update: Inventory/Trade-in";
-            case 15: return "🎥 Resource: Hidden feature video";
-            case 30: return "🔍 Checking In: Specific specs";
-            case 90: return "❄️ Seasonal: Service specials";
-            case 180: return "🤝 Relationship: High-level check-in";
-            case 365: return "🎂 Anniversary: Yearly check-in";
-            default: return "Follow up";
+            case 3:
+                return "💡 New Ideas: Follow up thoughts";
+            case 8:
+                return "📈 Market Update: Inventory/Trade-in";
+            case 15:
+                return "🎥 Resource: Hidden feature video";
+            case 30:
+                return "🔍 Checking In: Specific specs";
+            case 90:
+                return "❄️ Seasonal: Service specials";
+            case 180:
+                return "🤝 Relationship: High-level check-in";
+            case 365:
+                return "🎂 Anniversary: Yearly check-in";
+            default:
+                return "Follow up";
         }
     }
 
     private double getStageWeight(String stage) {
         if (stage == null) return 0;
         switch (stage.toUpperCase()) {
-            case "NEW": return 60;
-            case "CONTACTED": return 40;
-            case "VISITED": return 50;
-            case "TEST_DRIVE": return 70;
-            case "NEGOTIATION": return 80;
-            case "CLOSED": return 0;
-            default: return 10;
+            case "NEW":
+                return 40;
+            case "CONTACTED":
+                return 50;
+            case "VISITED":
+                return 60;
+            case "TEST_DRIVE":
+                return 70;
+            case "NEGOTIATION":
+                return 100;
+            case "CLOSED":
+                return 0;
+            default:
+                return 10;
         }
     }
 
@@ -165,14 +195,25 @@ public class ScoringService {
     }
 
     private double getEngagementWeight(Lead lead) {
-        // Logic from your previous code
-        if (lead.getLeadNotes() != null) {
-            String notes = lead.getLeadNotes().toLowerCase();
-            if (notes.contains("blocked")) return -100;
-            if (notes.contains("cold")) return -25;
-            if (notes.contains("hot")) return 15;
+        double engagementScore = 0;
+        List<Task> leadTasks = lead.getLeadTasks();
+
+        if (leadTasks != null) {
+            int validVisitCount = 0;
+            for (Task task : leadTasks) {
+                // Only count tasks that are COMPLETED and match high-intent keywords
+                if (task.isCompleted()) {
+                    String desc = task.getTitle().toLowerCase();
+                    if (desc.contains("appointment") || desc.contains("test drive") || desc.contains("visited")) {
+                        validVisitCount++;
+                    }
+                }
+            }
+            // Darryl gets +25 for every completed visit/appointment
+            engagementScore += (validVisitCount * 10);
         }
-        return 0;
+
+        return engagementScore;
     }
 
     private long getDaysDiff(Calendar start, Calendar end) {

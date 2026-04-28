@@ -9,10 +9,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Calendar;
 
 public class LeadDetailsActivity extends AppCompatActivity {
 
@@ -40,6 +44,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
     // View Mode Components
     private TextView tvViewName, tvViewPhone, tvViewEmail, tvViewAddress, tvViewVehicle, tvViewNotes, tvDetDate, tvDetUpdatedDate;
     private ImageView ivPhone, ivEmail, ivSms;
+    private ImageButton btnAddTask;
 
     // Edit Mode Components
     private EditText etFirstName, etLastName, etPhone, etEmail, etMake, etModel, etYear, etTrim, etNotes;
@@ -70,7 +75,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
         setupToolbar();
         initViews();
         setupContactActions();
-
+        btnAddTask.setOnClickListener(v -> showAddTaskDialog());
         if (currentLead != null) {
             refreshUI();
         } else {
@@ -116,6 +121,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
         ivSms = findViewById(R.id.ivSmsIcon);
 
         rvTimeline = findViewById(R.id.rvLeadTimeline);
+        btnAddTask = findViewById(R.id.btnAddTask);
 
         // Edit Mode EditTexts
         etFirstName = findViewById(R.id.etDetFirstName);
@@ -353,5 +359,79 @@ public class LeadDetailsActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    private void showAddTaskDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Schedule New Task");
+
+        // These keywords are recognized by your ScoringService for the +25 bonus
+        String[] taskTypes = {"Appointment", "Test Drive", "Follow-up Call", "Other"};
+
+        builder.setItems(taskTypes, (dialog, which) -> {
+            String selectedType = taskTypes[which];
+            promptForTaskDetails(selectedType);
+        });
+        builder.show();
+    }
+
+    private void promptForTaskDetails(String type) {
+        // 1. Initialize a Calendar to store the user's selection
+        final Calendar calendar = java.util.Calendar.getInstance();
+
+        // 2. First, pick the Date
+        new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+            calendar.set(java.util.Calendar.YEAR, year);
+            calendar.set(java.util.Calendar.MONTH, month);
+            calendar.set(java.util.Calendar.DAY_OF_MONTH, dayOfMonth);
+
+            // 3. Second, pick the Time
+            new TimePickerDialog(this, (timeView, hourOfDay, minute) -> {
+                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                calendar.set(Calendar.MINUTE, minute);
+
+                // 4. Finally, ask for optional details
+                showOptionalDetailsDialog(type, calendar.getTime());
+
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(java.util.Calendar.MINUTE), false).show();
+
+        }, calendar.get(java.util.Calendar.YEAR), calendar.get(java.util.Calendar.MONTH), calendar.get(java.util.Calendar.DAY_OF_MONTH)).show();
+    }
+
+    private void showOptionalDetailsDialog(String type, Date selectedDate) {
+        EditText etInput = new EditText(this);
+        etInput.setHint("Details (Optional)");
+
+        // Format the date for the dialog title so the user sees what they picked
+        SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault());
+
+        new AlertDialog.Builder(this)
+                .setTitle("Details for " + type)
+                .setMessage("Scheduled for: " + sdf.format(selectedDate))
+                .setView(etInput)
+                .setPositiveButton("Confirm & Save", (dialog, which) -> {
+                    String note = etInput.getText().toString();
+                    saveManualTask(type, note, selectedDate);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void saveManualTask(String type, String note,Date taskDate) {
+        // 1. Create the Task object using the selected date instead of 'new Date()'
+        String finalDescription = type + (note.isEmpty() ? "" : ": " + note);
+        Task newTask = new Task(currentLead, finalDescription, taskDate);
+        newTask.setCompleted(false);
+
+        // 2. Add and Persist
+        currentLead.addLeadTask(newTask);
+        String result = accessLeads.updateLead(currentLead);
+
+        if (result == null) {
+            Toast.makeText(this, "Task scheduled for " + taskDate.toString(), Toast.LENGTH_SHORT).show();
+            refreshUI();
+        } else {
+            Toast.makeText(this, "Error: " + result, Toast.LENGTH_SHORT).show();
+        }
     }
 }
