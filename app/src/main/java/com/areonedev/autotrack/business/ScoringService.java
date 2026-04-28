@@ -74,19 +74,8 @@ public class ScoringService {
             }
         }
 
-        // --- 2. ADD MANUAL USER TASKS
-        // This ensures the "Appointment", "Test Drive", etc., appear in the window
-        if (lead.getLeadTasks() != null && !lead.getLeadTasks().isEmpty()) {
-            timeline.addAll(lead.getLeadTasks());
-        }
-
-        // --- 3. SORT BY DATE
-        // This ensures the timeline flows correctly from past to future
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            timeline.sort((t1, t2) -> t1.getDate().compareTo(t2.getDate()));
-        } else {
-            Collections.sort(timeline, (t1, t2) -> t1.getDate().compareTo(t2.getDate()));
-        }
+        // 4. Sort by Date (Past to Present)
+        Collections.sort(timeline, (t1, t2) -> t1.getDate().compareTo(t2.getDate()));
 
         return timeline;
     }
@@ -196,21 +185,26 @@ public class ScoringService {
 
     private double getEngagementWeight(Lead lead) {
         double engagementScore = 0;
-        List<Task> leadTasks = lead.getLeadTasks();
 
-        if (leadTasks != null) {
-            int validVisitCount = 0;
-            for (Task task : leadTasks) {
-                // Only count tasks that are COMPLETED and match high-intent keywords
-                if (task.isCompleted()) {
-                    String desc = task.getTitle().toLowerCase();
-                    if (desc.contains("appointment") || desc.contains("test drive") || desc.contains("visited")) {
-                        validVisitCount++;
-                    }
-                }
+        // Since we have no Task List, we derive engagement from the Lead's current status
+        String stage = lead.getLeadStage() != null ? lead.getLeadStage().toUpperCase() : "";
+
+        // If they have reached high-intent stages, they get an engagement bonus
+        // This replaces the "validVisitCount" logic
+        if (stage.equals("VISITED")) {
+            engagementScore += 20;
+        } else if (stage.equals("TEST_DRIVE")) {
+            engagementScore += 40;
+        } else if (stage.equals("NEGOTIATION")) {
+            engagementScore += 60;
+        }
+
+        // Sentiment fallback: Check notes for "hot" keywords
+        if (lead.getLeadNotes() != null) {
+            String notes = lead.getLeadNotes().toLowerCase();
+            if (notes.contains("hot") || notes.contains("ready") || notes.contains("urgent")) {
+                engagementScore += 20;
             }
-            // Darryl gets +25 for every completed visit/appointment
-            engagementScore += (validVisitCount * 10);
         }
 
         return engagementScore;

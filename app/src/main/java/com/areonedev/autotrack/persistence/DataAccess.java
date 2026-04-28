@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Notification;
+import com.areonedev.autotrack.objects.Task;
 
 public interface DataAccess {
     void open(String string);
@@ -29,7 +30,6 @@ public interface DataAccess {
     String insertNotification(Notification notification);
     String updateNotification(Notification notification);
     String deleteNotification(Notification notification);
-
     List<Notification> getAllNotifications();
 
 }

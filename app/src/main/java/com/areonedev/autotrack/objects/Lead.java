@@ -31,8 +31,6 @@ public class Lead implements Serializable {
     private Date createdAt;
     private Date lastInteractionDate;
     private String lastInteractionBy; // "LEAD" or "SALES"
-    private List<Task> tasks;
-
 
     // =========================
     // Constructors
@@ -60,7 +58,6 @@ public class Lead implements Serializable {
         this.lastInteractionDate = null; // No interaction yet
         this.lastInteractionBy = "";
         this.score = 0.0;
-        this.tasks = new ArrayList<>();
     }
 
     public Lead(
@@ -111,8 +108,6 @@ public class Lead implements Serializable {
         this.followUpDate = (followUpDate == null) ? new Date() : followUpDate;
         this.createdAt = (createdAt == null) ? new Date() : createdAt;
         this.score = 0.0;
-
-        this.tasks = new ArrayList<>();
     }
 
     // =========================
@@ -205,20 +200,6 @@ public class Lead implements Serializable {
 
     public String getLastInteractionBy() { return lastInteractionBy; }
     public void setLastInteractionBy(String lastInteractionBy) { this.lastInteractionBy = lastInteractionBy; }
-
-    public void addLeadTask(Task task) {
-        tasks.add(task);
-    }
-
-    public void removeLeadTask(Task task) {
-        if(task!=null){
-            tasks.remove(task);
-        }
-    }
-
-    public List<Task> getLeadTasks() {
-        return tasks;
-    }
 
     // =========================
     // Helper Methods

@@ -418,20 +418,9 @@ public class LeadDetailsActivity extends AppCompatActivity {
     }
 
     private void saveManualTask(String type, String note,Date taskDate) {
-        // 1. Create the Task object using the selected date instead of 'new Date()'
-        String finalDescription = type + (note.isEmpty() ? "" : ": " + note);
+        // 1. Create the Task object
+        String finalDescription = type + (note.trim().isEmpty() ? "" : ": " + note);
         Task newTask = new Task(currentLead, finalDescription, taskDate);
         newTask.setCompleted(false);
-
-        // 2. Add and Persist
-        currentLead.addLeadTask(newTask);
-        String result = accessLeads.updateLead(currentLead);
-
-        if (result == null) {
-            Toast.makeText(this, "Task scheduled for " + taskDate.toString(), Toast.LENGTH_SHORT).show();
-            refreshUI();
-        } else {
-            Toast.makeText(this, "Error: " + result, Toast.LENGTH_SHORT).show();
-        }
     }
 }

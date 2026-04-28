@@ -327,6 +327,7 @@ public class DataAccessObject implements DataAccess {
         ArrayList<Lead> results = getLeadRandom(criteria);
         return (results != null && !results.isEmpty()) ? results.get(0) : null;
     }
+
     private void addDummyLeads() {
         // 1. Setup Vehicles
         Vehicle atlas = new Vehicle("Volkswagen", "Atlas", "2024", "Execline");
@@ -388,6 +389,7 @@ public class DataAccessObject implements DataAccess {
     }
 
 
+    /*** Notification ***/
     @Override
     public String getNotificationSequential(List<Notification> notificationResult) {
         if (db == null) return "Database connection lost";
@@ -521,7 +523,6 @@ public class DataAccessObject implements DataAccess {
         getNotificationSequential(notifications);
         return notifications;
     }
-
     private void addDummyNotifications(){
         // We must fetch actual leads first to link them to the dummy notifications
         List<Lead> leads = new ArrayList<>();
