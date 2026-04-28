@@ -26,10 +26,16 @@ public interface DataAccess {
     /*** Notification ***/
     String getNotificationSequential(List<Notification>notificationResult);
     ArrayList<Notification>getNotificationRandom(Notification notification);
-
     String insertNotification(Notification notification);
     String updateNotification(Notification notification);
     String deleteNotification(Notification notification);
     List<Notification> getAllNotifications();
+
+    /*** Task ***/
+    String getTaskSequential(List<Task>taskResult);
+    ArrayList<Task>getTaskRandom(Task task);
+    String insertTask(Task task);
+    String updateTask(Task task);
+    String deleteTask(Task task);
 
 }

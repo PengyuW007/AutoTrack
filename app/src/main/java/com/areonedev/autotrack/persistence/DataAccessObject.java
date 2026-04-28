@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 
 import com.areonedev.autotrack.objects.Lead;
+import com.areonedev.autotrack.objects.Task;
 import com.areonedev.autotrack.objects.Vehicle;
 import com.areonedev.autotrack.objects.Notification;
 
@@ -539,4 +540,117 @@ public class DataAccessObject implements DataAccess {
             }
         }
     }
+
+    /*** Task ***/
+    @Override
+    public String getTaskSequential(List<Task> taskResult) {
+        if (db == null) return "Database connection lost";
+        taskResult.clear();
+
+        try {
+            // Order by Timestamp so the timeline flows correctly
+            Cursor cursor = db.rawQuery("SELECT * FROM Tasks ORDER BY Timestamp ASC", null);
+
+            if (cursor.moveToFirst()) {
+                do {
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow("TaskID"));
+                    String title = cursor.getString(cursor.getColumnIndexOrThrow("Title"));
+                    long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow("Timestamp"));
+                    int isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow("IsCompleted"));
+                    long leadId = cursor.getLong(cursor.getColumnIndexOrThrow("LeadID"));
+
+                    // Resolve the Lead associated with this task
+                    Lead lead = getLeadByID(leadId);
+
+                    if (lead != null) {
+                        Task task = new Task(lead, title, new Date(timestamp));
+                        task.setCompleted(isCompleted == 1);
+                        // If your Task object has an ID field, set it here
+                        // task.setTaskID(id);
+                        taskResult.add(task);
+                    }
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            return null;
+        } catch (Exception e) {
+            Log.e("DAO", "getTaskSequential Error: " + e.getMessage());
+            return e.getMessage();
+        }
+    }
+
+    @Override
+    public ArrayList<Task> getTaskRandom(Task criteria) {
+        ArrayList<Task> results = new ArrayList<>();
+        if (db == null) return results;
+
+        try {
+            // Search by LeadID to get all tasks for a specific lead
+            Cursor cursor = db.rawQuery("SELECT * FROM Tasks WHERE LeadID = ?",
+                    new String[]{String.valueOf(criteria.getLead().getLeadID())});
+
+            if (cursor.moveToFirst()) {
+                do {
+                    String title = cursor.getString(cursor.getColumnIndexOrThrow("Title"));
+                    long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow("Timestamp"));
+                    int isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow("IsCompleted"));
+
+                    Task task = new Task(criteria.getLead(), title, new Date(timestamp));
+                    task.setCompleted(isCompleted == 1);
+                    results.add(task);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } catch (Exception e) {
+            Log.e("DAO", "getTaskRandom Error: " + e.getMessage());
+        }
+        return results;
+    }
+
+    @Override
+    public String insertTask(Task task) {
+        try {
+            ContentValues values = new ContentValues();
+            values.put("Title", task.getTitle());
+            values.put("Timestamp", task.getDate().getTime());
+            values.put("IsCompleted", task.isCompleted() ? 1 : 0);
+            values.put("LeadID", task.getLead() != null ? task.getLead().getLeadID() : -1);
+
+            long rowId = db.insert("Tasks", null, values);
+            return (rowId != -1) ? null : "Insert task failed";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @Override
+    public String updateTask(Task task) {
+        try {
+            ContentValues values = new ContentValues();
+            values.put("Title", task.getTitle());
+            values.put("Timestamp", task.getDate().getTime());
+            values.put("IsCompleted", task.isCompleted() ? 1 : 0);
+            values.put("LeadID", task.getLead() != null ? task.getLead().getLeadID() : -1);
+
+            // Update based on Title and LeadID (or TaskID if you have one)
+            int rows = db.update("Tasks", values, "Title = ? AND LeadID = ?",
+                    new String[]{task.getTitle(), String.valueOf(task.getLead().getLeadID())});
+
+            return (rows > 0) ? null : "Update failed: Task not found";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @Override
+    public String deleteTask(Task task) {
+        try {
+            int rows = db.delete("Tasks", "Title = ? AND LeadID = ?",
+                    new String[]{task.getTitle(), String.valueOf(task.getLead().getLeadID())});
+            return (rows > 0) ? null : "Delete failed";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
 }
