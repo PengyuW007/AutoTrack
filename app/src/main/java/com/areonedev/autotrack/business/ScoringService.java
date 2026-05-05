@@ -3,8 +3,6 @@ package com.areonedev.autotrack.business;
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Task;
 
-import android.os.Build;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -219,6 +217,13 @@ public class ScoringService {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
+    }
+
+    private boolean containsTask(List<Task> list, String title) {
+        for (Task t : list) {
+            if (t.getTitle().equals(title)) return true;
+        }
+        return false;
     }
 
 }
