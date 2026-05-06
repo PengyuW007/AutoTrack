@@ -1,6 +1,47 @@
 Developer Log — AutoTrack
 ---
+**Date:** May 5, 2026
+
+**Module:** Task Persistence & Lifecycle Management
+
+## Itinerary
+
+- **Task Database Architecture:**
+  - Integrated the `Tasks` table into the `DataAccessObject (DAO)` layer.
+  - Established a **LeadID foreign key relationship**, ensuring each task is linked to a specific lead.
+  - Configured the `isCompleted` field as an integer (0/1) to persist task completion state across app restarts.
+
+- **Intelligent Persistence Logic (ScoringService):**
+  - Implemented a **hydration pattern** in `getFullTimeline`, prioritizing database records before generating missing milestones.
+  - Added **idempotent insertion logic** to prevent duplicate system-generated tasks (e.g., "Day 1 Gratitude").
+  - Enabled **auto-hardening**, where system-generated milestones are immediately inserted into the database upon creation.
+
+- **UI-to-Database Synchronization:**
+  - Implemented `OnTaskStatusChangedListener` to connect `TimelineAdapter` with the DAO layer.
+  - Enabled **real-time persistence**, where toggling a task in the UI triggers an immediate database `UPDATE`.
+  - Developed the `saveManualTask` workflow, allowing users to create custom tasks (e.g., Appointments, Test Drives) that are instantly stored and reflected in scoring.
+
+- **Engagement Score Stabilization:**
+  - Refactored the scoring engine to read directly from the `Tasks` table instead of relying on in-memory calculations.
+  - Ensured the engagement score is now **fully consistent with persisted task data**.
+
+## Issues
+
+- **Volatile Engagement Score:**
+  - Root cause: Score calculation was previously dependent on transient in-memory task states.
+  - Resolution: Updated scoring logic to query persisted task data, ensuring accuracy and consistency across sessions.
+
+## Next
+
+- **Task CRUD Expansion:** Implement **Update/Delete functionality** via long-press gestures in the timeline to allow users to manage tasks more effectively.
+
+- **Lifecycle Management Enhancements:** Introduce safeguards for handling accidental task creation and improve edit workflows.
+
+- **Vehicle Inventory Integration (Future Phase):** Begin integrating the **Car Inventory Database** to associate specific vehicles with leads, enabling more context-aware and dynamic task generation.
+
+---
 **Date:** April 17 – April 23, 2026
+
 **Module:** Core Logic Refinement & UI/UX Optimization
 ## Itinerary
 
