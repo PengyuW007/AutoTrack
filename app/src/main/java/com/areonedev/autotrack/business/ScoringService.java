@@ -13,6 +13,7 @@ import java.util.Collections;
 public class ScoringService {
     private final int THRESHOLD = 100;
     private final int[] SILENT_MILESTONES = {3, 8, 15, 30, 90, 180, 365};
+    private AccessTasks accessTasks = new AccessTasks();
 
     public double calculateScore(Lead lead) {
         double score = 0;
@@ -30,6 +31,8 @@ public class ScoringService {
         List<Task> timeline = new ArrayList<>();
         if (lead == null || lead.getLeadCreatedAt() == null) return timeline;
 
+        accessTasks.getTasksByLead(timeline, lead);
+
         // Determine Pivot Date: If lead replied, reset timeline to that date.
         Date pivotDate = (lead.getLastInteractionDate() != null && "LEAD".equals(lead.getLastInteractionBy()))
                 ? lead.getLastInteractionDate()
@@ -43,32 +46,45 @@ public class ScoringService {
         resetTime(todayCal);
 
         // 1. Handle Day 1 Gratitude (Always from Creation)
-        Calendar day1Cal = Calendar.getInstance();
-        day1Cal.setTime(lead.getLeadCreatedAt());
-        day1Cal.add(Calendar.DAY_OF_YEAR, 1);
-        resetTime(day1Cal);
-        if (!day1Cal.after(todayCal)) {
-            Task t = new Task(lead, "🙏 Gratitude: Thank You & Info Swap", day1Cal.getTime());
-            t.setCompleted(true);
-            timeline.add(t);
+        String gratitudeTitle = "🙏 Gratitude: Thank You & Info Swap";
+        if (!containsTask(timeline, gratitudeTitle)) {
+            Calendar day1Cal = Calendar.getInstance();
+            day1Cal.setTime(lead.getLeadCreatedAt());
+            day1Cal.add(Calendar.DAY_OF_YEAR, 1);
+            resetTime(day1Cal);
+
+            if (!day1Cal.after(todayCal)) {
+                Task t = new Task(lead, gratitudeTitle, day1Cal.getTime());
+                t.setCompleted(true);
+                accessTasks.insertTask(t); // PERSIST
+                timeline.add(t);
+            }
         }
 
         // 2. Handle 48h Urgency if Lead Replied
-        long daysFromPivot = getDaysDiff(pivotCal, todayCal);
-        if ("LEAD".equals(lead.getLastInteractionBy())) {
-            Task urgent = new Task(lead, "🚨 URGENT: Lead replied. Respond within 48h!", todayCal.getTime());
+        String urgentTitle = "🚨 URGENT: Lead replied. Respond within 48h!";
+        if ("LEAD".equals(lead.getLastInteractionBy()) && !containsTask(timeline, urgentTitle)) {
+            Task urgent = new Task(lead, urgentTitle, todayCal.getTime());
+            long daysFromPivot = getDaysDiff(pivotCal, todayCal);
             urgent.setCompleted(daysFromPivot > 2);
+            accessTasks.insertTask(urgent); // PERSIST
             timeline.add(urgent);
         }
 
         // 3. Silent Milestones from Pivot
         for (int milestone : SILENT_MILESTONES) {
-            Calendar mCal = (Calendar) pivotCal.clone();
-            mCal.add(Calendar.DAY_OF_YEAR, milestone);
-            if (!mCal.after(todayCal)) {
-                Task t = new Task(lead, getMissionNameByDay(milestone), mCal.getTime());
-                t.setCompleted(mCal.before(todayCal));
-                timeline.add(t);
+            String milestoneTitle = getMissionNameByDay(milestone);
+            if (!containsTask(timeline, milestoneTitle)) {
+                Calendar mCal = (Calendar) pivotCal.clone();
+                mCal.add(Calendar.DAY_OF_YEAR, milestone);
+                resetTime(mCal);
+
+                if (!mCal.after(todayCal)) {
+                    Task t = new Task(lead, milestoneTitle, mCal.getTime());
+                    t.setCompleted(mCal.before(todayCal));
+                    accessTasks.insertTask(t); // PERSIST
+                    timeline.add(t);
+                }
             }
         }
 

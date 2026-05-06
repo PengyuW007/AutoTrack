@@ -4,6 +4,7 @@ import com.areonedev.autotrack.application.Main;
 import com.areonedev.autotrack.application.Services;
 import com.areonedev.autotrack.persistence.DataAccess;
 import com.areonedev.autotrack.objects.Task;
+import com.areonedev.autotrack.objects.Lead;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,5 +57,28 @@ public class AccessTasks {
 
     public String deleteTask(Task currTask){
         return dataAccess.deleteTask(currTask);
+    }
+
+    public String getTasksByLead(List<Task> resultList, Lead lead) {
+        if (lead == null) {
+            return "Lead cannot be null";
+        }
+
+        resultList.clear();
+        try {
+            // Create a search criteria task using the constructor you provided
+            // We use null for title and date because we are only filtering by Lead
+            Task criteria = new Task(lead, null, null);
+
+            // Use the persistence layer to find tasks matching this lead
+            ArrayList<Task> foundTasks = dataAccess.getTaskRandom(criteria);
+
+            if (foundTasks != null) {
+                resultList.addAll(foundTasks);
+            }
+            return null;
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 }

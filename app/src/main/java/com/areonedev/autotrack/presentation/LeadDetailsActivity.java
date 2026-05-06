@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.areonedev.autotrack.R;
 import com.areonedev.autotrack.business.AccessLeads;
+import com.areonedev.autotrack.business.AccessTasks;
 import com.areonedev.autotrack.business.ScoringService;
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Vehicle;
@@ -52,6 +53,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
     private ScoringService scoringService;
     private Lead currentLead;
     private AccessLeads accessLeads;
+    private AccessTasks accessTasks;
     private boolean isEditMode = false;
 
     @Override
@@ -71,6 +73,8 @@ public class LeadDetailsActivity extends AppCompatActivity {
                 currentLead = accessLeads.getRandom(leadId);
             }
         }
+
+        accessTasks = new AccessTasks();
 
         setupToolbar();
         initViews();
@@ -258,6 +262,17 @@ public class LeadDetailsActivity extends AppCompatActivity {
         // 5. Bind to Adapter
         if (timeline != null && !timeline.isEmpty()) {
             TimelineAdapter adapter = new TimelineAdapter(timeline);
+            // Handle clicks on the timeline tasks
+            adapter.setOnTaskStatusChangedListener(task -> {
+                // 1. Update the task in the database (IsCompleted 0 -> 1)
+                accessTasks.updateTask(task);
+
+                // 2. Refresh the whole UI
+                // This updates the Engagement Score and the Mission Board
+                // because a completed task changes the lead's status.
+                refreshUI();
+            });
+
             rvTimeline.setNestedScrollingEnabled(true);
             rvTimeline.setAdapter(adapter);
         } else {
@@ -393,9 +408,9 @@ public class LeadDetailsActivity extends AppCompatActivity {
                 // 4. Finally, ask for optional details
                 showOptionalDetailsDialog(type, calendar.getTime());
 
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(java.util.Calendar.MINUTE), false).show();
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show();
 
-        }, calendar.get(java.util.Calendar.YEAR), calendar.get(java.util.Calendar.MONTH), calendar.get(java.util.Calendar.DAY_OF_MONTH)).show();
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     private void showOptionalDetailsDialog(String type, Date selectedDate) {
@@ -418,9 +433,18 @@ public class LeadDetailsActivity extends AppCompatActivity {
     }
 
     private void saveManualTask(String type, String note,Date taskDate) {
+        if (currentLead == null) return;
         // 1. Create the Task object
         String finalDescription = type + (note.trim().isEmpty() ? "" : ": " + note);
         Task newTask = new Task(currentLead, finalDescription, taskDate);
-        newTask.setCompleted(false);
+        String result = accessTasks.insertTask(newTask);
+
+        if (result == null) {
+            Toast.makeText(this, "Task Saved", Toast.LENGTH_SHORT).show();
+            // 4. Refresh UI so the new task appears on the timeline immediately
+            refreshUI();
+        } else {
+            Toast.makeText(this, "Error saving task: " + result, Toast.LENGTH_SHORT).show();
+        }
     }
 }

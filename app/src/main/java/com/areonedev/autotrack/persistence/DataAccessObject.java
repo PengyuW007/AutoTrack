@@ -68,6 +68,16 @@ public class DataAccessObject implements DataAccess {
                     "LeadID INTEGER" + // <--- Add this to link to TABLE_LEADS
                     ")");
 
+            //5. Create Tasks Table
+            db.execSQL("CREATE TABLE IF NOT EXISTS Tasks (" +
+                    "TaskID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "Title TEXT, " +
+                    "Timestamp INTEGER, " +
+                    "IsCompleted INTEGER, " +
+                    "LeadID INTEGER, " +
+                    "FOREIGN KEY(LeadID) REFERENCES " + TABLE_LEADS + "(LeadID)" +
+                    ")");
+
             Log.d(TAG, "Database opened successfully at: " + dbPath);
 
             /* Insert three leads to the DB */
