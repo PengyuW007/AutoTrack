@@ -22,6 +22,20 @@ import java.util.Locale;
 public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHolder> {
     private List<Task> tasks;
     private SimpleDateFormat sdf = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
+    private OnTaskStatusChangedListener statusChangedListener;
+
+    // 1. ADD THIS INTERFACE
+    public interface OnTaskClickListener {
+        void onTaskClick(Task task);
+    }
+
+    // 2. ADD THIS VARIABLE
+    private OnTaskClickListener onTaskClickListener;
+
+    // 3. ADD THIS SETTER METHOD
+    public void setOnTaskClickListener(OnTaskClickListener listener) {
+        this.onTaskClickListener = listener;
+    }
 
     public TimelineAdapter(List<Task> tasks) {
         this.tasks = tasks;
@@ -111,14 +125,20 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.ViewHo
         }
 
         // 4. CLICK LOGIC: Toggle completion and notify activity to recalculate score
-        holder.itemView.setOnClickListener(v -> {
+        // ACTION A: Clicking the Checkbox Icon toggles completion status
+        holder.ivCheck.setOnClickListener(v -> {
             task.setCompleted(!task.isCompleted());
             notifyItemChanged(position);
 
-            // IMPORTANT: You should implement a callback here to LeadDetailsActivity
-            // to call accessLeads.updateLead(currentLead) so the score update is saved.
             if (onTaskStatusChangedListener != null) {
                 onTaskStatusChangedListener.onTaskStatusChanged(task);
+            }
+        });
+
+        // ACTION B: Clicking the whole card opens the Edit/Delete options
+        holder.itemView.setOnClickListener(v -> {
+            if (onTaskClickListener != null) {
+                onTaskClickListener.onTaskClick(task);
             }
         });
     }

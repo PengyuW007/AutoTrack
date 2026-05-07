@@ -273,6 +273,10 @@ public class LeadDetailsActivity extends AppCompatActivity {
                 refreshUI();
             });
 
+            adapter.setOnTaskClickListener(task -> {
+                showTaskOptionsDialog(task);
+            });
+
             rvTimeline.setNestedScrollingEnabled(true);
             rvTimeline.setAdapter(adapter);
         } else {
@@ -446,5 +450,61 @@ public class LeadDetailsActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Error saving task: " + result, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void showTaskOptionsDialog(Task task) {
+        String[] options = {"Edit Task", "Delete Task", "Cancel"};
+
+        new AlertDialog.Builder(this)
+                .setTitle("Manage Task")
+                .setItems(options, (dialog, which) -> {
+                    if (which == 0) {
+                        showEditTaskDialog(task);
+                    } else if (which == 1) {
+                        showDeleteTaskConfirmation(task);
+                    }
+                })
+                .show();
+    }
+
+    private void showEditTaskDialog(Task task) {
+        EditText etInput = new EditText(this);
+        etInput.setText(task.getTitle());
+        etInput.setSelection(etInput.getText().length());
+
+        new AlertDialog.Builder(this)
+                .setTitle("Edit Task")
+                .setView(etInput)
+                .setPositiveButton("Update", (dialog, which) -> {
+                    String newTitle = etInput.getText().toString();
+                    if (!newTitle.trim().isEmpty()) {
+                        task.setTitle(newTitle);
+                        String result = accessTasks.updateTask(task);
+                        if (result == null) {
+                            refreshUI();
+                        } else {
+                            Toast.makeText(this, "Update failed: " + result, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showDeleteTaskConfirmation(Task task) {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Task")
+                .setMessage("Are you sure you want to remove this task?")
+                .setPositiveButton("Delete", (dialog, which) -> {
+                    String result = accessTasks.deleteTask(task);
+                    if (result == null) {
+                        Toast.makeText(this, "Task removed", Toast.LENGTH_SHORT).show();
+                        refreshUI();
+                    } else {
+                        Toast.makeText(this, "Delete failed: " + result, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }
