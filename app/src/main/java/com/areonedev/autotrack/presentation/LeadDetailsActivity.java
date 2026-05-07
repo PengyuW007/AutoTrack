@@ -385,7 +385,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
         builder.setTitle("Schedule New Task");
 
         // These keywords are recognized by your ScoringService for the +25 bonus
-        String[] taskTypes = {"Appointment", "Test Drive", "Follow-up Call", "Other"};
+        String[] taskTypes = {"Appointment", "Test Drive", "Follow-up", "Other"};
 
         builder.setItems(taskTypes, (dialog, which) -> {
             String selectedType = taskTypes[which];
@@ -468,23 +468,77 @@ public class LeadDetailsActivity extends AppCompatActivity {
     }
 
     private void showEditTaskDialog(Task task) {
-        EditText etInput = new EditText(this);
-        etInput.setText(task.getTitle());
-        etInput.setSelection(etInput.getText().length());
+        // Updated list to include the 4 main types + Other
+        String[] taskTypes = {"Appointment", "Test Drive", "Follow-up", "Other"};
 
         new AlertDialog.Builder(this)
-                .setTitle("Edit Task")
+                .setTitle("Update Task Type")
+                .setItems(taskTypes, (dialog, which) -> {
+                    String selectedType = taskTypes[which];
+                    // Proceed to Date/Time selection specific to Editing
+                    promptForEditDetails(task, selectedType);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void promptForEditDetails(Task task, String newType) {
+        final Calendar calendar = Calendar.getInstance();
+        // Initialize with the task's CURRENT date/time
+        calendar.setTime(task.getDate());
+
+        // 1. Pick the New Date
+        new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, month);
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+            // 2. Pick the New Time
+            new TimePickerDialog(this, (timeView, hourOfDay, minute) -> {
+                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                calendar.set(Calendar.MINUTE, minute);
+
+                // 3. Final Step: Edit the Note and Save
+                showEditFinalConfirmation(task, newType, calendar.getTime());
+
+            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), false).show();
+
+        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    private void showEditFinalConfirmation(Task task, String type, Date newDate) {
+        EditText etInput = new EditText(this);
+
+        // Logic to extract the existing note from the "Type: Note" format
+        String currentTitle = task.getTitle();
+        String existingNote = currentTitle.contains(":") ? currentTitle.split(":", 2)[1].trim() : "";
+        etInput.setText(existingNote);
+        etInput.setHint("Update details (Optional)");
+
+        // UI Padding for the EditText
+        int padding = (int) (16 * getResources().getDisplayMetrics().density);
+        etInput.setPadding(padding, padding, padding, padding);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Finalize Changes")
                 .setView(etInput)
-                .setPositiveButton("Update", (dialog, which) -> {
-                    String newTitle = etInput.getText().toString();
-                    if (!newTitle.trim().isEmpty()) {
-                        task.setTitle(newTitle);
-                        String result = accessTasks.updateTask(task);
-                        if (result == null) {
-                            refreshUI();
-                        } else {
-                            Toast.makeText(this, "Update failed: " + result, Toast.LENGTH_SHORT).show();
-                        }
+                .setPositiveButton("Save Changes", (dialog, which) -> {
+                    String note = etInput.getText().toString();
+
+                    // Reconstruct title to maintain "Type: Note" format for ScoringService
+                    String finalTitle = type + (note.trim().isEmpty() ? "" : ": " + note);
+
+                    // Update the object fields
+                    task.setTitle(finalTitle);
+                    task.setDate(newDate);
+
+                    // Persist changes to SQLite
+                    String result = accessTasks.updateTask(task);
+                    if (result == null) {
+                        Toast.makeText(this, "Task Updated", Toast.LENGTH_SHORT).show();
+                        refreshUI(); // Refresh timeline and engagement score
+                    } else {
+                        Toast.makeText(this, "Update failed: " + result, Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancel", null)
