@@ -183,14 +183,12 @@ public class LeadDetailsActivity extends AppCompatActivity {
         if (currentLead == null) return;
 
         // 1. Handle the Mission + Notes Board
-        String mission = scoringService.getScientificMission(currentLead, new Date());
-        String displayMission = (mission != null) ? mission : "No urgent task today.";
+        //String mission = scoringService.getScientificMission(currentLead, new Date());
+        //String displayMission = (mission != null) ? mission : "No urgent task today.";
 
         // Combine Mission and Notes into one display for the "Board of Notes"
-        String notesDisplay = "🎯 MISSION: " + displayMission + "\n\n" +
-                "--- BOARD OF NOTES ---\n" +
-                (currentLead.getLeadNotes() != null ? currentLead.getLeadNotes() : "No notes.");
-        tvViewNotes.setText(notesDisplay);
+//        String notesDisplay = "🎯 MISSION: " + displayMission + "\n\n" + "--- BOARD OF NOTES ---\n" + (currentLead.getLeadNotes() != null ? currentLead.getLeadNotes() : "No notes.");
+        //tvViewNotes.setText();
 
         // 2. Setup the Timeline (The Task Ledger)
         // This calls the helper method you already have below
