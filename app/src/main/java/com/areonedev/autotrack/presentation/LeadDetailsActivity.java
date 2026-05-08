@@ -217,6 +217,9 @@ public class LeadDetailsActivity extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.getDefault());
         if (currentLead.getLeadFollowUpDate() != null) {
             tvDetUpdatedDate.setText("Last Updated: " + sdf.format(currentLead.getLeadFollowUpDate()));
+        }else{
+            // Hide if there's no update yet to keep the bottom clean
+            tvDetUpdatedDate.setVisibility(View.GONE);
         }
         if (currentLead.getLeadCreatedAt() != null) {
             tvDetDate.setText("Created: " + sdf.format(currentLead.getLeadCreatedAt()));
