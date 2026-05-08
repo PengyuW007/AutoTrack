@@ -575,8 +575,7 @@ public class DataAccessObject implements DataAccess {
                     if (lead != null) {
                         Task task = new Task(lead, title, new Date(timestamp));
                         task.setCompleted(isCompleted == 1);
-                        // If your Task object has an ID field, set it here
-                        // task.setTaskID(id);
+                        task.setEventID(id);
                         taskResult.add(task);
                     }
                 } while (cursor.moveToNext());
@@ -601,12 +600,14 @@ public class DataAccessObject implements DataAccess {
 
             if (cursor.moveToFirst()) {
                 do {
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow("TaskID"));
                     String title = cursor.getString(cursor.getColumnIndexOrThrow("Title"));
                     long timestamp = cursor.getLong(cursor.getColumnIndexOrThrow("Timestamp"));
                     int isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow("IsCompleted"));
 
                     Task task = new Task(criteria.getLead(), title, new Date(timestamp));
                     task.setCompleted(isCompleted == 1);
+                    task.setEventID(id);
                     results.add(task);
                 } while (cursor.moveToNext());
             }
@@ -627,7 +628,12 @@ public class DataAccessObject implements DataAccess {
             values.put("LeadID", task.getLead() != null ? task.getLead().getLeadID() : -1);
 
             long rowId = db.insert("Tasks", null, values);
-            return (rowId != -1) ? null : "Insert task failed";
+            if (rowId != -1) {
+                task.setEventID((int) rowId);
+                return null;
+            } else {
+                return "Insert task failed";
+            }
         } catch (Exception e) {
             return e.getMessage();
         }
@@ -642,9 +648,10 @@ public class DataAccessObject implements DataAccess {
             values.put("IsCompleted", task.isCompleted() ? 1 : 0);
             values.put("LeadID", task.getLead() != null ? task.getLead().getLeadID() : -1);
 
-            // Update based on Title and LeadID (or TaskID if you have one)
-            int rows = db.update("Tasks", values, "Title = ? AND LeadID = ?",
-                    new String[]{task.getTitle(), String.valueOf(task.getLead().getLeadID())});
+            String whereClause = "TaskID = ?";
+            String[] whereArgs = { String.valueOf(task.getEventID()) };
+
+            int rows = db.update("Tasks", values, whereClause, whereArgs);
 
             return (rows > 0) ? null : "Update failed: Task not found";
         } catch (Exception e) {
@@ -655,8 +662,8 @@ public class DataAccessObject implements DataAccess {
     @Override
     public String deleteTask(Task task) {
         try {
-            int rows = db.delete("Tasks", "Title = ? AND LeadID = ?",
-                    new String[]{task.getTitle(), String.valueOf(task.getLead().getLeadID())});
+            int rows = db.delete("Tasks", "TaskID = ?",
+                    new String[]{String.valueOf(task.getEventID())});
             return (rows > 0) ? null : "Delete failed";
         } catch (Exception e) {
             return e.getMessage();

@@ -12,10 +12,10 @@ public class Task extends Event {
     }
 
     // Constructor for existing tasks loaded from the Database
-    public Task(long id, Lead lead, String title, Date date, boolean isCompleted) {
+    public Task(long id, Lead lead, String title, Date date) {
         super(lead, title, date);
         this.setEventID(id);
-        this.isCompleted = isCompleted;
+        this.isCompleted = false;
     }
 
     public boolean isCompleted() {

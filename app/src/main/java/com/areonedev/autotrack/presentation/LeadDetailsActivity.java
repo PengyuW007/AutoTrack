@@ -451,6 +451,14 @@ public class LeadDetailsActivity extends AppCompatActivity {
     }
 
     private void showTaskOptionsDialog(Task task) {
+        if (task.getEventID() <= 0) {
+            String result = accessTasks.insertTask(task);
+            if (result != null) {
+                Toast.makeText(this, "Failed to access tasks", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         String[] options = {"Edit Task", "Delete Task", "Cancel"};
 
         new AlertDialog.Builder(this)
