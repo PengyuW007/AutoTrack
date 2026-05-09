@@ -80,14 +80,24 @@ public class DataAccessObject implements DataAccess {
                     "FOREIGN KEY(LeadID) REFERENCES " + TABLE_LEADS + "(LeadID)" +
                     ")");
 
+            //6. Create Vehicles Table
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_VEHICLES + " (" +
+                    "CarID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "Make TEXT, " +
+                    "Model TEXT, " +
+                    "Year TEXT, " +
+                    "Trim TEXT, " +
+                    "Price REAL, " +
+                    "Color TEXT, " +
+                    "InStock INTEGER, " +
+                    "VIN TEXT, " +
+                    "Transmission TEXT" +
+                    ")");
+
             Log.d(TAG, "Database opened successfully at: " + dbPath);
 
             /* Insert three leads to the DB */
-            Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_LEADS, null);
-
-            cursor.moveToFirst();
-            int count = cursor.getInt(0);
-            cursor.close();
+            int count = getTableCount(TABLE_LEADS);
 
             if (count == 0) {
                 Log.d(TAG, "Database is empty. Adding initial dummy leads.");
@@ -96,22 +106,33 @@ public class DataAccessObject implements DataAccess {
                 Log.d(TAG, "Database already contains " + count + " leads. Skipping dummy data.");
             }
 
-            cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_NOTIFICATIONS, null);
-            cursor.moveToFirst();
-
-            count = cursor.getInt(0);
+            count = getTableCount(TABLE_NOTIFICATIONS);
             if (count == 0) {
                 addDummyNotifications();
             }else {
                 Log.d(TAG, "Database already contains " + count + " notifications. Skipping dummy data.");
             }
-            cursor.close();
+
+            count = getTableCount(TABLE_VEHICLES);
+            if(count==0){
+
+            }
 
         } catch (Exception e) {
             Log.e(TAG, "CRITICAL: Failed to open database: " + e.getMessage());
             db = null; // Ensure it's explicitly null if it fails
         }
 
+    }
+
+    private int getTableCount(String tableName) {
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + tableName, null);
+        int count = 0;
+        if (cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+        }
+        cursor.close();
+        return count;
     }
 
     @Override
@@ -679,28 +700,19 @@ public class DataAccessObject implements DataAccess {
         vehicleResult.clear();
 
         try {
-            // Fetch all cars ordered by Make and Model
-            Cursor cursor = db.rawQuery("SELECT * FROM Cars ORDER BY Make ASC, Model ASC", null);
+            // We only fetch the columns the user cares about
+            Cursor cursor = db.rawQuery("SELECT * FROM Cars ORDER BY Year DESC, Make ASC", null);
 
             if (cursor.moveToFirst()) {
                 do {
-                    // Extract data from cursor
-                    long id = cursor.getLong(cursor.getColumnIndexOrThrow("CarID"));
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow("VehicleID"));
                     String make = cursor.getString(cursor.getColumnIndexOrThrow("Make"));
                     String model = cursor.getString(cursor.getColumnIndexOrThrow("Model"));
                     String year = cursor.getString(cursor.getColumnIndexOrThrow("Year"));
                     String trim = cursor.getString(cursor.getColumnIndexOrThrow("Trim"));
-                    double price = cursor.getDouble(cursor.getColumnIndexOrThrow("Price"));
-                    String color = cursor.getString(cursor.getColumnIndexOrThrow("Color"));
-                    boolean inStock = cursor.getInt(cursor.getColumnIndexOrThrow("InStock")) == 1;
-                    String vin = cursor.getString(cursor.getColumnIndexOrThrow("VIN"));
-                    String trans = cursor.getString(cursor.getColumnIndexOrThrow("Transmission"));
 
-                    // Use the Full Constructor
-                    Vehicle v = new Vehicle(make, model, year, trim, price, color, inStock, vin, trans);
-
-                    // Set the ID so we can update/delete this specific object later
-                    // Assuming Vehicle has a setVehicleID or setEventID method
+                    // Use the Partial Constructor (Make, Model, Year, Trim)
+                    Vehicle v = new Vehicle(make, model, year, trim);
                     v.setVehicleID(id);
 
                     vehicleResult.add(v);
@@ -720,15 +732,10 @@ public class DataAccessObject implements DataAccess {
         if (db == null) return results;
 
         try {
-            Cursor cursor;
-            // Search by VIN if provided, otherwise search by Make
-            if (criteria.getVin() != null && !criteria.getVin().equals("N/A")) {
-                cursor = db.rawQuery("SELECT * FROM Cars WHERE VIN = ?",
-                        new String[]{criteria.getVin()});
-            } else {
-                cursor = db.rawQuery("SELECT * FROM Cars WHERE Make LIKE ?",
-                        new String[]{"%" + criteria.getMake() + "%"});
-            }
+            // Search by Model or Make - this is what the user will type in the search bar
+            String search = "%" + criteria.getModel() + "%";
+            Cursor cursor = db.rawQuery("SELECT * FROM Cars WHERE Model LIKE ? OR Make LIKE ?",
+                    new String[]{search, search});
 
             if (cursor.moveToFirst()) {
                 do {
@@ -736,12 +743,7 @@ public class DataAccessObject implements DataAccess {
                             cursor.getString(cursor.getColumnIndexOrThrow("Make")),
                             cursor.getString(cursor.getColumnIndexOrThrow("Model")),
                             cursor.getString(cursor.getColumnIndexOrThrow("Year")),
-                            cursor.getString(cursor.getColumnIndexOrThrow("Trim")),
-                            cursor.getDouble(cursor.getColumnIndexOrThrow("Price")),
-                            cursor.getString(cursor.getColumnIndexOrThrow("Color")),
-                            cursor.getInt(cursor.getColumnIndexOrThrow("InStock")) == 1,
-                            cursor.getString(cursor.getColumnIndexOrThrow("VIN")),
-                            cursor.getString(cursor.getColumnIndexOrThrow("Transmission"))
+                            cursor.getString(cursor.getColumnIndexOrThrow("Trim"))
                     );
                     v.setVehicleID(cursor.getLong(cursor.getColumnIndexOrThrow("VehicleID")));
                     results.add(v);
@@ -762,11 +764,7 @@ public class DataAccessObject implements DataAccess {
             values.put("Model", vehicle.getModel());
             values.put("Year", vehicle.getYear());
             values.put("Trim", vehicle.getTrim());
-            values.put("Price", vehicle.getPrice());
-            values.put("Color", vehicle.getColor());
-            values.put("InStock", vehicle.isInStock() ? 1 : 0);
-            values.put("VIN", vehicle.getVin());
-            values.put("Transmission", vehicle.getTransmission());
+            // Other fields get defaults from the DB schema or stay null
 
             long rowId = db.insert(TABLE_VEHICLES, null, values);
             if (rowId != -1) {
@@ -787,12 +785,8 @@ public class DataAccessObject implements DataAccess {
             values.put("Model", vehicle.getModel());
             values.put("Year", vehicle.getYear());
             values.put("Trim", vehicle.getTrim());
-            values.put("Price", vehicle.getPrice());
-            values.put("Color", vehicle.getColor());
-            values.put("InStock", vehicle.isInStock() ? 1 : 0);
-            values.put("VIN", vehicle.getVin());
-            values.put("Transmission", vehicle.getTransmission());
 
+            // Use CarID as the unique identifier
             int rows = db.update(TABLE_VEHICLES, values, "VehicleID = ?",
                     new String[]{String.valueOf(vehicle.getVehicleID())});
 
