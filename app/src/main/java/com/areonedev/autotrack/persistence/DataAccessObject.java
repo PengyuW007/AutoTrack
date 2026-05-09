@@ -26,6 +26,8 @@ public class DataAccessObject implements DataAccess {
     private static final String EOF = "  ";
     private static final String TABLE_LEADS = "Leads";
     private static final String TABLE_NOTIFICATIONS = "Notifications";
+    private static final String TABLE_TASKS = "Tasks";
+    private static final String TABLE_VEHICLES = "Vehicles";
 
     public DataAccessObject(String dbName) {
         this.dbName = dbName;
@@ -69,7 +71,7 @@ public class DataAccessObject implements DataAccess {
                     ")");
 
             //5. Create Tasks Table
-            db.execSQL("CREATE TABLE IF NOT EXISTS Tasks (" +
+            db.execSQL("CREATE TABLE IF NOT EXISTS "+TABLE_TASKS+" (" +
                     "TaskID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "Title TEXT, " +
                     "Timestamp INTEGER, " +
@@ -670,4 +672,144 @@ public class DataAccessObject implements DataAccess {
         }
     }
 
+    /*** Vehicle ***/
+    @Override
+    public String getVehicleSequential(List<Vehicle> vehicleResult) {
+        if (db == null) return "Database connection lost";
+        vehicleResult.clear();
+
+        try {
+            // Fetch all cars ordered by Make and Model
+            Cursor cursor = db.rawQuery("SELECT * FROM Cars ORDER BY Make ASC, Model ASC", null);
+
+            if (cursor.moveToFirst()) {
+                do {
+                    // Extract data from cursor
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow("CarID"));
+                    String make = cursor.getString(cursor.getColumnIndexOrThrow("Make"));
+                    String model = cursor.getString(cursor.getColumnIndexOrThrow("Model"));
+                    String year = cursor.getString(cursor.getColumnIndexOrThrow("Year"));
+                    String trim = cursor.getString(cursor.getColumnIndexOrThrow("Trim"));
+                    double price = cursor.getDouble(cursor.getColumnIndexOrThrow("Price"));
+                    String color = cursor.getString(cursor.getColumnIndexOrThrow("Color"));
+                    boolean inStock = cursor.getInt(cursor.getColumnIndexOrThrow("InStock")) == 1;
+                    String vin = cursor.getString(cursor.getColumnIndexOrThrow("VIN"));
+                    String trans = cursor.getString(cursor.getColumnIndexOrThrow("Transmission"));
+
+                    // Use the Full Constructor
+                    Vehicle v = new Vehicle(make, model, year, trim, price, color, inStock, vin, trans);
+
+                    // Set the ID so we can update/delete this specific object later
+                    // Assuming Vehicle has a setVehicleID or setEventID method
+                    v.setVehicleID(id);
+
+                    vehicleResult.add(v);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+            return null;
+        } catch (Exception e) {
+            Log.e("DAO", "getVehicleSequential Error: " + e.getMessage());
+            return e.getMessage();
+        }
+    }
+
+    @Override
+    public ArrayList<Vehicle> getVehicleRandom(Vehicle criteria) {
+        ArrayList<Vehicle> results = new ArrayList<>();
+        if (db == null) return results;
+
+        try {
+            Cursor cursor;
+            // Search by VIN if provided, otherwise search by Make
+            if (criteria.getVin() != null && !criteria.getVin().equals("N/A")) {
+                cursor = db.rawQuery("SELECT * FROM Cars WHERE VIN = ?",
+                        new String[]{criteria.getVin()});
+            } else {
+                cursor = db.rawQuery("SELECT * FROM Cars WHERE Make LIKE ?",
+                        new String[]{"%" + criteria.getMake() + "%"});
+            }
+
+            if (cursor.moveToFirst()) {
+                do {
+                    Vehicle v = new Vehicle(
+                            cursor.getString(cursor.getColumnIndexOrThrow("Make")),
+                            cursor.getString(cursor.getColumnIndexOrThrow("Model")),
+                            cursor.getString(cursor.getColumnIndexOrThrow("Year")),
+                            cursor.getString(cursor.getColumnIndexOrThrow("Trim")),
+                            cursor.getDouble(cursor.getColumnIndexOrThrow("Price")),
+                            cursor.getString(cursor.getColumnIndexOrThrow("Color")),
+                            cursor.getInt(cursor.getColumnIndexOrThrow("InStock")) == 1,
+                            cursor.getString(cursor.getColumnIndexOrThrow("VIN")),
+                            cursor.getString(cursor.getColumnIndexOrThrow("Transmission"))
+                    );
+                    v.setVehicleID(cursor.getLong(cursor.getColumnIndexOrThrow("VehicleID")));
+                    results.add(v);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } catch (Exception e) {
+            Log.e("DAO", "getVehicleRandom Error: " + e.getMessage());
+        }
+        return results;
+    }
+
+    @Override
+    public String insertVehicle(Vehicle vehicle) {
+        try {
+            ContentValues values = new ContentValues();
+            values.put("Make", vehicle.getMake());
+            values.put("Model", vehicle.getModel());
+            values.put("Year", vehicle.getYear());
+            values.put("Trim", vehicle.getTrim());
+            values.put("Price", vehicle.getPrice());
+            values.put("Color", vehicle.getColor());
+            values.put("InStock", vehicle.isInStock() ? 1 : 0);
+            values.put("VIN", vehicle.getVin());
+            values.put("Transmission", vehicle.getTransmission());
+
+            long rowId = db.insert(TABLE_VEHICLES, null, values);
+            if (rowId != -1) {
+                vehicle.setVehicleID(rowId);
+                return null;
+            }
+            return "Insert vehicle failed";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @Override
+    public String updateVehicle(Vehicle vehicle) {
+        try {
+            ContentValues values = new ContentValues();
+            values.put("Make", vehicle.getMake());
+            values.put("Model", vehicle.getModel());
+            values.put("Year", vehicle.getYear());
+            values.put("Trim", vehicle.getTrim());
+            values.put("Price", vehicle.getPrice());
+            values.put("Color", vehicle.getColor());
+            values.put("InStock", vehicle.isInStock() ? 1 : 0);
+            values.put("VIN", vehicle.getVin());
+            values.put("Transmission", vehicle.getTransmission());
+
+            int rows = db.update(TABLE_VEHICLES, values, "VehicleID = ?",
+                    new String[]{String.valueOf(vehicle.getVehicleID())});
+
+            return (rows > 0) ? null : "Update failed: Vehicle not found";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
+    @Override
+    public String deleteVehicle(Vehicle vehicle) {
+        try {
+            int rows = db.delete(TABLE_VEHICLES, "VehicleID = ?",
+                    new String[]{String.valueOf(vehicle.getVehicleID())});
+            return (rows > 0) ? null : "Delete failed: Vehicle not found";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+    }
 }

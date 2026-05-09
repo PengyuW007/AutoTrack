@@ -6,6 +6,7 @@ import java.util.List;
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Notification;
 import com.areonedev.autotrack.objects.Task;
+import com.areonedev.autotrack.objects.Vehicle;
 
 public interface DataAccess {
     void open(String string);
@@ -37,5 +38,12 @@ public interface DataAccess {
     String insertTask(Task task);
     String updateTask(Task task);
     String deleteTask(Task task);
+
+    /*** Vehicle ***/
+    String getVehicleSequential(List<Vehicle>vehicleResult);
+    ArrayList<Vehicle>getVehicleRandom(Vehicle vehicle);
+    String insertVehicle(Vehicle vehicle);
+    String updateVehicle(Vehicle vehicle);
+    String deleteVehicle(Vehicle vehicle);
 
 }

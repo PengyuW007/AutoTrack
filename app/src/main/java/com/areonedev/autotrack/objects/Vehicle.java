@@ -13,6 +13,7 @@ public class Vehicle implements Serializable {
     private double price;          // The MSRP or listed price of this specific unit
     private boolean inStock; // To indicate if the unit is currently on the lot
     private String vin;         // Optional: Vehicle Identification Number (for specific inventory tracking)
+    protected long vehicleID;
 
     // 1. Full Constructor: Includes all parameters
     public Vehicle(String make, String model, String year, String trim, double price,String color, boolean inStock, String vin,String transmission) {
@@ -105,6 +106,15 @@ public class Vehicle implements Serializable {
 
     public void setColor(String color) { this.color = color; }
     public void setInStock(boolean inStock) { this.inStock = inStock; }
+
+    public long getVehicleID() {
+        return vehicleID;
+    }
+
+    public void setVehicleID(long vehicleID) {
+        this.vehicleID = vehicleID;
+    }
+
 
     // A helper method for your LeadAdapter to display a clean string
     public String getFullDescription() {
