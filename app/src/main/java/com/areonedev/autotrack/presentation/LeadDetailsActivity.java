@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -25,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.areonedev.autotrack.R;
 import com.areonedev.autotrack.business.AccessLeads;
 import com.areonedev.autotrack.business.AccessTasks;
+import com.areonedev.autotrack.business.AccessVehicles;
 import com.areonedev.autotrack.business.ScoringService;
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Vehicle;
@@ -35,6 +37,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Calendar;
+import java.util.ArrayList;
 
 public class LeadDetailsActivity extends AppCompatActivity {
 
@@ -45,6 +48,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
     // View Mode Components
     private TextView tvViewName, tvViewPhone, tvViewEmail, tvViewAddress, tvViewVehicle, tvViewNotes, tvDetDate, tvDetUpdatedDate;
     private ImageView ivPhone, ivEmail, ivSms;
+    private AutoCompleteTextView actvVehicleSearch;
     private ImageButton btnAddTask;
 
     // Edit Mode Components
@@ -54,6 +58,8 @@ public class LeadDetailsActivity extends AppCompatActivity {
     private Lead currentLead;
     private AccessLeads accessLeads;
     private AccessTasks accessTasks;
+    private AccessVehicles accessVehicles;
+    private List<Vehicle> allVehicles;
     private boolean isEditMode = false;
 
     @Override
@@ -74,6 +80,7 @@ public class LeadDetailsActivity extends AppCompatActivity {
             }
         }
 
+        /*** Load Tasks ***/
         accessTasks = new AccessTasks();
 
         setupToolbar();
@@ -89,6 +96,14 @@ public class LeadDetailsActivity extends AppCompatActivity {
 
         btnUpdate.setOnClickListener(v -> handleUpdate());
         btnDelete.setOnClickListener(v -> showDeleteConfirmation());
+
+        /*** Load Vehicles ***/
+        accessVehicles = new AccessVehicles();
+        allVehicles = new ArrayList<>();
+        accessVehicles.getVehicles(allVehicles);
+
+        setupVehicleSearchAdapter();
+        setupVehicleSelectionListener();
     }
 
     private void setupToolbar() {
@@ -132,10 +147,11 @@ public class LeadDetailsActivity extends AppCompatActivity {
         etLastName = findViewById(R.id.etDetLastName);
         etPhone = findViewById(R.id.etDetPhone);
         etEmail = findViewById(R.id.etDetEmail);
-        etMake = findViewById(R.id.etDetMake);
-        etModel = findViewById(R.id.etDetModel);
-        etYear = findViewById(R.id.etDetYear);
-        etTrim = findViewById(R.id.etDetTrim);
+        actvVehicleSearch = findViewById(R.id.actvVehicleSearch);
+//        etMake = findViewById(R.id.etDetMake);
+//        etModel = findViewById(R.id.etDetModel);
+//        etYear = findViewById(R.id.etDetYear);
+//        etTrim = findViewById(R.id.etDetTrim);
         etNotes = findViewById(R.id.etDetNotes);
 
         // Buttons
@@ -179,6 +195,44 @@ public class LeadDetailsActivity extends AppCompatActivity {
         });
     }
 
+    private void setupVehicleSearchAdapter() {
+        if (allVehicles == null || allVehicles.isEmpty()) return;
+
+        List<String> vehicleStrings = new ArrayList<>();
+        for (Vehicle v : allVehicles) {
+            // Create the searchable string: "2026 VW Tiguan Highline"
+            String displayString = String.format("%s %s %s %s",
+                    v.getYear(), v.getMake(), v.getModel(), v.getTrim());
+            vehicleStrings.add(displayString);
+        }
+
+        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                vehicleStrings
+        );
+        actvVehicleSearch.setAdapter(adapter);
+    }
+
+    private void setupVehicleSelectionListener() {
+        actvVehicleSearch.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedString = (String) parent.getItemAtPosition(position);
+
+            // Find the matching Vehicle object from our list
+            for (Vehicle v : allVehicles) {
+                String fullTitle = String.format("%s %s %s %s",
+                        v.getYear(), v.getMake(), v.getModel(), v.getTrim());
+
+                if (fullTitle.equals(selectedString)) {
+                    // Update the lead object with the full vehicle data
+                    currentLead.setLeadVehicleInterest(v);
+                    Toast.makeText(this, "Interest Updated: " + fullTitle, Toast.LENGTH_SHORT).show();
+                    break;
+                }
+            }
+        });
+    }
+
     private void refreshUI() {
         if (currentLead == null) return;
 
@@ -208,9 +262,10 @@ public class LeadDetailsActivity extends AppCompatActivity {
         // 4. Populate Vehicle Interest
         Vehicle v = currentLead.getLeadVehicleInterest();
         if (v != null) {
-            tvViewVehicle.setText(String.format("%s %s %s %s", v.getYear(), v.getMake(), v.getModel(), v.getTrim()));
+            String vehicleDisplay = String.format("%s %s %s %s", v.getYear(), v.getMake(), v.getModel(), v.getTrim());
+            actvVehicleSearch.setText(vehicleDisplay,false);
         } else {
-            tvViewVehicle.setText("No specific model selected");
+            actvVehicleSearch.setText("No specific model selected");
         }
 
         // 5. Set Dates
@@ -231,12 +286,6 @@ public class LeadDetailsActivity extends AppCompatActivity {
         etPhone.setText(currentLead.getLeadPhoneNumber());
         etEmail.setText(currentLead.getLeadEmail());
         etNotes.setText(currentLead.getLeadNotes());
-        if (v != null) {
-            etMake.setText(v.getMake());
-            etModel.setText(v.getModel());
-            etYear.setText(v.getYear());
-            etTrim.setText(v.getTrim());
-        }
     }
 
     private void setupTimeline() {
@@ -327,13 +376,13 @@ public class LeadDetailsActivity extends AppCompatActivity {
         currentLead.setLeadNotes(etNotes.getText().toString());
         currentLead.setLeadFollowUpDate(new Date());
 
-        Vehicle updatedVehicle = new Vehicle(
-                etYear.getText().toString(),
-                etMake.getText().toString(),
-                etModel.getText().toString(),
-                etTrim.getText().toString()
-        );
-        currentLead.setLeadVehicleInterest(updatedVehicle);
+//        Vehicle updatedVehicle = new Vehicle(
+//                etYear.getText().toString(),
+//                etMake.getText().toString(),
+//                etModel.getText().toString(),
+//                etTrim.getText().toString()
+//        );
+//        currentLead.setLeadVehicleInterest(updatedVehicle);
 
         String result = accessLeads.updateLead(currentLead);
         if (result == null) {

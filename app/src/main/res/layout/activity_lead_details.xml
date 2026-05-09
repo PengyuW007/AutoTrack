@@ -80,6 +80,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1">
+
                                 <ImageView
                                     android:id="@+id/ivPhoneIcon"
                                     android:layout_width="50dp"
@@ -95,6 +96,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1">
+
                                 <ImageView
                                     android:id="@+id/ivSmsIcon"
                                     android:layout_width="50dp"
@@ -110,6 +112,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1">
+
                                 <ImageView
                                     android:id="@+id/ivEmailIcon"
                                     android:layout_width="50dp"
@@ -225,8 +228,8 @@
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:background="?attr/selectableItemBackgroundBorderless"
-                                android:src="@android:drawable/ic_input_add"
                                 android:contentDescription="Add new task"
+                                android:src="@android:drawable/ic_input_add"
                                 app:tint="?attr/colorPrimary" />
                         </RelativeLayout>
 
@@ -251,18 +254,89 @@
                 android:padding="16dp"
                 android:visibility="gone">
 
-                <EditText android:id="@+id/etDetFirstName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="First Name" />
-                <EditText android:id="@+id/etDetLastName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Last Name" />
-                <EditText android:id="@+id/etDetPhone" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Phone" android:inputType="phone" />
-                <EditText android:id="@+id/etDetEmail" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Email" />
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Vehicle" android:textStyle="bold" />
-                <EditText android:id="@+id/etDetMake" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Make" />
-                <EditText android:id="@+id/etDetModel" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Model" />
-                <EditText android:id="@+id/etDetYear" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Year" android:inputType="number" />
-                <EditText android:id="@+id/etDetTrim" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Trim" />
-                <EditText android:id="@+id/etDetNotes" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:gravity="top" android:hint="Notes" android:lines="3" />
-                <Button android:id="@+id/btnUpdateLead" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="Save Changes" />
-                <Button android:id="@+id/btnDeleteLead" style="@style/Widget.AppCompat.Button.Borderless" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="Delete Lead" android:textColor="@android:color/holo_red_dark" />
+                <EditText
+                    android:id="@+id/etDetFirstName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="First Name" />
+
+                <EditText
+                    android:id="@+id/etDetLastName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Last Name" />
+
+                <EditText
+                    android:id="@+id/etDetPhone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Phone"
+                    android:inputType="phone" />
+
+                <EditText
+                    android:id="@+id/etDetEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Email" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Vehicle"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Search Vehicle Interest"
+                    android:textStyle="bold" />
+
+                <!-- The Search Box -->
+                <AutoCompleteTextView
+                    android:id="@+id/actvVehicleSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Type to search (e.g. VW Tiguan)"
+                    android:completionThreshold="1"
+                    android:padding="12dp"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/tvSelectedVehiclePreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="13sp"
+                    android:textStyle="italic"
+                    tools:text="Current: 2026 VW Tiguan Highline" />
+
+                <EditText
+                    android:id="@+id/etDetNotes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="top"
+                    android:hint="Notes"
+                    android:lines="3" />
+
+                <Button
+                    android:id="@+id/btnUpdateLead"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Save Changes" />
+
+                <Button
+                    android:id="@+id/btnDeleteLead"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Delete Lead"
+                    android:textColor="@android:color/holo_red_dark" />
             </LinearLayout>
         </FrameLayout>
     </FrameLayout>
