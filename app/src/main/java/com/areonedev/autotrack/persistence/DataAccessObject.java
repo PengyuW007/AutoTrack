@@ -1,10 +1,16 @@
 package com.areonedev.autotrack.persistence;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -12,6 +18,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.areonedev.autotrack.application.Services;
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Task;
 import com.areonedev.autotrack.objects.Vehicle;
@@ -21,6 +28,7 @@ public class DataAccessObject implements DataAccess {
     private SQLiteDatabase db;
     private String dbName;
     private String dbType;
+    private Context context;
     private final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     private static final String TAG = "DataAccessObject";
     private static final String EOF = "  ";
@@ -36,9 +44,15 @@ public class DataAccessObject implements DataAccess {
     @Override
     public void open(String dbPath) {
         try {
+
+            context = Services.getAppContext();
+            if (context == null) {
+                Log.e(TAG, "Context is null. Vehicle CSV import cannot run.");
+            }// this step is for Vehicle DB to read the CSV file
+
             // 1. Safety Check: Ensure the directory exists
-            java.io.File dbFile = new java.io.File(dbPath);
-            java.io.File dbDir = dbFile.getParentFile();
+            File dbFile = new File(dbPath);
+            File dbDir = dbFile.getParentFile();
             if (dbDir != null && !dbDir.exists()) {
                 dbDir.mkdirs(); // Create the /databases/ folder if it's missing
             }
@@ -82,7 +96,7 @@ public class DataAccessObject implements DataAccess {
 
             //6. Create Vehicles Table
             db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_VEHICLES + " (" +
-                    "CarID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "VehicleID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "Make TEXT, " +
                     "Model TEXT, " +
                     "Year TEXT, " +
@@ -115,7 +129,11 @@ public class DataAccessObject implements DataAccess {
 
             count = getTableCount(TABLE_VEHICLES);
             if(count==0){
-
+                if (context != null) {
+                    importVehiclesFromCSV();
+                } else {
+                    Log.e(TAG, "Context is null. Skipping vehicle CSV import.");
+                }
             }
 
         } catch (Exception e) {
@@ -133,6 +151,55 @@ public class DataAccessObject implements DataAccess {
         }
         cursor.close();
         return count;
+    }
+
+    private void importVehiclesFromCSV() {
+        InputStream is = null;
+        BufferedReader reader = null;
+
+        try {
+            // 1. Open the file from assets
+            is = context.getAssets().open("db/CARS.csv");
+            reader = new BufferedReader(new InputStreamReader(is));
+
+            String line;
+            db.beginTransaction(); // Use transaction for high-speed insertion
+            try {
+                // Skip the header row (Make, Year, Model, Category)
+                reader.readLine();
+
+                while ((line = reader.readLine()) != null) {
+                    // Split by comma
+                    String[] parts = line.split(",");
+
+                    // Ensure we have at least the first 3 columns
+                    if (parts.length >= 3) {
+                        ContentValues values = new ContentValues();
+                        values.put("Make", parts[0].trim());
+                        values.put("Year", parts[1].trim());
+                        values.put("Model", parts[2].trim());
+                        values.put("Trim", ""); // Default empty as it's not in your CSV
+
+                        // We ignore parts[3] (Category) as requested
+
+                        db.insert(TABLE_VEHICLES, null, values);
+                    }
+                }
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            Log.d("DAO", "CSV Import successful.");
+        } catch (Exception e) {
+            Log.e("DAO", "Error importing CSV: " + e.getMessage());
+        } finally {
+            try {
+                if (reader != null) reader.close();
+                if (is != null) is.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -701,7 +768,7 @@ public class DataAccessObject implements DataAccess {
 
         try {
             // We only fetch the columns the user cares about
-            Cursor cursor = db.rawQuery("SELECT * FROM Cars ORDER BY Year DESC, Make ASC", null);
+            Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_VEHICLES+" ORDER BY Year DESC, Make ASC", null);
 
             if (cursor.moveToFirst()) {
                 do {
@@ -734,7 +801,7 @@ public class DataAccessObject implements DataAccess {
         try {
             // Search by Model or Make - this is what the user will type in the search bar
             String search = "%" + criteria.getModel() + "%";
-            Cursor cursor = db.rawQuery("SELECT * FROM Cars WHERE Model LIKE ? OR Make LIKE ?",
+            Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_VEHICLES+ " WHERE Model LIKE ? OR Make LIKE ?",
                     new String[]{search, search});
 
             if (cursor.moveToFirst()) {

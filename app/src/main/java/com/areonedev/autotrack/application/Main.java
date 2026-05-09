@@ -26,6 +26,7 @@ public class Main {
         setDBPathName(realPath);
 
         // Initialize the DataAccessObject via your Services class
+        Services.initialize(context);// Pass the Android context to get Vehicle CSV import working
         Services.createDataAccess(dbName);
 
         // Open the database using the real Android path

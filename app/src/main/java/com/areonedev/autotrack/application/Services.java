@@ -1,10 +1,22 @@
 package com.areonedev.autotrack.application;
 
+import android.content.Context;
+
 import com.areonedev.autotrack.persistence.DataAccess;
 import com.areonedev.autotrack.persistence.DataAccessObject;
+
 public class Services {
     private static DataAccess dataAccessService = null;
+    private static Context appContext;
 
+    public static void initialize(Context context) {
+        appContext = context.getApplicationContext();
+    }
+
+    /*** Both Context and DataAccess are static for the entire app ***/
+    public static Context getAppContext() {
+        return appContext;
+    }
     public static DataAccess createDataAccess(String dbPath)
     {
         if (dataAccessService == null)
@@ -15,6 +27,7 @@ public class Services {
         return dataAccessService;
     }
 
+    /*** STUB ***/
     public static DataAccess createDataAccess(DataAccess alternateDataAccessService)
     {
         if (dataAccessService == null)
