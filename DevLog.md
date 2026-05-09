@@ -1,5 +1,61 @@
 Developer Log — AutoTrack
 ---
+**Date:** May 8, 2026
+
+**Module:** Task Details Refinement & Vehicle Data Integration
+
+## Itinerary
+
+- **Lead Details UI/UX Refinement:**
+  - Relocated the **Created At** and **Last Updated** metadata from the Notes section to a pinned footer at the bottom of `LeadDetailsActivity`.
+  - Refactored the layout using `CoordinatorLayout` combined with `NestedScrollView` to maintain visibility of modification timestamps even when large task lists are displayed.
+  - Improved overall visual hierarchy and readability within the Lead Details workflow.
+
+- **Task Management Bug Fixes:**
+  - Resolved an issue where tasks appeared to delete or update successfully in the UI but were not actually modified in the database.
+  - Identified the root cause within `getTaskRandom`, where the `TaskID` was not properly mapped back onto the `Task` object during retrieval.
+  - Updated the DAO retrieval pipeline to correctly assign the `EventID`, ensuring SQL statements using:
+    ```sql
+    WHERE TaskID = ?
+    ```
+    target the correct database row.
+
+- **Vehicle Persistence Layer Integration:**
+  - Expanded the `DataAccess` interface and `DataAccessObject` implementation to support full **Vehicle CRUD operations**.
+  - Added the `Cars` table schema within the DAO `open()` initialization process, supporting:
+    - Year
+    - Make
+    - Model
+    - Trim
+  - Implemented a transaction-based CSV parser to import vehicle inventory data from:
+    ```
+    assets/db/CARS.csv
+    ```
+    into the local SQLite database for standardized vehicle selection.
+
+## Issues
+
+- **Access Layer Incomplete:**  
+  The persistence layer for Vehicles is fully operational; however, the `AccessVehicles` business layer remains incomplete, preventing UI modules from interacting with the vehicle dataset.
+
+- **Calendar Filtering Logic:**  
+  Identified a flaw in `CalendarActivity` where tasks are not being filtered strictly by their assigned dates, causing unrelated tasks to appear within the daily agenda.
+
+## Next
+
+- **Complete AccessVehicles Layer:**  
+  Finalize the business logic methods required to bridge the Vehicle DAO with UI components.
+
+- **Calendar Activity Refactor:**
+  - Implement strict **date-specific task filtering** so daily agendas display only tasks assigned to the selected date.
+  - Develop an advanced sorting pipeline based on:
+    - **Completion Status:** Completed tasks move to the bottom.
+    - **Priority:** Active tasks sorted by urgency score.
+
+- **Vehicle UI Integration:**  
+  Begin integrating the Vehicle database into lead creation and detail workflows using searchable dropdown components and inventory-linked selection logic.
+
+---
 **Date:** May 5, 2026
 
 **Module:** Task Persistence & Lifecycle Management
