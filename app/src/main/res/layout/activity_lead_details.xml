@@ -279,36 +279,55 @@
                     android:layout_height="wrap_content"
                     android:hint="Email" />
 
+                <!-- Section Label -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="Vehicle"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="Search Vehicle Interest"
+                    android:layout_marginTop="16dp"
+                    android:text="Vehicle Interest"
+                    android:textColor="?attr/colorPrimary"
                     android:textStyle="bold" />
 
                 <!-- The Search Box -->
+                <!-- Year Dropdown -->
                 <AutoCompleteTextView
-                    android:id="@+id/actvVehicleSearch"
+                    android:id="@+id/actvYear"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Type to search (e.g. VW Tiguan)"
-                    android:completionThreshold="1"
-                    android:padding="12dp"
-                    android:layout_marginTop="4dp" />
+                    android:hint="Select Year"
+                    android:completionThreshold="1" />
 
+                <!-- Make Dropdown -->
+                <AutoCompleteTextView
+                    android:id="@+id/actvMake"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Select Make"
+                    android:completionThreshold="1" />
+
+                <!-- Model Dropdown -->
+                <AutoCompleteTextView
+                    android:id="@+id/actvModel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Select Model"
+                    android:completionThreshold="1" />
+
+                <!-- Trim Dropdown -->
+                <AutoCompleteTextView
+                    android:id="@+id/actvTrim"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Select Trim"
+                    android:completionThreshold="1" />
+
+                <!-- Selection Preview -->
                 <TextView
                     android:id="@+id/tvSelectedVehiclePreview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:textColor="?attr/colorPrimary"
+                    android:textColor="#666666"
                     android:textSize="13sp"
                     android:textStyle="italic"
                     tools:text="Current: 2026 VW Tiguan Highline" />

@@ -48,11 +48,11 @@ public class LeadDetailsActivity extends AppCompatActivity {
     // View Mode Components
     private TextView tvViewName, tvViewPhone, tvViewEmail, tvViewAddress, tvViewVehicle, tvViewNotes, tvDetDate, tvDetUpdatedDate;
     private ImageView ivPhone, ivEmail, ivSms;
-    private AutoCompleteTextView actvVehicleSearch;
+    private AutoCompleteTextView actvYear, actvMake, actvModel, actvTrim;
     private ImageButton btnAddTask;
 
     // Edit Mode Components
-    private EditText etFirstName, etLastName, etPhone, etEmail, etMake, etModel, etYear, etTrim, etNotes;
+    private EditText etFirstName, etLastName, etPhone, etEmail, etNotes;
     private Button btnUpdate, btnDelete;
     private ScoringService scoringService;
     private Lead currentLead;
@@ -102,8 +102,8 @@ public class LeadDetailsActivity extends AppCompatActivity {
         allVehicles = new ArrayList<>();
         accessVehicles.getVehicles(allVehicles);
 
-        setupVehicleSearchAdapter();
-        setupVehicleSelectionListener();
+        setupVehicleDropdowns();
+        setupDropdownBehaviors();
     }
 
     private void setupToolbar() {
@@ -147,7 +147,11 @@ public class LeadDetailsActivity extends AppCompatActivity {
         etLastName = findViewById(R.id.etDetLastName);
         etPhone = findViewById(R.id.etDetPhone);
         etEmail = findViewById(R.id.etDetEmail);
-        actvVehicleSearch = findViewById(R.id.actvVehicleSearch);
+
+        actvYear = findViewById(R.id.actvYear);
+        actvMake = findViewById(R.id.actvMake);
+        actvModel = findViewById(R.id.actvModel);
+        actvTrim = findViewById(R.id.actvTrim);
 //        etMake = findViewById(R.id.etDetMake);
 //        etModel = findViewById(R.id.etDetModel);
 //        etYear = findViewById(R.id.etDetYear);
@@ -195,57 +199,111 @@ public class LeadDetailsActivity extends AppCompatActivity {
         });
     }
 
-    private void setupVehicleSearchAdapter() {
+    private void setupVehicleDropdowns() {
         if (allVehicles == null || allVehicles.isEmpty()) return;
 
-        List<String> vehicleStrings = new ArrayList<>();
+        // 1. Populate Year (Unique years from allVehicles)
+        List<String> years = new ArrayList<>();
         for (Vehicle v : allVehicles) {
-            // Create the searchable string: "2026 VW Tiguan Highline"
-            String displayString = String.format("%s %s %s %s",
-                    v.getYear(), v.getMake(), v.getModel(), v.getTrim());
-            vehicleStrings.add(displayString);
+            if (!years.contains(v.getYear())) years.add(v.getYear());
         }
+        updateAdapter(actvYear, years);
 
-        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                vehicleStrings
-        );
-        actvVehicleSearch.setAdapter(adapter);
-    }
+        // 2. When Year is selected -> Filter Makes
+        actvYear.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedYear = (String) parent.getItemAtPosition(position);
+            actvMake.setText(""); actvModel.setText(""); actvTrim.setText(""); // Clear children
 
-    private void setupVehicleSelectionListener() {
-        actvVehicleSearch.setOnItemClickListener((parent, view, position, id) -> {
-            String selectedString = (String) parent.getItemAtPosition(position);
-
-            // Find the matching Vehicle object from our list
+            List<String> makes = new ArrayList<>();
             for (Vehicle v : allVehicles) {
-                String fullTitle = String.format("%s %s %s %s",
-                        v.getYear(), v.getMake(), v.getModel(), v.getTrim());
+                if (v.getYear().equals(selectedYear) && !makes.contains(v.getMake())) {
+                    makes.add(v.getMake());
+                }
+            }
+            updateAdapter(actvMake, makes);
+        });
 
-                if (fullTitle.equals(selectedString)) {
-                    // Update the lead object with the full vehicle data
+        // 3. When Make is selected -> Filter Models
+        actvMake.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedYear = actvYear.getText().toString();
+            String selectedMake = (String) parent.getItemAtPosition(position);
+            actvModel.setText(""); actvTrim.setText(""); // Clear children
+
+            List<String> models = new ArrayList<>();
+            for (Vehicle v : allVehicles) {
+                if (v.getYear().equals(selectedYear) && v.getMake().equals(selectedMake)
+                        && !models.contains(v.getModel())) {
+                    models.add(v.getModel());
+                }
+            }
+            updateAdapter(actvModel, models);
+        });
+
+        // 4. When Model is selected -> Filter Trims
+        actvModel.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedYear = actvYear.getText().toString();
+            String selectedMake = actvMake.getText().toString();
+            String selectedModel = (String) parent.getItemAtPosition(position);
+            actvTrim.setText("");
+
+            List<String> trims = new ArrayList<>();
+            for (Vehicle v : allVehicles) {
+                if (v.getYear().equals(selectedYear) && v.getMake().equals(selectedMake)
+                        && v.getModel().equals(selectedModel)) {
+                    trims.add(v.getTrim());
+                }
+            }
+            updateAdapter(actvTrim, trims);
+        });
+
+        // 5. When Trim is selected -> Finalize selection
+        actvTrim.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedTrim = (String) parent.getItemAtPosition(position);
+            // Find the exact vehicle object to save
+            for (Vehicle v : allVehicles) {
+                if (v.getYear().equals(actvYear.getText().toString()) &&
+                        v.getMake().equals(actvMake.getText().toString()) &&
+                        v.getModel().equals(actvModel.getText().toString()) &&
+                        v.getTrim().equals(selectedTrim)) {
+
                     currentLead.setLeadVehicleInterest(v);
-                    Toast.makeText(this, "Interest Updated: " + fullTitle, Toast.LENGTH_SHORT).show();
                     break;
                 }
             }
         });
     }
 
+    private void setupDropdownBehaviors() {
+        // Create a shared listener for focus changes
+        View.OnFocusChangeListener focusListener = (v, hasFocus) -> {
+            if (hasFocus && v instanceof AutoCompleteTextView) {
+                ((AutoCompleteTextView) v).showDropDown();
+            }
+        };
+
+        // Apply focus listener to all 4 dropdowns
+        actvYear.setOnFocusChangeListener(focusListener);
+        actvMake.setOnFocusChangeListener(focusListener);
+        actvModel.setOnFocusChangeListener(focusListener);
+        actvTrim.setOnFocusChangeListener(focusListener);
+
+        // Apply click listener so it re-opens if they click while already focused
+        actvYear.setOnClickListener(v -> actvYear.showDropDown());
+        actvMake.setOnClickListener(v -> actvMake.showDropDown());
+        actvModel.setOnClickListener(v -> actvModel.showDropDown());
+        actvTrim.setOnClickListener(v -> actvTrim.showDropDown());
+    }
+
+    // Helper to refresh adapters
+    private void updateAdapter(AutoCompleteTextView view, List<String> data) {
+        android.widget.ArrayAdapter<String> adapter = new android.widget.ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, data);
+        view.setAdapter(adapter);
+    }
+
     private void refreshUI() {
         if (currentLead == null) return;
 
-        // 1. Handle the Mission + Notes Board
-        //String mission = scoringService.getScientificMission(currentLead, new Date());
-        //String displayMission = (mission != null) ? mission : "No urgent task today.";
-
-        // Combine Mission and Notes into one display for the "Board of Notes"
-//        String notesDisplay = "🎯 MISSION: " + displayMission + "\n\n" + "--- BOARD OF NOTES ---\n" + (currentLead.getLeadNotes() != null ? currentLead.getLeadNotes() : "No notes.");
-        //tvViewNotes.setText();
-
-        // 2. Setup the Timeline (The Task Ledger)
-        // This calls the helper method you already have below
         setupTimeline();
 
         // 3. Populate Contact Info
@@ -262,10 +320,21 @@ public class LeadDetailsActivity extends AppCompatActivity {
         // 4. Populate Vehicle Interest
         Vehicle v = currentLead.getLeadVehicleInterest();
         if (v != null) {
-            String vehicleDisplay = String.format("%s %s %s %s", v.getYear(), v.getMake(), v.getModel(), v.getTrim());
-            actvVehicleSearch.setText(vehicleDisplay,false);
-        } else {
-            actvVehicleSearch.setText("No specific model selected");
+            String vehicleDisplay = String.format("%s %s %s %s",
+                    v.getYear(), v.getMake(), v.getModel(), v.getTrim());
+            // Update the View Mode TextView
+            tvViewVehicle.setText(vehicleDisplay);
+
+            actvYear.setText(v.getYear(), false);
+            actvMake.setText(v.getMake(), false);
+            actvModel.setText(v.getModel(), false);
+            actvTrim.setText(v.getTrim(), false);
+        }else {
+            tvViewVehicle.setText("No vehicle selected");
+            actvYear.setText("");
+            actvMake.setText("");
+            actvModel.setText("");
+            actvTrim.setText("");
         }
 
         // 5. Set Dates
@@ -286,6 +355,13 @@ public class LeadDetailsActivity extends AppCompatActivity {
         etPhone.setText(currentLead.getLeadPhoneNumber());
         etEmail.setText(currentLead.getLeadEmail());
         etNotes.setText(currentLead.getLeadNotes());
+
+        if (v != null) {
+            actvYear.setText(v.getYear(), false);
+            actvMake.setText(v.getMake(), false);
+            actvModel.setText(v.getModel(), false);
+            actvTrim.setText(v.getTrim(), false);
+        }
     }
 
     private void setupTimeline() {
@@ -376,17 +452,26 @@ public class LeadDetailsActivity extends AppCompatActivity {
         currentLead.setLeadNotes(etNotes.getText().toString());
         currentLead.setLeadFollowUpDate(new Date());
 
-//        Vehicle updatedVehicle = new Vehicle(
-//                etYear.getText().toString(),
-//                etMake.getText().toString(),
-//                etModel.getText().toString(),
-//                etTrim.getText().toString()
-//        );
-//        currentLead.setLeadVehicleInterest(updatedVehicle);
+        String selectedYear = actvYear.getText().toString();
+        String selectedMake = actvMake.getText().toString();
+        String selectedModel = actvModel.getText().toString();
+        String selectedTrim = actvTrim.getText().toString();
+
+        for (Vehicle veh : allVehicles) {
+            if (veh.getYear().equals(selectedYear) &&
+                    veh.getMake().equals(selectedMake) &&
+                    veh.getModel().equals(selectedModel) &&
+                    veh.getTrim().equals(selectedTrim)) {
+
+                currentLead.setLeadVehicleInterest(veh);
+                break;
+            }
+        }
 
         String result = accessLeads.updateLead(currentLead);
         if (result == null) {
             Toast.makeText(this, "Lead updated", Toast.LENGTH_SHORT).show();
+            isEditMode = false; // Switch back to view mode
             toggleEditMode(); // Switch back to view mode
             refreshUI();      // Show new data in cards
         } else {
