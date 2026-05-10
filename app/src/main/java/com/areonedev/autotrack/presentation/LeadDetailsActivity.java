@@ -1,6 +1,8 @@
 package com.areonedev.autotrack.presentation;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.net.Uri;
@@ -15,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.PopupMenu;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 
@@ -42,14 +45,15 @@ import java.util.ArrayList;
 public class LeadDetailsActivity extends AppCompatActivity {
 
     // Layout Containers
-    private LinearLayout layoutViewMode, layoutEditMode;
+    private LinearLayout layoutViewMode, llStatusToggle,layoutEditMode;
     private RecyclerView rvTimeline;
 
     // View Mode Components
-    private TextView tvViewName, tvViewPhone, tvViewEmail, tvViewAddress, tvViewVehicle, tvViewNotes, tvDetDate, tvDetUpdatedDate;
+    private TextView tvViewName, tvViewAddress, tvViewVehicle, tvStatusLabel, tvViewNotes, tvDetDate, tvDetUpdatedDate;
     private ImageView ivPhone, ivEmail, ivSms;
     private AutoCompleteTextView actvYear, actvMake, actvModel, actvTrim;
     private ImageButton btnAddTask;
+    private View viewStatusDot;
 
     // Edit Mode Components
     private EditText etFirstName, etLastName, etPhone, etEmail, etNotes;
@@ -124,11 +128,12 @@ public class LeadDetailsActivity extends AppCompatActivity {
         // Containers
         layoutViewMode = findViewById(R.id.layoutViewMode);
         layoutEditMode = findViewById(R.id.layoutEditMode);
+        llStatusToggle = findViewById(R.id.llStatusToggle);
 
         // View Mode TextViews
+        viewStatusDot = findViewById(R.id.viewStatusDot);
+        tvStatusLabel = findViewById(R.id.tvStatusLabel);
         tvViewName = findViewById(R.id.tvViewName);
-        //tvViewPhone = findViewById(R.id.tvViewPhone);
-        //tvViewEmail = findViewById(R.id.tvViewEmail);
         tvViewAddress = findViewById(R.id.tvViewAddress);
         tvViewVehicle = findViewById(R.id.tvViewVehicle);
         tvViewNotes = findViewById(R.id.tvViewNotes);
@@ -164,6 +169,29 @@ public class LeadDetailsActivity extends AppCompatActivity {
     }
 
     private void setupContactActions() {
+        // 1. Status Toggle (Active/Lost)
+        llStatusToggle.setOnClickListener(v -> {
+            PopupMenu popup = new PopupMenu(this, llStatusToggle);
+            popup.getMenu().add("Active");
+            popup.getMenu().add("Lost");
+
+            popup.setOnMenuItemClickListener(item -> {
+                String selectedTitle = item.getTitle().toString();
+                boolean isActive = selectedTitle.equalsIgnoreCase("Active");
+
+                currentLead.setLeadStatus(isActive);
+
+                // Save immediately to DB
+                String result = accessLeads.updateLead(currentLead);
+                if (result == null) {
+                    refreshUI(); // Update the dot color and text label
+                    Toast.makeText(this, "Status updated to " + selectedTitle, Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            });
+            popup.show();
+        });
+
         // 1. Phone Popup + Dial
         ivPhone.setOnClickListener(v -> {
             if (currentLead == null || currentLead.getLeadPhoneNumber() == null) return;
@@ -316,6 +344,15 @@ public class LeadDetailsActivity extends AppCompatActivity {
                 currentLead.getLeadProvince() + ", " +
                 currentLead.getLeadPostalCode();
         tvViewAddress.setText(address);
+
+        // Update Status Dot and Label based on boolean
+        if (currentLead.getLeadStatus()) { // if true (Active)
+            tvStatusLabel.setText("Active");
+            viewStatusDot.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
+        } else { // if false (Lost)
+            tvStatusLabel.setText("Lost");
+            viewStatusDot.setBackgroundTintList(ColorStateList.valueOf(Color.RED));
+        }
 
         // 4. Populate Vehicle Interest
         Vehicle v = currentLead.getLeadVehicleInterest();

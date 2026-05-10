@@ -64,6 +64,7 @@ public class DataAccessObject implements DataAccess {
             // 3. Create Table (Matches Lead class fields)
             db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_LEADS + " (" +
                     "LeadID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "Status INTEGER DEFAULT 1, " +
                     "FirstName TEXT, LastName TEXT, PhoneNumber TEXT, Email TEXT, " +
                     "Division TEXT, Address TEXT, City TEXT, Province TEXT, " +
                     "Country TEXT, PostalCode TEXT, Budget REAL, Stage TEXT, " +
@@ -313,6 +314,7 @@ public class DataAccessObject implements DataAccess {
         values.put("Notes", lead.getLeadNotes());
         values.put("FollowUpDate", lead.getLeadFollowUpDate() != null ? formatter.format(lead.getLeadFollowUpDate()) : "");
         values.put("CreatedAt", formatter.format(lead.getLeadCreatedAt()));
+        values.put("Status", lead.getLeadStatus() ? 1 : 0);
 
         // Flatten Vehicle Interest
         Vehicle vi = lead.getLeadVehicleInterest();
@@ -371,7 +373,7 @@ public class DataAccessObject implements DataAccess {
                 lead.setLeadBudget(cursor.getDouble(cursor.getColumnIndexOrThrow("Budget")));
                 lead.setLeadStage(cursor.getString(cursor.getColumnIndexOrThrow("Stage")));
                 lead.setLeadNotes(cursor.getString(cursor.getColumnIndexOrThrow("Notes")));
-
+                lead.setLeadStatus(cursor.getInt(cursor.getColumnIndexOrThrow("Status")) == 1);
                 // 1. Reconstruct Vehicle Interest
                 int viMakeIdx = cursor.getColumnIndexOrThrow("VI_Make");
                 if (!cursor.isNull(viMakeIdx)) {
