@@ -1,4 +1,27 @@
 Developer Log — AutoTrack
+**Date:** May 9-10, 2026
+
+**Module:** Smart UI & Data Integrity
+
+## Itinerary
+
+- **Database Integration:** Updated the DAO to seed the vehicle table directly from CSV data without requiring a complex constructor-based setup.
+
+- **Smart Vehicle Selection UI:** Replaced four static `EditText` fields with four intelligent, cascading `AutoCompleteTextView` components for vehicle selection.
+
+- **Data Integrity:** Ensured the normal **View Mode** card in `LeadDetailsActivity` dynamically refreshes immediately after users save vehicle-related changes.
+
+## Issues
+
+- **Static Input Limitation:** The previous vehicle input fields relied on free-text entry, which increased the risk of inconsistent vehicle data.
+
+- **View Mode Synchronization:** The Lead Details display initially did not update immediately after edits were saved.
+
+## Next
+
+- **Calendar Activity Refinement:** Refactor the Calendar task pipeline so only tasks due on the selected date are displayed.
+
+- **Priority Sorting:** Sort daily tasks so high-priority follow-ups and high-engagement leads appear at the top of the agenda.
 ---
 **Date:** May 8, 2026
 
