@@ -482,28 +482,32 @@ public class LeadDetailsActivity extends AppCompatActivity {
 
     private void handleUpdate() {
         // Update the object
-        currentLead.setLeadFirstName(etFirstName.getText().toString());
-        currentLead.setLeadLastName(etLastName.getText().toString());
-        currentLead.setLeadPhoneNumber(etPhone.getText().toString());
-        currentLead.setLeadEmail(etEmail.getText().toString());
-        currentLead.setLeadNotes(etNotes.getText().toString());
+        currentLead.setLeadFirstName(etFirstName.getText().toString().trim());
+        currentLead.setLeadLastName(etLastName.getText().toString().trim());
+        currentLead.setLeadPhoneNumber(etPhone.getText().toString().trim());
+        currentLead.setLeadEmail(etEmail.getText().toString().trim());
+        currentLead.setLeadNotes(etNotes.getText().toString().trim());
         currentLead.setLeadFollowUpDate(new Date());
 
-        String selectedYear = actvYear.getText().toString();
-        String selectedMake = actvMake.getText().toString();
-        String selectedModel = actvModel.getText().toString();
-        String selectedTrim = actvTrim.getText().toString();
+        String selectedYear = actvYear.getText().toString().trim();
+        String selectedMake = actvMake.getText().toString().trim();
+        String selectedModel = actvModel.getText().toString().trim();
+        String selectedTrim = actvTrim.getText().toString().trim();
 
-        for (Vehicle veh : allVehicles) {
-            if (veh.getYear().equals(selectedYear) &&
-                    veh.getMake().equals(selectedMake) &&
-                    veh.getModel().equals(selectedModel) &&
-                    veh.getTrim().equals(selectedTrim)) {
-
-                currentLead.setLeadVehicleInterest(veh);
-                break;
-            }
+        Vehicle v = currentLead.getLeadVehicleInterest();
+        if (v == null) {
+            // If the lead had no vehicle interest before, create a new object
+            v = new Vehicle();
         }
+
+        // Force the new values into the object
+        v.setYear(selectedYear);
+        v.setMake(selectedMake);
+        v.setModel(selectedModel);
+        v.setTrim(selectedTrim);
+
+        // Re-assign to ensure the lead object is holding the updated vehicle
+        currentLead.setLeadVehicleInterest(v);
 
         String result = accessLeads.updateLead(currentLead);
         if (result == null) {

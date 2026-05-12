@@ -274,11 +274,21 @@ public class DataAccessObject implements DataAccess {
 
     @Override
     public String updateLead(Lead lead) {
+        if (db == null) return "Database connection lost";
         try {
             ContentValues values = getLeadContentValues(lead);
-            int rows = db.update(TABLE_LEADS, values, "LeadID = ?", new String[]{String.valueOf(lead.getLeadID())});
-            return (rows > 0) ? null : "Update failed: Lead not found";
+
+            // Log for debugging: verify what is being sent to the DB
+            Log.d(TAG, "Updating Lead ID: " + lead.getLeadID() +
+                    " with Vehicle: " + (lead.getLeadVehicleInterest() != null ?
+                    lead.getLeadVehicleInterest().getMake() : "NULL"));
+
+            int rows = db.update(TABLE_LEADS, values, "LeadID = ?",
+                    new String[]{String.valueOf(lead.getLeadID())});
+
+            return (rows > 0) ? null : "Update failed: Lead ID " + lead.getLeadID() + " not found";
         } catch (Exception e) {
+            Log.e(TAG, "Update Error: " + e.getMessage());
             return e.getMessage();
         }
     }
@@ -375,12 +385,15 @@ public class DataAccessObject implements DataAccess {
                 lead.setLeadNotes(cursor.getString(cursor.getColumnIndexOrThrow("Notes")));
                 lead.setLeadStatus(cursor.getInt(cursor.getColumnIndexOrThrow("Status")) == 1);
                 // 1. Reconstruct Vehicle Interest
+                int viYearIdx = cursor.getColumnIndexOrThrow("VI_Year");
                 int viMakeIdx = cursor.getColumnIndexOrThrow("VI_Make");
-                if (!cursor.isNull(viMakeIdx)) {
+                int viModelIdx = cursor.getColumnIndexOrThrow("VI_Model");
+
+                if (!cursor.isNull(viYearIdx) || !cursor.isNull(viMakeIdx) || !cursor.isNull(viModelIdx)) {
                     Vehicle vi = new Vehicle(
                             cursor.getString(viMakeIdx),
-                            cursor.getString(cursor.getColumnIndexOrThrow("VI_Model")),
-                            cursor.getString(cursor.getColumnIndexOrThrow("VI_Year")),
+                            cursor.getString(viModelIdx),
+                            cursor.getString(viYearIdx),
                             cursor.getString(cursor.getColumnIndexOrThrow("VI_Trim")),
                             cursor.getDouble(cursor.getColumnIndexOrThrow("VI_Price")),
                             cursor.getString(cursor.getColumnIndexOrThrow("VI_Color")),
@@ -886,6 +899,7 @@ public class DataAccessObject implements DataAccess {
         try {
             // Use DISTINCT so we don't get duplicates
             // Note: Ensure "Leads" matches your TABLE_LEADS constant if you have one
+
             Cursor cursor = db.query(true, "Leads", new String[]{targetColumn},
                     selection, selectionArgs, null, null, targetColumn + " ASC", null);
 
@@ -913,21 +927,16 @@ public class DataAccessObject implements DataAccess {
         List<String> values = new ArrayList<>();
         if (db == null) return values;
 
-        try {
-            // SELECT DISTINCT columnName FROM Leads ORDER BY columnName ASC
-            Cursor cursor = db.query(true, "Leads", new String[]{columnName},
-                    null, null, null, null, columnName + " ASC", null);
+        // Use true for 'distinct' parameter to get unique values only
+        Cursor cursor = db.query(true, "Leads", new String[]{columnName},
+                columnName + " IS NOT NULL", null, null, null, columnName + " DESC", null);
 
-            if (cursor.moveToFirst()) {
-                do {
-                    String val = cursor.getString(0);
-                    if (val != null && !val.isEmpty()) values.add(val);
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-        } catch (Exception e) {
-            Log.e("DAO", "Error fetching unique column values: " + e.getMessage());
+        if (cursor.moveToFirst()) {
+            do {
+                values.add(cursor.getString(0));
+            } while (cursor.moveToNext());
         }
+        cursor.close();
         return values;
     }
 }
