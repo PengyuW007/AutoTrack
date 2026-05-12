@@ -150,6 +150,7 @@ public class AccessLeads {
         List<Lead> allLeads = new ArrayList<>();
         dataAccess.getLeadSequential(allLeads); // Fetch all data from persistence
 
+        allLeads.sort((l1, l2) -> Long.compare(l2.getLeadID(), l1.getLeadID())); // Make all leads in DESC order, latest created lead on the top
         List<Lead> filtered = new ArrayList<>();
 
         for (Lead lead : allLeads) {

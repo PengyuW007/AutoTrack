@@ -103,7 +103,7 @@ public class LeadsActivity extends AppCompatActivity {
             applyFilters();
             filterPanel.setVisibility(View.GONE);
             isFilterPanelExpanded = false;
-            btnFilterToggle.setImageResource(android.R.drawable.ic_menu_manage);
+            btnFilterToggle.setImageResource(R.drawable.ic_filter_funnel);
         });
 
         // 3. Reset Button
