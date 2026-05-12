@@ -228,72 +228,84 @@ public class LeadDetailsActivity extends AppCompatActivity {
     }
 
     private void setupVehicleDropdowns() {
-        if (allVehicles == null || allVehicles.isEmpty()) return;
-
-        // 1. Populate Year (Unique years from allVehicles)
-        List<String> years = new ArrayList<>();
+        List<String> allYears = new ArrayList<>();
+        List<String> allMakes = new ArrayList<>();
         for (Vehicle v : allVehicles) {
-            if (!years.contains(v.getYear())) years.add(v.getYear());
+            if (!allYears.contains(v.getYear())) allYears.add(v.getYear());
+            if (!allMakes.contains(v.getMake())) allMakes.add(v.getMake());
         }
-        updateAdapter(actvYear, years);
+        updateAdapter(actvYear, allYears);
+        updateAdapter(actvMake, allMakes);
 
-        // 2. When Year is selected -> Filter Makes
+        // 2. When Year is selected -> Filter Makes available for that year
         actvYear.setOnItemClickListener((parent, view, position, id) -> {
             String selectedYear = (String) parent.getItemAtPosition(position);
-            actvMake.setText(""); actvModel.setText(""); actvTrim.setText(""); // Clear children
 
-            List<String> makes = new ArrayList<>();
+            // Reset dependent fields
+            actvMake.setText("");
+            actvModel.setText("");
+            actvTrim.setText("");
+
+            List<String> filteredMakes = new ArrayList<>();
             for (Vehicle v : allVehicles) {
-                if (v.getYear().equals(selectedYear) && !makes.contains(v.getMake())) {
-                    makes.add(v.getMake());
+                if (v.getYear().equals(selectedYear) && !filteredMakes.contains(v.getMake())) {
+                    filteredMakes.add(v.getMake());
                 }
             }
-            updateAdapter(actvMake, makes);
+            updateAdapter(actvMake, filteredMakes);
+            // Automatically show the next dropdown
+            actvMake.showDropDown();
         });
 
-        // 3. When Make is selected -> Filter Models
+        // 3. When Make is selected -> Filter Models based on Year + Make
         actvMake.setOnItemClickListener((parent, view, position, id) -> {
             String selectedYear = actvYear.getText().toString();
             String selectedMake = (String) parent.getItemAtPosition(position);
-            actvModel.setText(""); actvTrim.setText(""); // Clear children
 
-            List<String> models = new ArrayList<>();
+            actvModel.setText("");
+            actvTrim.setText("");
+
+            List<String> filteredModels = new ArrayList<>();
             for (Vehicle v : allVehicles) {
-                if (v.getYear().equals(selectedYear) && v.getMake().equals(selectedMake)
-                        && !models.contains(v.getModel())) {
-                    models.add(v.getModel());
+                // If year is empty, filter by make only. If year is selected, filter by both.
+                boolean yearMatch = selectedYear.isEmpty() || v.getYear().equals(selectedYear);
+                if (yearMatch && v.getMake().equals(selectedMake) && !filteredModels.contains(v.getModel())) {
+                    filteredModels.add(v.getModel());
                 }
             }
-            updateAdapter(actvModel, models);
+            updateAdapter(actvModel, filteredModels);
+            actvModel.showDropDown();
         });
 
-        // 4. When Model is selected -> Filter Trims
+        // 4. When Model is selected -> Filter Trims based on Year + Make + Model
         actvModel.setOnItemClickListener((parent, view, position, id) -> {
             String selectedYear = actvYear.getText().toString();
             String selectedMake = actvMake.getText().toString();
             String selectedModel = (String) parent.getItemAtPosition(position);
+
             actvTrim.setText("");
 
-            List<String> trims = new ArrayList<>();
+            List<String> filteredTrims = new ArrayList<>();
             for (Vehicle v : allVehicles) {
-                if (v.getYear().equals(selectedYear) && v.getMake().equals(selectedMake)
-                        && v.getModel().equals(selectedModel)) {
-                    trims.add(v.getTrim());
+                boolean yearMatch = selectedYear.isEmpty() || v.getYear().equals(selectedYear);
+                if (yearMatch && v.getMake().equals(selectedMake) && v.getModel().equals(selectedModel)) {
+                    filteredTrims.add(v.getTrim());
                 }
             }
-            updateAdapter(actvTrim, trims);
+            updateAdapter(actvTrim, filteredTrims);
+            actvTrim.showDropDown();
         });
 
-        // 5. When Trim is selected -> Finalize selection
+        // 5. Final Selection: Update the currentLead object
         actvTrim.setOnItemClickListener((parent, view, position, id) -> {
-            String selectedTrim = (String) parent.getItemAtPosition(position);
-            // Find the exact vehicle object to save
-            for (Vehicle v : allVehicles) {
-                if (v.getYear().equals(actvYear.getText().toString()) &&
-                        v.getMake().equals(actvMake.getText().toString()) &&
-                        v.getModel().equals(actvModel.getText().toString()) &&
-                        v.getTrim().equals(selectedTrim)) {
+            String sYear = actvYear.getText().toString();
+            String sMake = actvMake.getText().toString();
+            String sModel = actvModel.getText().toString();
+            String sTrim = (String) parent.getItemAtPosition(position);
 
+            for (Vehicle v : allVehicles) {
+                if (v.getYear().equals(sYear) && v.getMake().equals(sMake) &&
+                        v.getModel().equals(sModel) && v.getTrim().equals(sTrim)) {
                     currentLead.setLeadVehicleInterest(v);
                     break;
                 }
@@ -366,6 +378,8 @@ public class LeadDetailsActivity extends AppCompatActivity {
             actvMake.setText(v.getMake(), false);
             actvModel.setText(v.getModel(), false);
             actvTrim.setText(v.getTrim(), false);
+
+            updateDependentAdapters(v);
         }else {
             tvViewVehicle.setText("No vehicle selected");
             actvYear.setText("");
@@ -399,6 +413,51 @@ public class LeadDetailsActivity extends AppCompatActivity {
             actvModel.setText(v.getModel(), false);
             actvTrim.setText(v.getTrim(), false);
         }
+    }
+
+    private void updateDependentAdapters(Vehicle v) {
+        // 1. CRITICAL SAFETY CHECK: If the master list hasn't loaded yet, stop here.
+        if (allVehicles == null) {
+            Log.e("LeadDetails", "allVehicles is null. Make sure it is initialized in onCreate.");
+            return;
+        }
+
+        List<String> makes = new ArrayList<>();
+        List<String> models = new ArrayList<>();
+        List<String> trims = new ArrayList<>();
+
+        // 2. Get current values safely to avoid NullPointerExceptions during comparison
+        String currentYear = (v != null) ? v.getYear() : "";
+        String currentMake = (v != null) ? v.getMake() : "";
+        String currentModel = (v != null) ? v.getModel() : "";
+
+        for (Vehicle veh : allVehicles) {
+            // A. Logic for Makes:
+            // If no year is selected, show all makes. If a year is selected, filter by that year.
+            boolean yearMatch = currentYear.isEmpty() || currentYear.equals(veh.getYear());
+            if (yearMatch && veh.getMake() != null && !makes.contains(veh.getMake())) {
+                makes.add(veh.getMake());
+            }
+
+            // B. Logic for Models:
+            // Only show models if the Make matches (and Year matches)
+            boolean makeMatch = !currentMake.isEmpty() && currentMake.equals(veh.getMake());
+            if (yearMatch && makeMatch && veh.getModel() != null && !models.contains(veh.getModel())) {
+                models.add(veh.getModel());
+            }
+
+            // C. Logic for Trims:
+            // Only show trims if Year, Make, and Model all match
+            boolean modelMatch = !currentModel.isEmpty() && currentModel.equals(veh.getModel());
+            if (yearMatch && makeMatch && modelMatch && veh.getTrim() != null && !trims.contains(veh.getTrim())) {
+                trims.add(veh.getTrim());
+            }
+        }
+
+        // 3. Update the UI adapters with the filtered lists
+        updateAdapter(actvMake, makes);
+        updateAdapter(actvModel, models);
+        updateAdapter(actvTrim, trims);
     }
 
     private void setupTimeline() {
