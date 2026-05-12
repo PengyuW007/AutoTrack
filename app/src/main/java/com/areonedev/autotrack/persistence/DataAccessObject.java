@@ -875,4 +875,59 @@ public class DataAccessObject implements DataAccess {
             return e.getMessage();
         }
     }
+
+    @Override
+    public List<String> getFilteredColumnValues(String targetColumn, String selection, String[] selectionArgs) {
+        List<String> values = new ArrayList<>();
+
+        // Use the existing 'db' instance variable instead of calling getReadableDatabase()
+        if (db == null) return values;
+
+        try {
+            // Use DISTINCT so we don't get duplicates
+            // Note: Ensure "Leads" matches your TABLE_LEADS constant if you have one
+            Cursor cursor = db.query(true, "Leads", new String[]{targetColumn},
+                    selection, selectionArgs, null, null, targetColumn + " ASC", null);
+
+            if (cursor.moveToFirst()) {
+                do {
+                    int columnIndex = cursor.getColumnIndex(targetColumn);
+                    if (columnIndex != -1) {
+                        String val = cursor.getString(columnIndex);
+                        if (val != null && !val.isEmpty()) {
+                            values.add(val);
+                        }
+                    }
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } catch (Exception e) {
+            Log.e("DAO", "Error fetching filtered column values: " + e.getMessage());
+        }
+
+        return values;
+    }
+
+    @Override
+    public List<String> getUniqueColumnValues(String columnName) {
+        List<String> values = new ArrayList<>();
+        if (db == null) return values;
+
+        try {
+            // SELECT DISTINCT columnName FROM Leads ORDER BY columnName ASC
+            Cursor cursor = db.query(true, "Leads", new String[]{columnName},
+                    null, null, null, null, columnName + " ASC", null);
+
+            if (cursor.moveToFirst()) {
+                do {
+                    String val = cursor.getString(0);
+                    if (val != null && !val.isEmpty()) values.add(val);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } catch (Exception e) {
+            Log.e("DAO", "Error fetching unique column values: " + e.getMessage());
+        }
+        return values;
+    }
 }

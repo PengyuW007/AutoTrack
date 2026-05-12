@@ -46,4 +46,7 @@ public interface DataAccess {
     String updateVehicle(Vehicle vehicle);
     String deleteVehicle(Vehicle vehicle);
 
+    List<String> getFilteredColumnValues(String targetColumn, String selection, String[] selectionArgs);
+    List<String> getUniqueColumnValues(String columnName);
+
 }

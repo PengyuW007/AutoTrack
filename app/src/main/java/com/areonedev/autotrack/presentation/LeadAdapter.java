@@ -92,19 +92,6 @@ public class LeadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         clickListener.onLeadClick(lead);
                     }
                 });
-//                builder.append(row1).append("\n");
-//
-//                int start = builder.length();
-//                builder.append(row2);
-//                builder.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
-//                        start, builder.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                builder.setSpan(new android.text.style.RelativeSizeSpan(1.1f),
-//                        start, builder.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                builder.append("\n");
-//
-//                builder.append(row3);
-//                lvh.vehicle.setText(builder);
-
             } else {
                 lvh.vehicle.setText("No Vehicle Interest");
             }

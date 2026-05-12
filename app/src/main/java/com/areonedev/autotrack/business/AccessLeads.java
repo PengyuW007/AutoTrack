@@ -9,6 +9,7 @@ import java.util.Locale;
 import com.areonedev.autotrack.application.Main;
 import com.areonedev.autotrack.application.Services;
 import com.areonedev.autotrack.objects.Lead;
+import com.areonedev.autotrack.objects.Vehicle;
 import com.areonedev.autotrack.persistence.DataAccess;
 
 public class AccessLeads {
@@ -143,5 +144,88 @@ public class AccessLeads {
 
     public String deleteLead(Lead currLead) {
         return dataAccess.deleteLead(currLead);
+    }
+
+    public List<Lead> getLeadsFiltered(String query, String status, String stage, String division, String year, String make, String model) {
+        List<Lead> allLeads = new ArrayList<>();
+        dataAccess.getLeadSequential(allLeads); // Fetch all data from persistence
+
+        List<Lead> filtered = new ArrayList<>();
+
+        for (Lead lead : allLeads) {
+            if (matchesSearch(lead, query) &&
+                    matchesStatus(lead, status) &&
+                    matchesStage(lead, stage) &&
+                    matchesDivision(lead, division) &&
+                    matchesCar(lead, year, make, model)) {
+
+                filtered.add(lead);
+            }
+        }
+        return filtered;
+    }
+
+    private boolean matchesSearch(Lead lead, String query) {
+        if (query == null || query.trim().isEmpty()) return true;
+        String lowerQuery = query.toLowerCase().trim();
+
+        String fullName = (lead.getLeadFirstName() + " " + lead.getLeadLastName()).toLowerCase();
+        String phone = lead.getLeadPhoneNumber() != null ? lead.getLeadPhoneNumber() : "";
+
+        return fullName.contains(lowerQuery) || phone.contains(lowerQuery);
+    }
+
+    private boolean matchesStatus(Lead lead, String status) {
+        if (status == null || status.trim().isEmpty() || status.toLowerCase().contains("all")) return true;
+
+        // Lead status is boolean: true = Active, false = Lost
+        boolean isActive = status.equalsIgnoreCase("Active");
+        return lead.getLeadStatus() == isActive;
+    }
+
+    private boolean matchesStage(Lead lead, String stage) {
+        if (stage == null || stage.trim().isEmpty() || stage.toLowerCase().contains("all")) return true;
+
+        String leadStage = lead.getLeadStage();
+        return leadStage != null && leadStage.equalsIgnoreCase(stage);
+    }
+
+    private boolean matchesDivision(Lead lead, String division) {
+        if (division == null || division.trim().isEmpty() || division.toLowerCase().contains("all")) return true;
+
+        String leadDivision = lead.getLeadDivision();
+        return leadDivision != null && leadDivision.equalsIgnoreCase(division);
+    }
+
+    private boolean matchesCar(Lead lead, String year, String make, String model) {
+        boolean isYearFiltered = year != null && !year.equalsIgnoreCase("Year") && !year.trim().isEmpty();
+        boolean isMakeFiltered = make != null && !make.equalsIgnoreCase("Make") && !make.trim().isEmpty();
+        boolean isModelFiltered = model != null && !model.equalsIgnoreCase("Model") && !model.trim().isEmpty();
+
+        // If no car filters are selected, this lead is a match (don't filter it out)
+        if (!isYearFiltered && !isMakeFiltered && !isModelFiltered) return true;
+
+        Vehicle vehicle = lead.getLeadVehicleInterest();
+        // If user IS filtering by car but this lead has no vehicle data, it's not a match
+        if (vehicle == null) return false;
+
+        // Check each field: Match if filter is "Year/Make/Model" (ignore) OR if it matches the data
+        boolean yearMatch = !isYearFiltered || (vehicle.getYear() != null && vehicle.getYear().equalsIgnoreCase(year));
+        boolean makeMatch = !isMakeFiltered || (vehicle.getMake() != null && vehicle.getMake().equalsIgnoreCase(make));
+        boolean modelMatch = !isModelFiltered || (vehicle.getModel() != null && vehicle.getModel().equalsIgnoreCase(model));
+
+        return yearMatch && makeMatch && modelMatch;
+    }
+
+    public List<String> getUniqueVehicleYears() {
+        return dataAccess.getUniqueColumnValues("VI_Year");
+    }
+
+    public List<String> getMakesByYear(String year) {
+        return dataAccess.getFilteredColumnValues("VI_Make", "VI_Year = ?", new String[]{year});
+    }
+
+    public List<String> getModelsByYearAndMake(String year, String make) {
+        return dataAccess.getFilteredColumnValues("VI_Model", "VI_Year = ? AND VI_Make = ?", new String[]{year, make});
     }
 }

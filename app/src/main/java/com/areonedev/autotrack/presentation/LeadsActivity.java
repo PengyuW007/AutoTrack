@@ -1,22 +1,30 @@
 package com.areonedev.autotrack.presentation;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.Toast;
-import android.content.Intent;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.areonedev.autotrack.R;
+import com.areonedev.autotrack.business.AccessLeads;
+import com.areonedev.autotrack.objects.Lead;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import com.areonedev.autotrack.business.AccessLeads;
-import com.areonedev.autotrack.R;
-import com.areonedev.autotrack.objects.Lead;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,140 +32,123 @@ import java.util.List;
 
 public class LeadsActivity extends AppCompatActivity {
     private static final String TAG = "LeadsActivity";
+
     private RecyclerView recyclerView;
     private BottomNavigationView bottomNav;
-    private FloatingActionButton fab;
     private SearchView searchView;
-    private View emptyStateView; // Added for "No Results"
+    private View emptyStateView;
+    private FloatingActionButton fab;
+    private ImageButton btnFilterToggle;
+    private Button btnApply, btnReset;
+    private LinearLayout filterPanel;
+    private Spinner spinnerStatusFilter, spinnerStageFilter, spinnerDivisionFilter;
+    private AutoCompleteTextView actvYear, actvMake, actvModel;
     private AccessLeads accessLeads;
-    private List<Lead> leadList;
     private LeadAdapter adapter;
+    private boolean isFilterPanelExpanded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_all_my_leads); // You will create this XML next
+        setContentView(R.layout.activity_all_my_leads);
 
-        // 1. Initialize UI Components
-        intiViews();
-
-        // 2. Initialize Business Logic (Uses DB opened in MainActivity)
         accessLeads = new AccessLeads();
-        leadList = new ArrayList<>();
 
-        // 3. Load and Display Data
-        loadLeadsFromDB();
-
-        // 4. Setup Listeners (Search, Navigation, FAB)
+        initViews();
         setupListeners();
+
+        setupVehicleDropdowns();
+        setupDropdownBehaviors();
+
+        applyFilters();
     }
 
-    private void intiViews(){
+    private void initViews() {
         recyclerView = findViewById(R.id.recyclerViewLeads);
         bottomNav = findViewById(R.id.bottom_navigation);
         fab = findViewById(R.id.fab_add_lead);
         searchView = findViewById(R.id.searchView);
-        emptyStateView = findViewById(R.id.empty_state_view); // Ensure this ID exists in your XML
+        btnFilterToggle = findViewById(R.id.btnFilterToggle);
+        filterPanel = findViewById(R.id.filterPanel);
+        spinnerStatusFilter = findViewById(R.id.spinnerStatusFilter);
+        spinnerStageFilter = findViewById(R.id.spinnerStageFilter);
+        spinnerDivisionFilter = findViewById(R.id.spinnerDivisionFilter);
+        actvYear = findViewById(R.id.actvYearFilter);
+        actvMake = findViewById(R.id.actvMakeFilter);
+        actvModel = findViewById(R.id.actvModelFilter);
+        btnApply = findViewById(R.id.btnApplyFilters);
+        btnReset = findViewById(R.id.btnResetFilters);
+        emptyStateView = findViewById(R.id.empty_state_view);
 
-        // Configure RecyclerView
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         bottomNav.setSelectedItemId(R.id.nav_leads);
-    }
 
-    private void loadLeadsFromDB() {
-        leadList.clear();
-        // Fetch leads using the business logic layer
-        String error = accessLeads.getLeads(leadList);
 
-        if (error == null) {
-            // Sort by CreatedAt date (Newest first) for categorization
-            Collections.sort(leadList, (l1, l2) -> l2.getLeadCreatedAt().compareTo(l1.getLeadCreatedAt()));
-
-            // Initialize and set the adapter
-            adapter = new LeadAdapter(leadList, lead -> {
-                Intent intent = new Intent(LeadsActivity.this, LeadDetailsActivity.class);
-                intent.putExtra("SELECTED_LEAD", lead); // Pass the lead object
-                startActivity(intent);
-            });
-            recyclerView.setAdapter(adapter);
-            toggleEmptyState(leadList.isEmpty());
-        } else {
-            Log.e(TAG, "Failed to load leads: " + error);
-            Toast.makeText(this, "Error loading leads", Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void setupListeners() {
-        // Search Logic
+        // 1. Toggle Filter Panel
+        btnFilterToggle.setOnClickListener(v -> {
+            isFilterPanelExpanded = !isFilterPanelExpanded;
+            filterPanel.setVisibility(isFilterPanelExpanded ? View.VISIBLE : View.GONE);
+            if (isFilterPanelExpanded) {
+                btnFilterToggle.setImageResource(android.R.drawable.ic_menu_close_clear_cancel);
+            } else {
+                btnFilterToggle.setImageResource(R.drawable.ic_filter_funnel); // Switch back to funnel
+            }
+        });
+
+        // 2. Apply Button (Triggers the database/list update)
+        btnApply.setOnClickListener(v -> {
+            applyFilters();
+            filterPanel.setVisibility(View.GONE);
+            isFilterPanelExpanded = false;
+            btnFilterToggle.setImageResource(android.R.drawable.ic_menu_manage);
+        });
+
+        // 3. Reset Button
+        btnReset.setOnClickListener(v -> {
+            spinnerStatusFilter.setSelection(0);
+            spinnerStageFilter.setSelection(0);
+            spinnerDivisionFilter.setSelection(0);
+            actvYear.setText("Year", false);
+            actvMake.setText("Make", false);
+            actvModel.setText("Model", false);
+
+            // Reset the dropdown lists to default
+            setupVehicleDropdowns();
+            searchView.setQuery("", false);
+            applyFilters(); // Refresh to show all
+        });
+
+        // 4. Search View (Keep real-time for quick name/phone lookup)
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                performSearch(query);
+                applyFilters();
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (newText.isEmpty()) {
-                    loadLeadsFromDB(); // Reset list if search is cleared
-                } else {
-                    performSearch(newText);
-                }
+                applyFilters();
                 return true;
             }
         });
 
-        fab.setOnClickListener(v -> {
-            // This will open the activity to create a new lead
-            Intent intent = new Intent(LeadsActivity.this, LeadsCreationActivity.class);
-            startActivity(intent);
-        });
+        // 5. FAB & Navigation
+        fab.setOnClickListener(v -> startActivity(new Intent(this, LeadsCreationActivity.class)));
 
-        // Bottom Navigation Logic
-        // Search Logic
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                performSearch(query);
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (newText.isEmpty()) {
-                    loadLeadsFromDB();
-                } else {
-                    performSearch(newText);
-                }
-                return true;
-            }
-        });
-
-        fab.setOnClickListener(v -> {
-            Intent intent = new Intent(LeadsActivity.this, LeadsCreationActivity.class);
-            startActivity(intent);
-        });
-
-        // Bottom Navigation Logic - FIXED
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-
-            if (id == R.id.nav_leads) {
-                return true; // Already here
-            }
+            if (id == R.id.nav_leads) return true;
 
             Intent intent;
-            if (id == R.id.nav_calendar) {
-                // Point to MainActivity where your calendar logic lives
-                intent = new Intent(LeadsActivity.this, CalendarActivity.class);
-            } else if (id == R.id.nav_notifications) {
-                intent = new Intent(LeadsActivity.this, NotificationsActivity.class);
-            } else {
-                return false;
-            }
+            if (id == R.id.nav_calendar) intent = new Intent(this, CalendarActivity.class);
+            else if (id == R.id.nav_notifications)
+                intent = new Intent(this, NotificationsActivity.class);
+            else return false;
 
-            // CRITICAL: This flag prevents the "Freeze" by reusing the existing activity
-            // instance instead of killing and restarting the DB connection.
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);
             overridePendingTransition(0, 0);
@@ -165,48 +156,120 @@ public class LeadsActivity extends AppCompatActivity {
         });
     }
 
-    private void performSearch(String query) {
-        if (query == null || query.trim().isEmpty()) {
-            if (adapter != null) {
-                adapter.updateList(new ArrayList<>(leadList));
-            }
-            toggleEmptyState(leadList.isEmpty());
-            return;
+    /**
+     * Combined Method: Handles Search, Filters, Database Query, and UI Updates
+     */
+    private void applyFilters() {
+        // 1. Get current values from all UI components
+        String query = (searchView != null) ? searchView.getQuery().toString().trim() : "";
+
+        // Use a helper to get Spinner text safely
+        String status = (spinnerStatusFilter.getSelectedItem() != null) ?
+                spinnerStatusFilter.getSelectedItem().toString() : "All Status";
+        String stage = (spinnerStageFilter.getSelectedItem() != null) ?
+                spinnerStageFilter.getSelectedItem().toString() : "All Stages";
+        String division = (spinnerDivisionFilter.getSelectedItem() != null) ?
+                spinnerDivisionFilter.getSelectedItem().toString() : "All Divisions";
+
+        // Get specific vehicle selections
+        String year = actvYear.getText().toString().trim();
+        String make = actvMake.getText().toString().trim();
+        String model = actvModel.getText().toString().trim();
+
+        // 2. Fetch filtered results from Business Layer (Option B)
+        // Ensure your AccessLeads.getLeadsFiltered signature matches these 7 parameters
+        List<Lead> filteredList = accessLeads.getLeadsFiltered(query, status, stage, division, year, make, model);
+        if (filteredList == null) filteredList = new ArrayList<>();
+
+        // 3. Update or Initialize Adapter
+        if (adapter == null) {
+            adapter = new LeadAdapter(new ArrayList<>(filteredList), lead -> {
+                Intent intent = new Intent(LeadsActivity.this, LeadDetailsActivity.class);
+                intent.putExtra("SELECTED_LEAD", lead);
+                startActivity(intent);
+            });
+            recyclerView.setAdapter(adapter);
+        } else {
+            adapter.updateList(filteredList);
         }
 
-        String filterPattern = query.toLowerCase().trim();
-        List<Lead> filteredResults = new ArrayList<>();
-
-        // Partial match search across Name, Phone, and Email
-        for (Lead lead : leadList) {
-            boolean matchesName = lead.getLeadName().toLowerCase().contains(filterPattern);
-            boolean matchesPhone = lead.getLeadPhoneNumber().contains(filterPattern);
-            boolean matchesEmail = (lead.getLeadEmail() != null &&
-                    lead.getLeadEmail().toLowerCase().contains(filterPattern));
-
-            if (matchesName || matchesPhone || matchesEmail) {
-                filteredResults.add(lead);
-            }
-        }
-
-        // Update the RecyclerView Adapter with the filtered results
-        if (adapter != null) {
-            adapter.updateList(filteredResults);
-        }
-        toggleEmptyState(filteredResults.isEmpty());
-    }
-
-    private void toggleEmptyState(boolean isEmpty) {
+        // 4. Toggle Empty State
+        boolean isEmpty = filteredList.isEmpty();
         if (emptyStateView != null) {
             emptyStateView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
             recyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
         }
     }
 
+    private void setupVehicleDropdowns() {
+        // 1. Initial Load: Get all unique years from the DB
+        List<String> years = accessLeads.getUniqueVehicleYears();
+        years.add(0, "Year"); // Add hint
+        updateAdapter(actvYear, years);
+
+        updateAdapter(actvMake, new ArrayList<>(Collections.singletonList("Make")));
+        updateAdapter(actvModel, new ArrayList<>(Collections.singletonList("Model")));
+
+        // 2. Year Selection -> Filter Makes
+        actvYear.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedYear = (String) parent.getItemAtPosition(position);
+
+            // Reset children
+            actvMake.setText("Make");
+            actvModel.setText("Model");
+
+            if (selectedYear.equals("Year")) {
+                updateAdapter(actvMake, new ArrayList<>(Collections.singletonList("Make")));
+            } else {
+                List<String> makes = accessLeads.getMakesByYear(selectedYear);
+                makes.add(0, "Make");
+                updateAdapter(actvMake, makes);
+            }
+        });
+
+        // 3. Make Selection -> Filter Models
+        actvMake.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedYear = actvYear.getText().toString();
+            String selectedMake = (String) parent.getItemAtPosition(position);
+
+            actvModel.setText("Model");
+
+            if (selectedMake.equals("Make")) {
+                updateAdapter(actvModel, new ArrayList<>(Collections.singletonList("Model")));
+            } else {
+                List<String> models = accessLeads.getModelsByYearAndMake(selectedYear, selectedMake);
+                models.add(0, "Model");
+                updateAdapter(actvModel, models);
+            }
+        });
+    }
+
+    private void setupDropdownBehaviors() {
+        View.OnFocusChangeListener focusListener = (v, hasFocus) -> {
+            if (hasFocus && v instanceof AutoCompleteTextView) {
+                ((AutoCompleteTextView) v).showDropDown();
+            }
+        };
+
+        actvYear.setOnFocusChangeListener(focusListener);
+        actvMake.setOnFocusChangeListener(focusListener);
+        actvModel.setOnFocusChangeListener(focusListener);
+
+        actvYear.setOnClickListener(v -> actvYear.showDropDown());
+        actvMake.setOnClickListener(v -> actvMake.showDropDown());
+        actvModel.setOnClickListener(v -> actvModel.showDropDown());
+    }
+
+    // Helper to refresh adapters (Same as your LeadDetailsActivity)
+    private void updateAdapter(AutoCompleteTextView view, List<String> data) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_dropdown_item_1line, data);
+        view.setAdapter(adapter);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh data whenever we return to this screen (e.g., after adding a lead)
-        loadLeadsFromDB();
+        applyFilters(); // Refresh list when returning to activity
     }
 }

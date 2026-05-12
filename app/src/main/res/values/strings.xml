@@ -1,3 +1,24 @@
 <resources>
     <string name="app_name">AutoTrack</string>
+
+    <string-array name="filter_status">
+        <item>All Status</item>
+        <item>Active</item>
+        <item>Lost</item>
+    </string-array>
+
+    <string-array name="filter_stages">
+        <item>All Stages</item>
+        <item>New</item>
+        <item>Contacted</item>
+        <item>Visited</item>
+        <item>Test Drive</item>
+        <item>Negotiation</item>
+    </string-array>
+
+    <string-array name="filter_division">
+        <item>All Divisions</item>
+        <item>New Car</item>
+        <item>Used Car</item>
+    </string-array>
 </resources>

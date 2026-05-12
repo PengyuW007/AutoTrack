@@ -12,22 +12,22 @@
         android:id="@+id/title_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:elevation="2dp"
         android:orientation="vertical"
         android:paddingStart="16dp"
         android:paddingTop="20dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="16dp"
-        android:background="@android:color/white"
-        android:elevation="2dp">
+        android:paddingBottom="16dp">
 
         <TextView
             android:id="@+id/header_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ALL MY LEADS"
+            android:textColor="#2196F3"
             android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="#2196F3" />
+            android:textStyle="bold" />
 
         <!-- Subtitle removed from here -->
     </LinearLayout>
@@ -42,13 +42,175 @@
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp">
 
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/searchView"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:iconifiedByDefault="false"
-            app:queryHint="Search by name or phone..."
-            app:queryBackground="@android:color/transparent" />
+            android:orientation="vertical">
+
+            <!-- Top Row: Search + Filter Toggle -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/searchView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/btnFilterToggle"
+                    app:iconifiedByDefault="false"
+                    app:queryBackground="@android:color/transparent"
+                    app:queryHint="Search by name or phone..." />
+
+                <ImageButton
+                    android:id="@+id/btnFilterToggle"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_filter_funnel"
+                    app:tint="#2196F3" />
+            </RelativeLayout>
+
+            <!-- Expandable Filter Panel (Hidden by default) -->
+            <LinearLayout
+                android:id="@+id/filterPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FAFAFA"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="#EEEEEE" />
+
+                <!-- Status Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lead Status"
+                    android:textAllCaps="true"
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerStatusFilter"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="12dp"
+                    android:entries="@array/filter_status" />
+
+                <!-- Stage Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sales Stage"
+                    android:textAllCaps="true"
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerStageFilter"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="12dp"
+                    android:entries="@array/filter_stages" />
+
+                <!-- Division Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Division"
+                    android:textAllCaps="true"
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/spinnerDivisionFilter"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="12dp"
+                    android:entries="@array/filter_division" />
+
+                <!-- Car Make Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Interested Vehicle (Year/Make/Model)"
+                    android:textAllCaps="true"
+                    android:textColor="#757575"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actvYearFilter"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:hint="Year"
+                        android:focusable="false"
+                        android:inputType="none" />
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actvMakeFilter"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:hint="Year"
+                        android:focusable="false"
+                        android:inputType="none" />
+
+                    <AutoCompleteTextView
+                        android:id="@+id/actvModelFilter"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:hint="Year"
+                        android:focusable="false"
+                        android:inputType="none" />
+                </LinearLayout>
+
+                <!-- Action Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:gravity="end"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnResetFilters"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Reset"
+                        android:textColor="#F44336" />
+
+                    <Button
+                        android:id="@+id/btnApplyFilters"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:backgroundTint="#2196F3"
+                        android:text="Apply Filters"
+                        android:textColor="@android:color/white" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 
     <!-- 3. RecyclerView for Categorized Leads -->
@@ -56,10 +218,10 @@
         android:id="@+id/recyclerViewLeads"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/search_card"
         android:layout_above="@id/bottom_navigation"
-        android:paddingHorizontal="8dp"
+        android:layout_below="@id/search_card"
         android:clipToPadding="false"
+        android:paddingHorizontal="8dp"
         tools:listitem="@android:layout/simple_list_item_2" />
 
     <LinearLayout
@@ -74,8 +236,8 @@
         <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:src="@android:drawable/ic_menu_search"
             android:contentDescription="No results"
+            android:src="@android:drawable/ic_menu_search"
             app:tint="#BDBDBD" />
 
         <TextView
@@ -100,14 +262,14 @@
         android:id="@+id/fab_add_lead"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
         android:layout_above="@id/bottom_navigation"
+        android:layout_alignParentEnd="true"
         android:layout_margin="20dp"
         android:contentDescription="Add Lead"
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="#2196F3"
-        app:tint="@android:color/white"
-        app:elevation="6dp"/>
+        app:elevation="6dp"
+        app:tint="@android:color/white" />
 
     <!-- 5. Bottom Navigation -->
 
