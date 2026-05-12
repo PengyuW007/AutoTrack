@@ -1,4 +1,61 @@
 Developer Log — AutoTrack
+
+---
+**Date:** May 11, 2026
+
+**Module:** Dynamic Filtering & Vehicle-Aware Search System
+
+## Itinerary
+
+- Successfully migrated filtering logic from `LeadsActivity` into `AccessLeads.java`, ensuring the presentation layer remains thin and aligned with proper multi-tier architecture principles.
+
+- Developed the `getLeadsFiltered()` pipeline to support simultaneous filtering across:
+  - Full-text search (`Name` and `Phone`)
+  - Categorical filters (`Status`, `Stage`, `Division`)
+  - Vehicle-based filtering (`Year`, `Make`, `Model`)
+
+- Implemented:
+  - `getUniqueVehicleYears()`
+  - `getMakesByYear()`
+  - `getModelsByYearAndMake()`
+
+  allowing filter dropdown options to load dynamically from the SQLite database instead of relying on static XML arrays.
+
+- Designed and implemented an expandable vertical **Filter Board** in `LeadsActivity`, improving usability and responsiveness on mobile layouts.
+
+- Integrated cascading dropdown logic:
+  ```
+  Year → Make → Model
+  ```
+  preventing invalid vehicle combinations during filtering.
+
+- Updated the `SearchView` listener so `applyFilters()` executes on every keystroke, creating a real-time filtering experience.
+
+## Issues
+
+- Identified an icon reset issue after applying filters. When the **Apply Filters** button is clicked, the filter icon incorrectly changes back to the wrench icon instead of remaining as the funnel icon.
+
+- Identified a lead sorting issue where leads are displayed in the wrong order. Newly created or most recently created leads should appear at the top, while older leads should appear below them.
+
+- Identified a vehicle persistence issue in `LeadDetailsActivity` Edit Mode. When vehicle interest information is changed and **Save Changes** is clicked, the lead card switches back to the old vehicle information instead of saving the updated selection.
+
+- Identified a dropdown population issue in the Filter Panel. Under the **Interested Vehicle** section, the `Year`, `Make`, and `Model` dropdowns do not display vehicle options, even though they should load available vehicle data from the database and allow user selection.
+
+- Identified a cascading dropdown issue in `LeadDetailsActivity` Edit Mode. The `Year` dropdown displays correctly, but the dependent `Make` and `Model` dropdowns do not populate based on the selected year.
+
+## Next
+
+- Fix the filter icon toggle logic so the funnel icon remains visible after filters are applied.
+
+- Update the DAO query or lead retrieval logic to display leads in descending creation order, with the newest leads appearing first.
+
+- Debug and repair vehicle interest persistence in `LeadDetailsActivity`, ensuring updated vehicle selections are correctly saved through `updateLead()` and reflected in View Mode.
+
+- Verify the vehicle dropdown data source in the Filter Panel, especially the database query methods used to populate `Year`, `Make`, and `Model`.
+
+- Manually trigger cascading dropdown initialization in Edit Mode so existing Year selections correctly load their related Make and Model options.
+---
+
 **Date:** May 9-10, 2026
 
 **Module:** Smart UI & Data Integrity
