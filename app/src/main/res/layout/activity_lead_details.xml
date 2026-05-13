@@ -27,379 +27,377 @@
         android:paddingBottom="80dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
 
-            <!-- VIEW MODE -->
-            <LinearLayout
-                android:id="@+id/layoutViewMode"
+        <!-- VIEW MODE -->
+        <LinearLayout
+            android:id="@+id/layoutViewMode"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="visible">
+
+            <!-- Contact Card -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:visibility="visible">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp">
 
-                <!-- Contact Card -->
-                <androidx.cardview.widget.CardView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:cardCornerRadius="8dp">
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                    <LinearLayout
+                    <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
+                        android:layout_height="wrap_content">
 
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
-
-                            <!-- Left side: Label -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentStart="true"
-                                android:layout_centerVertical="true"
-                                android:text="Contact"
-                                android:textColor="?attr/colorPrimary"
-                                android:textStyle="bold" />
-
-                            <!-- Right side: Interactive Status Toggle -->
-                            <LinearLayout
-                                android:id="@+id/llStatusToggle"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:layout_centerVertical="true"
-                                android:background="?attr/selectableItemBackgroundBorderless"
-                                android:clickable="true"
-                                android:focusable="true"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:minWidth="48dp"
-                                android:minHeight="48dp"
-                                android:padding="8dp">
-
-                                <!-- The Dot -->
-                                <View
-                                    android:id="@+id/viewStatusDot"
-                                    android:layout_width="15dp"
-                                    android:layout_height="15dp"
-                                    android:background="@drawable/circle_background_light_blue"
-                                    android:backgroundTint="@android:color/holo_green_light"/>
-
-                                <TextView
-                                    android:id="@+id/tvStatusLabel"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginStart="8dp"
-                                    android:text="Active"
-                                    android:textSize="15sp"
-                                    android:textStyle="bold" />
-                            </LinearLayout>
-                        </RelativeLayout>
-
+                        <!-- Left side: Label -->
                         <TextView
-                            android:id="@+id/tvViewName"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            tools:text="Pengyu Chen" />
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="Contact"
+                            android:textColor="?attr/colorPrimary"
+                            android:textStyle="bold" />
 
+                        <!-- Right side: Interactive Status Toggle -->
                         <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:gravity="center"
-                            android:orientation="horizontal">
-
-                            <FrameLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1">
-
-                                <ImageView
-                                    android:id="@+id/ivPhoneIcon"
-                                    android:layout_width="50dp"
-                                    android:layout_height="50dp"
-                                    android:layout_gravity="center"
-                                    android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:padding="8dp"
-                                    android:src="@android:drawable/stat_sys_phone_call"
-                                    app:tint="?attr/colorPrimary" />
-                            </FrameLayout>
-
-                            <FrameLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1">
-
-                                <ImageView
-                                    android:id="@+id/ivSmsIcon"
-                                    android:layout_width="50dp"
-                                    android:layout_height="50dp"
-                                    android:layout_gravity="center"
-                                    android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:padding="8dp"
-                                    android:src="@android:drawable/sym_action_chat"
-                                    app:tint="?attr/colorPrimary" />
-                            </FrameLayout>
-
-                            <FrameLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1">
-
-                                <ImageView
-                                    android:id="@+id/ivEmailIcon"
-                                    android:layout_width="50dp"
-                                    android:layout_height="50dp"
-                                    android:layout_gravity="center"
-                                    android:background="?attr/selectableItemBackgroundBorderless"
-                                    android:padding="8dp"
-                                    android:src="@android:drawable/ic_dialog_email"
-                                    app:tint="?attr/colorPrimary" />
-                            </FrameLayout>
-                        </LinearLayout>
-
-                        <TextView
-                            android:id="@+id/tvViewAddress"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:textColor="#666666"
-                            tools:text="123 Main St, Vancouver, BC" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- Vehicle Card -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:cardCornerRadius="8dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
+                            android:id="@+id/llStatusToggle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Vehicle Interest"
-                            android:textColor="?attr/colorPrimary"
-                            android:textStyle="bold" />
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:gravity="center_vertical"
+                            android:minWidth="48dp"
+                            android:minHeight="48dp"
+                            android:orientation="horizontal"
+                            android:padding="8dp">
 
-                        <TextView
-                            android:id="@+id/tvViewVehicle"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            tools:text="2024 VW Tiguan" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- Notes Card -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:cardCornerRadius="8dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Notes"
-                            android:textColor="?attr/colorPrimary"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvViewNotes"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            tools:text="Follow up next week." />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-
-                <!-- Tasks Card -->
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="16dp"
-                    app:cardCornerRadius="8dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <RelativeLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            <!-- The Dot -->
+                            <View
+                                android:id="@+id/viewStatusDot"
+                                android:layout_width="15dp"
+                                android:layout_height="15dp"
+                                android:background="@drawable/circle_background_light_blue"
+                                android:backgroundTint="@android:color/holo_green_light" />
 
                             <TextView
-                                android:id="@+id/tvTasksTitle"
+                                android:id="@+id/tvStatusLabel"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentStart="true"
-                                android:layout_centerVertical="true"
-                                android:text="Tasks &amp; Activities"
-                                android:textColor="?attr/colorPrimary"
-                                android:textSize="16sp"
+                                android:layout_marginStart="8dp"
+                                android:text="Active"
+                                android:textSize="15sp"
                                 android:textStyle="bold" />
+                        </LinearLayout>
+                    </RelativeLayout>
 
-                            <ImageButton
-                                android:id="@+id/btnAddTask"
+                    <TextView
+                        android:id="@+id/tvViewName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        tools:text="Pengyu Chen" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <FrameLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
+
+                            <ImageView
+                                android:id="@+id/ivPhoneIcon"
                                 android:layout_width="50dp"
                                 android:layout_height="50dp"
-                                android:layout_alignParentEnd="true"
-                                android:layout_centerVertical="true"
+                                android:layout_gravity="center"
                                 android:background="?attr/selectableItemBackgroundBorderless"
-                                android:contentDescription="Add new task"
-                                android:src="@android:drawable/ic_input_add"
+                                android:padding="8dp"
+                                android:src="@android:drawable/stat_sys_phone_call"
                                 app:tint="?attr/colorPrimary" />
-                        </RelativeLayout>
+                        </FrameLayout>
 
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rvLeadTimeline"
-                            android:layout_width="match_parent"
+                        <FrameLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
-                            android:nestedScrollingEnabled="false"
-                            tools:itemCount="3"
-                            tools:listitem="@layout/item_timeline" />
-                    </LinearLayout>
-                </androidx.cardview.widget.CardView>
-            </LinearLayout>
+                            android:layout_weight="1">
 
-            <!-- EDIT MODE -->
-            <LinearLayout
-                android:id="@+id/layoutEditMode"
+                            <ImageView
+                                android:id="@+id/ivSmsIcon"
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_gravity="center"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:padding="8dp"
+                                android:src="@android:drawable/sym_action_chat"
+                                app:tint="?attr/colorPrimary" />
+                        </FrameLayout>
+
+                        <FrameLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
+
+                            <ImageView
+                                android:id="@+id/ivEmailIcon"
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_gravity="center"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:padding="8dp"
+                                android:src="@android:drawable/ic_dialog_email"
+                                app:tint="?attr/colorPrimary" />
+                        </FrameLayout>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvViewAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="#666666"
+                        tools:text="123 Main St, Vancouver, BC" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Vehicle Card -->
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:visibility="gone">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp">
 
-                <EditText
-                    android:id="@+id/etDetFirstName"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="First Name" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <EditText
-                    android:id="@+id/etDetLastName"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Vehicle Interest"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvViewVehicle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        tools:text="2024 VW Tiguan" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Notes Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="8dp">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Last Name" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <EditText
-                    android:id="@+id/etDetPhone"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Notes"
+                        android:textColor="?attr/colorPrimary"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvViewNotes"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        tools:text="Follow up next week." />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Tasks Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="16dp"
+                android:layout_weight="1"
+                app:cardCornerRadius="8dp">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Phone"
-                    android:inputType="phone" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <EditText
-                    android:id="@+id/etDetEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Email" />
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
 
-                <!-- Section Label -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Vehicle Interest"
-                    android:textColor="?attr/colorPrimary"
-                    android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/tvTasksTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="Tasks &amp; Activities"
+                            android:textColor="?attr/colorPrimary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
-                <!-- The Search Box -->
-                <!-- Year Dropdown -->
-                <AutoCompleteTextView
-                    android:id="@+id/actvYear"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Select Year"
-                    android:completionThreshold="1" />
+                        <ImageButton
+                            android:id="@+id/btnAddTask"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="Add new task"
+                            android:src="@android:drawable/ic_input_add"
+                            app:tint="?attr/colorPrimary" />
+                    </RelativeLayout>
 
-                <!-- Make Dropdown -->
-                <AutoCompleteTextView
-                    android:id="@+id/actvMake"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Select Make"
-                    android:completionThreshold="1" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvLeadTimeline"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="12dp"
+                        android:nestedScrollingEnabled="true"
+                        android:scrollbars="vertical"
+                        tools:itemCount="10"
+                        tools:listitem="@layout/item_timeline" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
 
-                <!-- Model Dropdown -->
-                <AutoCompleteTextView
-                    android:id="@+id/actvModel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Select Model"
-                    android:completionThreshold="1" />
+        <!-- EDIT MODE -->
+        <LinearLayout
+            android:id="@+id/layoutEditMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="gone">
 
-                <!-- Trim Dropdown -->
-                <AutoCompleteTextView
-                    android:id="@+id/actvTrim"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Select Trim"
-                    android:completionThreshold="1" />
+            <EditText
+                android:id="@+id/etDetFirstName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="First Name" />
 
-                <!-- Selection Preview -->
-                <TextView
-                    android:id="@+id/tvSelectedVehiclePreview"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="#666666"
-                    android:textSize="13sp"
-                    android:textStyle="italic"
-                    tools:text="Current: 2026 VW Tiguan Highline" />
+            <EditText
+                android:id="@+id/etDetLastName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Last Name" />
 
-                <EditText
-                    android:id="@+id/etDetNotes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:gravity="top"
-                    android:hint="Notes"
-                    android:lines="3" />
+            <EditText
+                android:id="@+id/etDetPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Phone"
+                android:inputType="phone" />
 
-                <Button
-                    android:id="@+id/btnUpdateLead"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Save Changes" />
+            <EditText
+                android:id="@+id/etDetEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email" />
 
-                <Button
-                    android:id="@+id/btnDeleteLead"
-                    style="@style/Widget.AppCompat.Button.Borderless"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Delete Lead"
-                    android:textColor="@android:color/holo_red_dark" />
-            </LinearLayout>
-        </FrameLayout>
+            <!-- Section Label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Vehicle Interest"
+                android:textColor="?attr/colorPrimary"
+                android:textStyle="bold" />
+
+            <!-- The Search Box -->
+            <!-- Year Dropdown -->
+            <AutoCompleteTextView
+                android:id="@+id/actvYear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:completionThreshold="1"
+                android:hint="Select Year" />
+
+            <!-- Make Dropdown -->
+            <AutoCompleteTextView
+                android:id="@+id/actvMake"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:completionThreshold="1"
+                android:hint="Select Make" />
+
+            <!-- Model Dropdown -->
+            <AutoCompleteTextView
+                android:id="@+id/actvModel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:completionThreshold="1"
+                android:hint="Select Model" />
+
+            <!-- Trim Dropdown -->
+            <AutoCompleteTextView
+                android:id="@+id/actvTrim"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:completionThreshold="1"
+                android:hint="Select Trim" />
+
+            <!-- Selection Preview -->
+            <TextView
+                android:id="@+id/tvSelectedVehiclePreview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#666666"
+                android:textSize="13sp"
+                android:textStyle="italic"
+                tools:text="Current: 2026 VW Tiguan Highline" />
+
+            <EditText
+                android:id="@+id/etDetNotes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="top"
+                android:hint="Notes"
+                android:lines="3" />
+
+            <Button
+                android:id="@+id/btnUpdateLead"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Save Changes" />
+
+            <Button
+                android:id="@+id/btnDeleteLead"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Delete Lead"
+                android:textColor="@android:color/holo_red_dark" />
+        </LinearLayout>
+
     </FrameLayout>
 
     <!-- PINNED FOOTER: Stays at the bottom of the screen -->

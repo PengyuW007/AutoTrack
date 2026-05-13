@@ -146,7 +146,10 @@ public class LeadsActivity extends AppCompatActivity {
 
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_leads) return true;
+            if (id == R.id.nav_leads) {
+                recyclerView.smoothScrollToPosition(0);
+                return true;
+            }
 
             Intent intent;
             if (id == R.id.nav_calendar) intent = new Intent(this, CalendarActivity.class);
