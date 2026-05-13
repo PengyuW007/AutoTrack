@@ -1,5 +1,56 @@
 Developer Log — AutoTrack
+---
+**Date:** May 12, 2026
 
+**Module:** Lead Management & Core Lead Details & Filtering Logic Finalized
+
+## Itinerary
+
+- Implemented a robust `handleUpdate()` workflow in `LeadDetailsActivity` to correctly persist user modifications to SQLite.
+  - Captured all `EditText` and `AutoCompleteTextView` inputs.
+  - Mapped selected vehicle strings back into a `Vehicle` domain object using the master vehicle catalog.
+  - Connected the update pipeline to `accessLeads.updateLead()`.
+
+- Centralized all UI rendering into a unified `refreshUI()` method.
+  - Established a single source of truth using the `currentLead` object.
+  - Ensured View Mode (`TextView`) and Edit Mode (`EditText` / dropdowns) remain fully synchronized.
+
+- Implemented cascading vehicle selection logic for:
+  ```
+  Year → Make → Model
+  ```
+  using a "Load Once, Filter in Memory" strategy.
+  - Loaded the entire vehicle catalog during `onCreate()`.
+  - Added `OnItemClickListener` handlers to dynamically rebuild dependent dropdown adapters.
+
+- Integrated the cascading vehicle filtering system into `LeadsActivity`.
+  - Updated filters to query the full master vehicle catalog instead of only existing lead interests.
+  - Connected `SearchView` and all filter controls to a unified `applyFilters()` pipeline.
+
+- Improved application stability and crash prevention:
+  - Ensured `AccessVehicles` and `AccessLeads` are initialized during activity startup.
+  - Added null-safety checks in:
+    - `updateDependentAdapters()`
+    - `setupVehicleDropdowns()`
+  - Resolved a `SQLiteCantOpenDatabaseException` by correcting database path initialization logic.
+
+## Issues
+
+- Vehicle interest changes in `LeadDetailsActivity` previously reverted after saving due to incomplete object mapping between dropdown selections and the `Vehicle` domain model.
+
+- View Mode and Edit Mode displayed inconsistent lead information because UI updates were previously handled independently across multiple methods.
+
+- Cascading vehicle dropdowns initially failed to populate correctly due to missing adapter refresh logic for dependent fields.
+
+- Vehicle filters in `LeadsActivity` were limited to existing lead data rather than the full dealership vehicle catalog.
+
+## Next
+
+- Begin integration of the Calendar Activity task system.
+
+- Implement task scheduling and follow-up visualization for leads in Calendar Activity.
+
+- Continue refining the task management pipeline to support calendar-based workflow automation.
 ---
 **Date:** May 11, 2026
 
