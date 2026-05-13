@@ -2,18 +2,13 @@ package com.areonedev.autotrack.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -22,7 +17,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.areonedev.autotrack.R;
 import com.areonedev.autotrack.business.AccessLeads;
+import com.areonedev.autotrack.business.AccessVehicles;
 import com.areonedev.autotrack.objects.Lead;
+import com.areonedev.autotrack.objects.Vehicle;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -44,8 +42,11 @@ public class LeadsActivity extends AppCompatActivity {
     private Spinner spinnerStatusFilter, spinnerStageFilter, spinnerDivisionFilter;
     private AutoCompleteTextView actvYear, actvMake, actvModel;
     private AccessLeads accessLeads;
+    private AccessVehicles accessVehicles;
     private LeadAdapter adapter;
     private boolean isFilterPanelExpanded = false;
+    private List<Vehicle> allVehicles;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,10 @@ public class LeadsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_all_my_leads);
 
         accessLeads = new AccessLeads();
+
+        accessVehicles = new AccessVehicles();
+        allVehicles = new ArrayList<>();
+        accessVehicles.getVehicles(allVehicles);
 
         initViews();
         setupListeners();
@@ -202,45 +207,69 @@ public class LeadsActivity extends AppCompatActivity {
     }
 
     private void setupVehicleDropdowns() {
-        // 1. Initial Load: Get all unique years from the DB
-        List<String> years = accessLeads.getUniqueVehicleYears();
-        years.add(0, "Year"); // Add hint
-        updateAdapter(actvYear, years);
+        if (allVehicles == null) return;
 
-        updateAdapter(actvMake, new ArrayList<>(Collections.singletonList("Make")));
-        updateAdapter(actvModel, new ArrayList<>(Collections.singletonList("Model")));
+        // 1. Initial Load: Populate all Years and all Makes from the master list
+        List<String> allYears = new ArrayList<>();
+        List<String> allMakes = new ArrayList<>();
+        for (Vehicle v : allVehicles) {
+            if (!allYears.contains(v.getYear())) allYears.add(v.getYear());
+            if (!allMakes.contains(v.getMake())) allMakes.add(v.getMake());
+        }
 
-        // 2. Year Selection -> Filter Makes
+        // Sort them so they look nice in the dropdown
+        Collections.sort(allYears, Collections.reverseOrder());
+        Collections.sort(allMakes);
+
+        updateAdapter(actvYear, allYears);
+        updateAdapter(actvMake, allMakes);
+
+        // 2. When Year is selected -> Filter Makes available for that year
         actvYear.setOnItemClickListener((parent, view, position, id) -> {
             String selectedYear = (String) parent.getItemAtPosition(position);
 
-            // Reset children
-            actvMake.setText("Make");
-            actvModel.setText("Model");
+            // Reset dependent fields (using "" allows the hint to show or typing to start fresh)
+            actvMake.setText("", false);
+            actvModel.setText("", false);
 
-            if (selectedYear.equals("Year")) {
-                updateAdapter(actvMake, new ArrayList<>(Collections.singletonList("Make")));
-            } else {
-                List<String> makes = accessLeads.getMakesByYear(selectedYear);
-                makes.add(0, "Make");
-                updateAdapter(actvMake, makes);
+            List<String> filteredMakes = new ArrayList<>();
+            for (Vehicle v : allVehicles) {
+                if (v.getYear().equals(selectedYear) && !filteredMakes.contains(v.getMake())) {
+                    filteredMakes.add(v.getMake());
+                }
             }
+            Collections.sort(filteredMakes);
+            updateAdapter(actvMake, filteredMakes);
+
+            actvMake.showDropDown();
+            applyFilters(); // Refresh the lead list
         });
 
-        // 3. Make Selection -> Filter Models
+        // 3. When Make is selected -> Filter Models based on Year + Make
         actvMake.setOnItemClickListener((parent, view, position, id) -> {
             String selectedYear = actvYear.getText().toString();
             String selectedMake = (String) parent.getItemAtPosition(position);
 
-            actvModel.setText("Model");
+            actvModel.setText("", false);
 
-            if (selectedMake.equals("Make")) {
-                updateAdapter(actvModel, new ArrayList<>(Collections.singletonList("Model")));
-            } else {
-                List<String> models = accessLeads.getModelsByYearAndMake(selectedYear, selectedMake);
-                models.add(0, "Model");
-                updateAdapter(actvModel, models);
+            List<String> filteredModels = new ArrayList<>();
+            for (Vehicle v : allVehicles) {
+                // Logic: If year is empty or "Year", match by make only. Otherwise match both.
+                boolean yearMatch = selectedYear.isEmpty() || selectedYear.equals("Year") || v.getYear().equals(selectedYear);
+                if (yearMatch && v.getMake().equals(selectedMake) && !filteredModels.contains(v.getModel())) {
+                    filteredModels.add(v.getModel());
+                }
             }
+            Collections.sort(filteredModels);
+            updateAdapter(actvModel, filteredModels);
+
+            actvModel.showDropDown();
+            applyFilters(); // Refresh the lead list
+        });
+
+        // 4. When Model is selected -> Just trigger filter
+        actvModel.setOnItemClickListener((parent, view, position, id) -> {
+            applyFilters();
         });
     }
 

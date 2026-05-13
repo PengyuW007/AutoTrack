@@ -218,15 +218,20 @@ public class AccessLeads {
         return yearMatch && makeMatch && modelMatch;
     }
 
-    public List<String> getUniqueVehicleYears() {
-        return dataAccess.getUniqueColumnValues("VI_Year");
-    }
-
-    public List<String> getMakesByYear(String year) {
-        return dataAccess.getFilteredColumnValues("VI_Make", "VI_Year = ?", new String[]{year});
-    }
-
-    public List<String> getModelsByYearAndMake(String year, String make) {
-        return dataAccess.getFilteredColumnValues("VI_Model", "VI_Year = ? AND VI_Make = ?", new String[]{year, make});
-    }
+//    public List<String> getUniqueVehicleYears() {
+//        return dataAccess.getUniqueColumnValues("VI_Year");
+//    }
+//
+//    public List<String> getMakesByYear(String year) {
+//        return dataAccess.getFilteredColumnValues("VI_Make", "VI_Year = ?", new String[]{year});
+//    }
+//
+//    public List<String> getModelsByYearAndMake(String year, String make) {
+//        return dataAccess.getFilteredColumnValues("VI_Model", "VI_Year = ? AND VI_Make = ?", new String[]{year, make});
+//    }
+//
+//    public List<String> getAllMakes() {
+//        // This fetches every unique Make in the entire database
+//        return dataAccess.getUniqueColumnValues("VI_Make");
+//    }
 }

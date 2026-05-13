@@ -170,7 +170,7 @@
                         android:layout_width="0dp"
                         android:layout_height="48dp"
                         android:layout_weight="1"
-                        android:hint="Year"
+                        android:hint="Make"
                         android:focusable="false"
                         android:inputType="none" />
 
@@ -179,7 +179,7 @@
                         android:layout_width="0dp"
                         android:layout_height="48dp"
                         android:layout_weight="1"
-                        android:hint="Year"
+                        android:hint="Model"
                         android:focusable="false"
                         android:inputType="none" />
                 </LinearLayout>
