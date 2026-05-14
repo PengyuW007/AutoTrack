@@ -128,7 +128,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="No Tasks Scheduled"
+                            android:text="No Tasks Scheduled Today"
                             android:textColor="@android:color/darker_gray"
                             android:textSize="16sp"
                             android:textStyle="italic" />

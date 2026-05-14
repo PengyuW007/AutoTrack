@@ -1,5 +1,60 @@
 Developer Log — AutoTrack
 ---
+**Date:** May 13, 2026
+
+**Module:** Calendar Agenda & Priority Workflow System
+
+## Itinerary
+
+- Refactored `CalendarActivity` from a static date viewer into a dynamic **Daily Follow-Up Agenda** system.
+
+- Integrated `ScoringService` and `PriorityManager` into `AgendaService` to automatically surface high-value leads alongside scheduled follow-up tasks.
+
+- Improved agenda intelligence by combining:
+  - Scheduled manual tasks
+  - Scientific follow-up milestones
+  - Lead engagement priority scoring
+
+- Fixed a priority conflict where system-generated **Scientific Missions** were overriding manually created user tasks such as:
+  - Test Drives
+  - Appointments
+  - Customer Callbacks
+
+- Updated task rendering logic so manually assigned task titles always take precedence within the agenda UI.
+
+- Restored historical task visibility by updating the agenda retrieval pipeline to cross-reference the complete task history rather than filtering only current milestones.
+
+- Improved timeline consistency between:
+  - `CalendarActivity`
+  - `AgendaService`
+  - `Task Ledger`
+    ensuring historical and upcoming tasks remain synchronized.
+
+## Issues
+
+- System-generated milestone tasks previously overrode manual task titles during agenda rendering, reducing visibility of user-defined activities.
+
+- Historical tasks disappeared from the Calendar Agenda because retrieval logic only queried active milestone windows instead of the full persisted task dataset.
+
+- Priority calculation occasionally duplicated leads between scheduled tasks and suggested follow-up recommendations, requiring additional deduplication handling within `AgendaService`.
+
+## Next
+
+- Research and implement PII encryption strategies for Lead data storage to improve compliance with industrial security standards.
+
+- Prepare pre-acceptance testing workflows for:
+  - Lead creation
+  - Engagement scoring accuracy
+  - Agenda deduplication behavior
+  - Calendar task synchronization
+
+- Continue refining the Priority Score algorithm to better balance:
+  - Manual urgency
+  - Scientific follow-up cadence
+  - Lead engagement weighting
+  - Historical interaction behavior
+
+---
 **Date:** May 12, 2026
 
 **Module:** Lead Management & Core Lead Details & Filtering Logic Finalized
