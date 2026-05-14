@@ -2,20 +2,23 @@ package com.areonedev.autotrack.business;
 
 import com.areonedev.autotrack.objects.Lead;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.PriorityQueue;
 public class PriorityManager {
     private PriorityQueue<Lead> priorityQueue;
     private ScoringService scoringService;
-
+    private static double THRESHOLD = ScoringService.THRESHOLD;
     // =========================
     // Constructor
     // =========================
     public PriorityManager(ScoringService scoringService) {
         this.scoringService = scoringService;
-        // Comparator: score 越高优先级越高
+        // PriorityQueue and compare handles the "Queue" structure: Highest score stays at the head
         this.priorityQueue = new PriorityQueue<>((l1, l2) -> Double.compare(l2.getLeadScore(), l1.getLeadScore()));
     }
 
@@ -28,12 +31,18 @@ public class PriorityManager {
         priorityQueue.clear();
         if (inputLeads != null) {
             for (Lead lead : inputLeads) {
-                addOrUpdateLead(lead);
+                // Ensure score is set before adding to queue
+                if (lead.getLeadScore() == 0) {
+                    lead.setLeadScore(scoringService.calculateScore(lead));
+                }
+                priorityQueue.add(lead);
             }
         }
-        // Convert the sorted queue to a list for the RecyclerView
-        List<Lead> sortedList = new ArrayList<>(priorityQueue);
-        sortedList.sort((l1, l2) -> Double.compare(l2.getLeadScore(), l1.getLeadScore()));
+
+        List<Lead> sortedList = new ArrayList<>();
+        while (!priorityQueue.isEmpty()) {
+            sortedList.add(priorityQueue.poll());
+        }
         return sortedList;
     }
 
@@ -70,6 +79,8 @@ public class PriorityManager {
     // Get All Leads Sorted
     // =========================
     public List<Lead> getAllLeadsSorted() {
-        return new ArrayList<>(priorityQueue);
+        List<Lead> list = new ArrayList<>(priorityQueue);
+        list.sort((l1, l2) -> Double.compare(l2.getLeadScore(), l1.getLeadScore()));
+        return list;
     }
 }

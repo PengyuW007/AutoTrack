@@ -201,6 +201,14 @@ public class Lead implements Serializable {
     public Date getLastInteractionDate() { return lastInteractionDate; }
     public void setLastInteractionDate(Date lastInteractionDate) { this.lastInteractionDate = lastInteractionDate; }
 
+    public Date getFollowUpDate() {
+        return followUpDate;
+    }
+
+    public void setFollowUpDate(Date followUpDate) {
+        this.followUpDate = followUpDate;
+    }
+
     public String getLastInteractionBy() { return lastInteractionBy; }
     public void setLastInteractionBy(String lastInteractionBy) { this.lastInteractionBy = lastInteractionBy; }
 

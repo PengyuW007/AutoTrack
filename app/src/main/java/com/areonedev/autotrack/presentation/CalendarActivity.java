@@ -2,6 +2,7 @@ package com.areonedev.autotrack.presentation;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -10,11 +11,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.areonedev.autotrack.business.AgendaService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import com.areonedev.autotrack.R;
 import com.areonedev.autotrack.objects.Lead;
+import com.areonedev.autotrack.objects.Task;
 import com.areonedev.autotrack.business.AccessLeads;
+import com.areonedev.autotrack.business.AccessTasks;
 import com.areonedev.autotrack.business.ScoringService;
 import com.areonedev.autotrack.business.PriorityManager;
 
@@ -34,7 +39,10 @@ public class CalendarActivity extends AppCompatActivity {
     private Calendar currentCal; // Tracks the currently viewed week strip
 
     private ScoringService scoringService;
+    private PriorityManager priorityManager;
+    private AgendaService agendaService;
     private AccessLeads accessLeads;
+    private AccessTasks accessTasks;
     private Date selectedDate;
 
     @Override
@@ -44,7 +52,10 @@ public class CalendarActivity extends AppCompatActivity {
 
         // Initialize Business Logic
         scoringService = new ScoringService();
+        priorityManager = new PriorityManager(scoringService);
+        agendaService = new AgendaService(scoringService, priorityManager);
         accessLeads = new AccessLeads();
+        accessTasks = new AccessTasks();
 
         // Initialize Calendar State
         currentCal = Calendar.getInstance(); // Defaults to Today
@@ -86,30 +97,27 @@ public class CalendarActivity extends AppCompatActivity {
      * Fetches, scores, and sorts all leads for the selected day into one unified list.
      */
     private void updateTaskPanels(Date date) {
-        // 1. Get all leads scheduled for this date from the business layer
-        //List<Lead> dayLeads = accessLeads.getLeadsByDate(date);
+        // 1. Fetch all leads from the database
         List<Lead> allLeads = accessLeads.getAllLeads();
-        List<Lead> dayMissions = new ArrayList<>();
 
-        // 2. Filter leads based on the Scientific Milestone logic
-        for (Lead lead : allLeads) {
-            // Ask the service: "Does this lead have a mission on this specific calendar date?"
-            String mission = scoringService.getScientificMission(lead, date);
+        // 2. Fetch ALL tasks from the database using the sequential method
+        List<Task> allTasks = new ArrayList<>();
+        String error = accessTasks.getTasks(allTasks);
 
-            // If mission is not null, it means today is a milestone (Day 0, 1, 3, 8, etc.)
-            if (mission != null) {
-                dayMissions.add(lead);
-            }
+        // Optional: Log error if the database retrieval failed
+        if (error != null) {
+            Log.e("CalendarActivity", "Error fetching tasks: " + error);
         }
 
-        // 3. Use PriorityManager to calculate scores and sort them (Highest Score first)
-        PriorityManager priorityManager = new PriorityManager(scoringService);
-        List<Lead> sortedLeads = priorityManager.getPrioritizedList(dayMissions);
+        // 3. Use AgendaService to get the prioritized agenda for the selected date
+        // Now allTasks contains every task for every lead, ensuring historical tasks appear
+        List<Lead> agendaLeads = agendaService.getTodayAgenda(allLeads, allTasks, date);
 
         // 4. Bind to the unified RecyclerView
-        // We pass the scoringService so the Adapter can display the calculated score
         View emptyView = findViewById(R.id.llEmptyState);
-        rvGeneralTasks.setAdapter(new TaskAdapter(sortedLeads, scoringService,emptyView,date));
+
+        // TaskAdapter will display the list.
+        rvGeneralTasks.setAdapter(new TaskAdapter(agendaLeads, scoringService, emptyView, date));
 
         // 5. Update the Agenda Header text
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMM dd", Locale.getDefault());

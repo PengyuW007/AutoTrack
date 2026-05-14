@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.Collections;
 
 public class ScoringService {
-    private final int THRESHOLD = 100;
+    protected static final int THRESHOLD = 100;
     private final int[] SILENT_MILESTONES = {3, 8, 15, 30, 90, 180, 365};
     private AccessTasks accessTasks = new AccessTasks();
 
