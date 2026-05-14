@@ -3,6 +3,7 @@ package com.areonedev.autotrack.business;
 import com.areonedev.autotrack.objects.Lead;
 import com.areonedev.autotrack.objects.Task;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -96,6 +97,25 @@ public class ScoringService {
 
     public String getScientificMission(Lead lead, Date targetDate) {
         if (lead == null || lead.getLeadCreatedAt() == null) return null;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+        String targetDateStr = sdf.format(targetDate);
+
+        // Check for Manual Tasks in the database for this specific date
+        List<Task> leadTasks = new ArrayList<>();
+        accessTasks.getTasksByLead(leadTasks, lead); // Fetch tasks for this lead
+
+        if (!leadTasks.isEmpty()) {
+            for (Task task : leadTasks) {
+                if (task.getDate() != null) {
+                    String taskDateStr = sdf.format(task.getDate());
+                    if (targetDateStr.equals(taskDateStr)) {
+                        // If a manual task exists (e.g., "Test Drive"), return its title
+                        return task.getTitle();
+                    }
+                }
+            }
+        }
 
         Calendar targetCal = Calendar.getInstance();
         targetCal.setTime(targetDate);

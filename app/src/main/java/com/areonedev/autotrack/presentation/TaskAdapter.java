@@ -17,7 +17,6 @@ import com.areonedev.autotrack.objects.Lead;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     private List<Lead> leads;
@@ -66,17 +65,17 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
         // Calculate the Score and Mission for this specific lead
         double score = scoringService.calculateScore(lead);
-        String missionTitle = getMissionTitle(lead);
         String missionDesc = scoringService.getScientificMission(lead,selectedDate);
 
         // Fallback if the mission returns null (though your filter should prevent this)
         if (missionDesc == null) missionDesc = "Routine Follow-up";
 
+        String missionTitle = getMissionTitle(lead);
         // Line 1: Name + Mission Title (e.g., "John Doe | 🏎️ Test Drive")
-        holder.tvName.setText(String.format("%s %s | %s", lead.getLeadFirstName(), lead.getLeadLastName(), missionTitle));
+        holder.tvName.setText(String.format("%s %s | %s", lead.getLeadFirstName(), lead.getLeadLastName(), lead.getLeadStage()));
 
         // Line 2: Mission Description + Stage (Scientific Context)
-        String performanceText = String.format("Mission: %s [%s]", missionDesc, lead.getLeadStage());
+        String performanceText = String.format("Mission: %s [%s]", missionDesc, missionTitle);
         holder.tvStage.setText(performanceText);
 
         // 1. Get "Today" at midnight
