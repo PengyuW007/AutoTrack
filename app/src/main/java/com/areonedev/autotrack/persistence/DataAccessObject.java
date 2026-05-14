@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.File;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,9 +37,11 @@ public class DataAccessObject implements DataAccess {
     private static final String TABLE_NOTIFICATIONS = "Notifications";
     private static final String TABLE_TASKS = "Tasks";
     private static final String TABLE_VEHICLES = "Vehicles";
+    private CryptoManager cryptoManager;
 
     public DataAccessObject(String dbName) {
         this.dbName = dbName;
+        this.cryptoManager = new CryptoManager();
     }
 
     @Override
@@ -86,7 +89,7 @@ public class DataAccessObject implements DataAccess {
                     ")");
 
             //5. Create Tasks Table
-            db.execSQL("CREATE TABLE IF NOT EXISTS "+TABLE_TASKS+" (" +
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_TASKS + " (" +
                     "TaskID INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "Title TEXT, " +
                     "Timestamp INTEGER, " +
@@ -124,12 +127,12 @@ public class DataAccessObject implements DataAccess {
             count = getTableCount(TABLE_NOTIFICATIONS);
             if (count == 0) {
                 addDummyNotifications();
-            }else {
+            } else {
                 Log.d(TAG, "Database already contains " + count + " notifications. Skipping dummy data.");
             }
 
             count = getTableCount(TABLE_VEHICLES);
-            if(count==0){
+            if (count == 0) {
                 if (context != null) {
                     importVehiclesFromCSV();
                 } else {
@@ -309,10 +312,13 @@ public class DataAccessObject implements DataAccess {
      */
     private ContentValues getLeadContentValues(Lead lead) {
         ContentValues values = new ContentValues();
-        values.put("FirstName", lead.getLeadFirstName());
-        values.put("LastName", lead.getLeadLastName());
-        values.put("PhoneNumber", lead.getLeadPhoneNumber());
-        values.put("Email", lead.getLeadEmail());
+        // Encrypt sensitive PII fields
+        values.put("FirstName", cryptoManager.encrypt(lead.getLeadFirstName()));
+        values.put("LastName", cryptoManager.encrypt(lead.getLeadLastName()));
+        values.put("PhoneNumber", cryptoManager.encrypt(lead.getLeadPhoneNumber()));
+        values.put("Email", cryptoManager.encrypt(lead.getLeadEmail()));
+
+        //Non-sensitive fields remain plain text
         values.put("Division", lead.getLeadDivision());
         values.put("Address", lead.getLeadAddress());
         values.put("City", lead.getLeadCity());
@@ -370,10 +376,14 @@ public class DataAccessObject implements DataAccess {
                 Lead lead = new Lead();
 
                 lead.setLeadID(cursor.getLong(cursor.getColumnIndexOrThrow("LeadID")));
-                lead.setLeadFirstName(cursor.getString(cursor.getColumnIndexOrThrow("FirstName")));
-                lead.setLeadLastName(cursor.getString(cursor.getColumnIndexOrThrow("LastName")));
-                lead.setLeadPhoneNumber(cursor.getString(cursor.getColumnIndexOrThrow("PhoneNumber")));
-                lead.setLeadEmail(cursor.getString(cursor.getColumnIndexOrThrow("Email")));
+
+                // Decrypt sensitive PII fields
+                lead.setLeadFirstName(cryptoManager.decrypt(cursor.getString(cursor.getColumnIndexOrThrow("FirstName"))));
+                lead.setLeadLastName(cryptoManager.decrypt(cursor.getString(cursor.getColumnIndexOrThrow("LastName"))));
+                lead.setLeadPhoneNumber(cryptoManager.decrypt(cursor.getString(cursor.getColumnIndexOrThrow("PhoneNumber"))));
+                lead.setLeadEmail(cryptoManager.decrypt(cursor.getString(cursor.getColumnIndexOrThrow("Email"))));
+
+                // Non-sensitive fields
                 lead.setLeadDivision(cursor.getString(cursor.getColumnIndexOrThrow("Division")));
                 lead.setLeadAddress(cursor.getString(cursor.getColumnIndexOrThrow("Address")));
                 lead.setLeadCity(cursor.getString(cursor.getColumnIndexOrThrow("City")));
@@ -639,7 +649,8 @@ public class DataAccessObject implements DataAccess {
         getNotificationSequential(notifications);
         return notifications;
     }
-    private void addDummyNotifications(){
+
+    private void addDummyNotifications() {
         // We must fetch actual leads first to link them to the dummy notifications
         List<Lead> leads = new ArrayList<>();
         getLeadSequential(leads);
@@ -754,7 +765,7 @@ public class DataAccessObject implements DataAccess {
             values.put("LeadID", task.getLead() != null ? task.getLead().getLeadID() : -1);
 
             String whereClause = "TaskID = ?";
-            String[] whereArgs = { String.valueOf(task.getEventID()) };
+            String[] whereArgs = {String.valueOf(task.getEventID())};
 
             int rows = db.update("Tasks", values, whereClause, whereArgs);
 
@@ -783,7 +794,7 @@ public class DataAccessObject implements DataAccess {
 
         try {
             // We only fetch the columns the user cares about
-            Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_VEHICLES+" ORDER BY Year DESC, Make ASC", null);
+            Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_VEHICLES + " ORDER BY Year DESC, Make ASC", null);
 
             if (cursor.moveToFirst()) {
                 do {
@@ -816,7 +827,7 @@ public class DataAccessObject implements DataAccess {
         try {
             // Search by Model or Make - this is what the user will type in the search bar
             String search = "%" + criteria.getModel() + "%";
-            Cursor cursor = db.rawQuery("SELECT * FROM "+TABLE_VEHICLES+ " WHERE Model LIKE ? OR Make LIKE ?",
+            Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_VEHICLES + " WHERE Model LIKE ? OR Make LIKE ?",
                     new String[]{search, search});
 
             if (cursor.moveToFirst()) {
