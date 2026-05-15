@@ -18,3 +18,4 @@ local.properties
 *.apk
 *.aab
 *.png
+/app/release
