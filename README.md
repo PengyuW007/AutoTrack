@@ -209,11 +209,12 @@ Planned improvements include:
 ---
 ## Application Screenshots
 ### Calendar Agenda
-![]()
+![calendar](docs/images/Calendar.png)
 ### Lead List
-
+![leadList](docs/images/Leads.png)
 ### Lead Filter
-
+![](docs/images/LeadsFilter.png)
 ### Lead Detail
-
+![](docs/images/LeadsDetail.png)
 ### Architecture Diagram
+![](docs/images/Architecture.png)
