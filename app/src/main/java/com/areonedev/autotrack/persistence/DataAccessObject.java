@@ -471,10 +471,10 @@ public class DataAccessObject implements DataAccess {
         Lead darren = new Lead();
         darren.setLeadFirstName("Darren");
         darren.setLeadLastName("Adam");
-        darren.setLeadPhoneNumber("416-278-6191");
+        darren.setLeadPhoneNumber("416-222-3333");
         darren.setLeadVehicleInterest(jetta);
         darren.setTradeInVehicle(oldCivic);
-        calendar.set(2026, Calendar.APRIL, 1);
+        calendar.set(2026, Calendar.MAY, 1);
         darren.setLeadCreatedAt(calendar.getTime());
         darren.setLeadFollowUpDate(calendar.getTime());
         darren.setLeadStage("NEW");
@@ -484,22 +484,80 @@ public class DataAccessObject implements DataAccess {
         Lead darryl = new Lead();
         darryl.setLeadFirstName("Darryl");
         darryl.setLeadLastName("Kessel");
-        darryl.setLeadPhoneNumber("647-282-9967");
-        darryl.setLeadVehicleInterest(tiguan);
-        calendar.set(2026, Calendar.APRIL, 2);
+        darryl.setLeadPhoneNumber("647-111-2222");
+        darryl.setLeadVehicleInterest(atlas);
+        calendar.set(2026, Calendar.MAY, 2);
         darryl.setLeadCreatedAt(calendar.getTime());
         darryl.setLeadFollowUpDate(calendar.getTime());
         darryl.setLeadStage("VISITED");
         insertLead(darryl);
 
+        //Anna
+        Lead anna = new Lead();
+        anna.setLeadFirstName("Anna");
+        anna.setLeadLastName("Ivashchenko");
+        anna.setLeadPhoneNumber("905-555-1111");
+        anna.setLeadVehicleInterest(tiguan);
+        calendar.set(2026, Calendar.MAY, 3);
+        anna.setLeadCreatedAt(calendar.getTime());
+        anna.setLeadFollowUpDate(calendar.getTime());
+        anna.setLeadStage("VISITED");
+        insertLead(anna);
 
+        //John
+        Lead john = new Lead();
+        john.setLeadFirstName("John");
+        john.setLeadLastName("Bassett");
+        john.setLeadPhoneNumber("905-111-2222");
+        john.setLeadVehicleInterest(tiguan);
+        calendar.set(2026, Calendar.MAY, 6);
+        john.setLeadCreatedAt(calendar.getTime());
+        john.setLeadFollowUpDate(calendar.getTime());
+        john.setLeadStage("VISITED");
+        insertLead(john);
+
+        //Melisa
+        Lead melisa = new Lead();
+        melisa.setLeadFirstName("Melisa");
+        melisa.setLeadLastName("Rojas");
+        melisa.setLeadPhoneNumber("905-222-3333");
+        melisa.setLeadVehicleInterest(tiguan);
+        calendar.set(2026, Calendar.APRIL, 17);
+        melisa.setLeadCreatedAt(calendar.getTime());
+        melisa.setLeadFollowUpDate(calendar.getTime());
+        melisa.setLeadStage("VISITED");
+        insertLead(melisa);
+
+        //Ash
+        Lead ash = new Lead();
+        ash.setLeadFirstName("Ashutosh");
+        ash.setLeadLastName("Bakare");
+        ash.setLeadPhoneNumber("437-222-3333");
+        ash.setLeadVehicleInterest(tiguan);
+        calendar.set(2026, Calendar.MARCH, 17);
+        ash.setLeadCreatedAt(calendar.getTime());
+        ash.setLeadFollowUpDate(calendar.getTime());
+        ash.setLeadStage("VISITED");
+        insertLead(ash);
+
+        //Viggy
+        Lead viggy = new Lead();
+        viggy.setLeadFirstName("Vignejan");
+        viggy.setLeadLastName("Velsam");
+        viggy.setLeadPhoneNumber("437-333-4444");
+        viggy.setLeadVehicleInterest(tiguan);
+        calendar.set(2026, Calendar.MARCH, 30);
+        viggy.setLeadCreatedAt(calendar.getTime());
+        viggy.setLeadFollowUpDate(calendar.getTime());
+        viggy.setLeadStage("VISITED");
+        insertLead(viggy);
         /* --- CURRENT LEADS (Using your SECOND constructor) --- */
         // These will automatically be set to Stage="NEW" and Date="Today"
         // because of the logic inside your new constructor.
 
         // Pengyu Wang
         Lead pengyu = new Lead(
-                "Pengyu", "Wang", "613-802-7195", "pengyu@example.com",
+                "Pengyu", "Wang", "613-111-2222", "pengyu@example.com",
                 "New Cars", "101 Elgin St", "Ottawa", "ON", "Canada", "K1P 5K7",
                 52000, atlas, null, "Interested in the new Atlas"
         );
@@ -507,7 +565,7 @@ public class DataAccessObject implements DataAccess {
 
         // Irfan Nassir
         Lead irfan = new Lead(
-                "Irfan", "Nassir", "416-891-9798", "irfan@example.com",
+                "Irfan", "Nassir", "416-777-8888", "irfan@example.com",
                 "Fleet", "202 King St", "Toronto", "ON", "Canada", "M5V 1J2",
                 60000, tiguan, null, "Looking for fleet pricing"
         );

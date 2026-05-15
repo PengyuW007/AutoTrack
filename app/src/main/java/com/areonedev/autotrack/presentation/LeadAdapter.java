@@ -17,6 +17,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Collections;
 
 public class LeadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_HEADER = 0;
@@ -127,11 +128,17 @@ public class LeadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         displayItems.clear();
         if (leads == null || leads.isEmpty()) return;
 
+        List<Lead> sortedLeads = new ArrayList<>(leads);
+        Collections.sort(sortedLeads, (l1, l2) -> {
+            if (l1.getLeadCreatedAt() == null || l2.getLeadCreatedAt() == null) return 0;
+            return l2.getLeadCreatedAt().compareTo(l1.getLeadCreatedAt()); // Descending
+        });
+
         // Use a formatter to get a consistent "yyyy-MM-dd" string for comparison
         SimpleDateFormat compareFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String lastDateLabel = "";
 
-        for (Lead lead : leads) {
+        for (Lead lead : sortedLeads) {
             Date createdAt = lead.getLeadCreatedAt();
             if (createdAt == null) continue;
 
