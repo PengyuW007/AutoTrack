@@ -163,7 +163,7 @@ AES/GCM Encryption
 
 #### Clone Repository
 ````
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+git clone https://github.com/PengyuW007/AutoTrack.git
 ````
 ---
 ## Running Environment
@@ -218,3 +218,10 @@ Planned improvements include:
 ![](docs/images/LeadsDetail.png)
 ### Architecture Diagram
 ![](docs/images/Architecture.png)
+
+---
+## Author
+
+Developed by Pengyu Wang.
+
+This project was built as a practical software engineering project inspired by real automotive sales workflow challenges and designed to bridge dealership workflow problems with mobile software solutions.
