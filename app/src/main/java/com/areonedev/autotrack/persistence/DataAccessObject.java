@@ -119,14 +119,14 @@ public class DataAccessObject implements DataAccess {
 
             if (count == 0) {
                 Log.d(TAG, "Database is empty. Adding initial dummy leads.");
-                addDummyLeads();
+                //addDummyLeads();
             } else {
                 Log.d(TAG, "Database already contains " + count + " leads. Skipping dummy data.");
             }
 
             count = getTableCount(TABLE_NOTIFICATIONS);
             if (count == 0) {
-                addDummyNotifications();
+                //addDummyNotifications();
             } else {
                 Log.d(TAG, "Database already contains " + count + " notifications. Skipping dummy data.");
             }
