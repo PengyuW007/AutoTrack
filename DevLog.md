@@ -1,5 +1,68 @@
 Developer Log — AutoTrack
 ---
+**Date:** May 14, 2026
+
+**Module:** Security Hardening, Agenda Reliability & UI Chronology
+
+## Itinerary
+
+- Implemented an industrial-grade security layer within the Persistence Layer (`DataAccessObject`) to protect sensitive Personally Identifiable Information (PII).
+
+- Developed a `CryptoManager` integrated with the Android Keystore system to generate and manage hardware-backed AES encryption keys.
+
+- Added field-level AES-GCM encryption for sensitive lead data before SQLite persistence, including:
+  - First Name
+  - Last Name
+  - Phone Number
+  - Email Address
+
+- Refactored DAO cursor parsing logic to support transparent decryption during retrieval, allowing:
+  - Encrypted physical database storage
+  - Readable Business and UI layer objects
+  - Clean separation between security and presentation logic
+
+- Refined Calendar Agenda behavior to properly prioritize manual user-created tasks over system-generated Scientific Missions.
+  - Example:
+    - `"Test Drive"` now correctly overrides default milestone labels.
+
+- Updated `AgendaService` to cross-reference the complete task history rather than only active milestone windows.
+  - Historical leads and scheduled tasks now appear correctly on their original calendar dates even if lead status changes later.
+
+- Refactored `DataAccessObject` retrieval logic for:
+  - Notifications
+  - Tasks
+    improving query safety and overall maintainability.
+
+- Added defensive fallback handling to prevent crashes when notifications reference deleted or missing leads.
+  - Introduced a **Dummy Lead fallback object** for invalid references.
+
+## Issues
+
+- Manual user-created tasks were previously overwritten by automatically generated Scientific Mission titles within the Calendar Agenda.
+
+- Historical tasks disappeared from past calendar dates because the agenda logic only referenced current milestone windows rather than persisted historical records.
+
+- Newly created leads occasionally appeared under incorrect date headers due to timezone drift during String-to-Date parsing.
+
+- Notification retrieval could crash when associated lead records no longer existed in the database.
+
+- Field-level encryption introduced additional DAO processing overhead, requiring future performance validation.
+
+## Next
+
+- Conduct full pre-acceptance testing covering the complete lead lifecycle:
+  ```
+  Create → Score → Task → Close
+  ```
+
+- Validate Empty State UI behavior for:
+  - New users
+  - Empty lead lists
+  - Empty task agendas
+
+- Monitor DAO performance and query latency after introducing encryption/decryption operations on every database transaction.
+
+---
 **Date:** May 13, 2026
 
 **Module:** Calendar Agenda & Priority Workflow System
