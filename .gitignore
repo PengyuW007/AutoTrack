@@ -17,5 +17,4 @@ local.properties
 *.db
 *.apk
 *.aab
-*.png
 /app/release
