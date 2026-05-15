@@ -7,6 +7,22 @@ Unlike traditional static CRM systems, AutoTrack focuses on workflow prioritizat
 The application was developed as a native Android project using Java and follows a layered architecture separating presentation, business logic, persistence, and object models.
 
 ---
+## Installation & Setup
+
+### Option 1 — Install APK
+1. Go to the GitHub Releases page
+2. Download the latest APK release
+3. Transfer APK to an Android device
+4. Enable installation from unknown sources if necessary
+5. Install and launch AutoTrack
+
+### Option 2 — Run from Android Studio
+
+#### Clone Repository
+````
+git clone https://github.com/PengyuW007/AutoTrack.git
+````
+---
 
 ## Features
 
@@ -149,22 +165,6 @@ AES/GCM Encryption
 - PriorityQueue Algorithms
 - CSV Vehicle Import System
 
----
-## Installation & Setup
-
-### Option 1 — Install APK
-1. Go to the GitHub Releases page
-2. Download the latest APK release
-3. Transfer APK to an Android device
-4. Enable installation from unknown sources if necessary
-5. Install and launch AutoTrack
-
-### Option 2 — Run from Android Studio
-
-#### Clone Repository
-````
-git clone https://github.com/PengyuW007/AutoTrack.git
-````
 ---
 ## Running Environment
 
